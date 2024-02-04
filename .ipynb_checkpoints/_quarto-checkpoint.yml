@@ -1,5 +1,5 @@
 project:
-  type: website
+  type: book
   output-dir: docs
 
 book:
@@ -7,7 +7,7 @@ book:
   author: "An Chu"
   date: "2/4/2024"
   keyword: polars, python, dataframe
-  repo-url: https://github.com/chuvanan/cookbook-python-polars
+  repo-url: https://chuvanan.github.io/cookbook-python-polars/
   chapters:
     - index.qmd
     - first_steps.qmd

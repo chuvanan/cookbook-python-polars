@@ -1,9 +1,3 @@
 # Preface {.unnumbered}
 
-This is a Quarto book.
-
-To learn more about Quarto books visit <https://quarto.org/docs/books>.
-
-```{r}
-1 + 1
-```
+Welcome to the polars cookbook tailored for R users, including myself. The cookbook aims to assist seasoned R users in enhancing their Python skills in the year 2024.
