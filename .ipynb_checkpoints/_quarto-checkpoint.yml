@@ -1,0 +1,30 @@
+project:
+  type: book
+
+book:
+  title: "Cookbook polars for Python"
+  author: "An Chu"
+  date: "2/4/2024"
+  keyword: polars, python, dataframe
+  repo-url: https://github.com/chuvanan/cookbook-python-polars
+  chapters:
+    - index.qmd
+    - first_steps.qmd
+    - data_manipulation.qmd
+    - import_export.qmd
+    - lazy_execution.qmd
+    - benchmarking.qmd
+    - references.qmd
+
+bibliography: references.bib
+
+format:
+  html:
+    theme: cosmo
+    code-fold: false
+    monofont: Fira Mono
+  pdf:
+    documentclass: scrreprt
+
+
+

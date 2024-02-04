@@ -1,0 +1,135 @@
+
+# First steps with polars
+
+## Installation
+
+Let's kick off our journey into the world of data manipulation with the polars library. First things first, we need to install polars and set up a virtual environment for a clean installation. Use the following commands:
+
+```bash
+# you better setting up a virtual enviroment before 
+# installing any python libraries
+pip install polars
+```
+
+To gain insights into the installed polars package, including version details and enabled features, utilize the `build_info()` method in Python:
+
+```{python}
+#| eval: false
+import polars as pl
+pl.build_info()
+```
+
+
+## Initial exploration
+
+### Reading data with polars
+
+Reading a CSV file using polars is not only straightforward but also efficient. Let's take a quick look:
+
+```{python}
+import polars as pl
+flights = pl.read_csv('./data/flights.csv')
+```
+
+If you're coming from an R background, checking the data types in polars might seem overwhelming due to the numerous available types. Here's a quick way to inspect them:
+
+```{python}
+# 10 sample columns
+flights[:,0:9].schema
+```
+
+For those familiar with R's dplyr, a similar method called `glimpse()` is available:
+
+```{python}
+flights[:, 0:9].glimpse()
+```
+
+Standard commands from pandas such as `head()`, `tail()`, and `describe()` can be used seamlessly:
+
+
+```{python}
+flights[:, 0:9].head()
+```
+
+```{python}
+flights[:, 0:9].tail()
+```
+
+```{python}
+flights[:, 0:9].describe()
+```
+### Row and column counting
+
+Determining the number of rows and columns in a polars DataFrame is as simple as checking the shape:
+
+```{python}
+flights.shape
+```
+
+The output from polars comes with some useful features:
+
+* Underneath each column name is a data type.
+
+* No index numbers are present.
+
+* String values are quoted with double quotes.
+
+* Missing values are represented as `null`, applicable to all data types.
+
+
+### Converting from pandas
+
+Transitioning from a Pandas DataFrame to a polars DataFrame is effortless with the `from_pandas()` method:
+
+```{python}
+import pandas as pd
+flights2 = pl.from_pandas(pd.read_csv('./data/flights.csv'))
+
+flights2[:,0:9].glimpse()
+```
+
+### Understanding data structure
+
+The fundamental data structures in polars are `Series` and `DataFrames`:
+
+* `Series` is **1-dimensional** data structure, akin to R's atomic vector, where all elements must share the same data type.
+
+```{python}
+s = pl.Series('a', [1, 2, 3])
+print(s)
+```
+
+
+```{python}
+s.dtype
+```
+
+* `Series` supports various [methods](https://docs.pola.rs/py-polars/html/reference/series/index.html), including operations like finding the maximum or calculating the mean.
+
+```{python}
+s.max()
+```
+
+```{python}
+s.mean()
+```
+
+* `DataFrames` are 2-dimensional structures backed by `Series`, similar to R's `data.frame`. They come with several attributes for exploration:
+
+```{python}
+flights.columns
+flights.dtypes
+flights.height
+flights.width
+flights.schema
+flights.shape
+flights[:,0:9].flags
+```
+
+## Summary
+
+At first glance, polars offers the ease of use reminiscent of R, blending with the familiarity of pandas (minus any potential frustrations).
+
+
+
+
