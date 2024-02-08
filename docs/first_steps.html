@@ -239,7 +239,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co"># installing any python libraries</span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install polars</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>To gain insights into the installed polars package, including version details and enabled features, utilize the <code>build_info()</code> method in Python:</p>
-<div id="310422c5" class="cell" data-execution_count="1">
+<div id="62deb9d3" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>pl.build_info()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
@@ -249,12 +249,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="reading-data-with-polars" class="level3" data-number="1.2.1">
 <h3 data-number="1.2.1" class="anchored" data-anchor-id="reading-data-with-polars"><span class="header-section-number">1.2.1</span> Reading data with polars</h3>
 <p>Reading a CSV file using polars is not only straightforward but also efficient. Let’s take a quick look:</p>
-<div id="2c818fa5" class="cell" data-execution_count="2">
+<div id="6b21912d" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>flights <span class="op">=</span> pl.read_csv(<span class="st">'./data/flights.csv'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>If you’re coming from an R background, checking the data types in polars might seem overwhelming due to the numerous available types. Here’s a quick way to inspect them:</p>
-<div id="673e61e5" class="cell" data-execution_count="3">
+<div id="79896c1e" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 10 sample columns</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>flights[:,<span class="dv">0</span>:<span class="dv">9</span>].schema</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="2">
@@ -270,7 +270,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <p>For those familiar with R’s dplyr, a similar method called <code>glimpse()</code> is available:</p>
-<div id="47993366" class="cell" data-execution_count="4">
+<div id="9241075f" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>flights[:, <span class="dv">0</span>:<span class="dv">9</span>].glimpse()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Rows: 999
@@ -288,7 +288,7 @@ $ IATA_CODE_Reporting_Airline &lt;str&gt; 'YX', 'YX', 'YX', 'YX', 'YX', 'YX', 'Y
 </div>
 </div>
 <p>Standard commands from pandas such as <code>head()</code>, <code>tail()</code>, and <code>describe()</code> can be used seamlessly:</p>
-<div id="8fc6da09" class="cell" data-execution_count="5">
+<div id="1c4f055e" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>flights[:, <span class="dv">0</span>:<span class="dv">9</span>].head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="4">
 <div><style>
@@ -385,7 +385,7 @@ $ IATA_CODE_Reporting_Airline &lt;str&gt; 'YX', 'YX', 'YX', 'YX', 'YX', 'YX', 'Y
 </div>
 </div>
 </div>
-<div id="291f021c" class="cell" data-execution_count="6">
+<div id="a2c4a103" class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>flights[:, <span class="dv">0</span>:<span class="dv">9</span>].tail()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="5">
 <div><style>
@@ -482,7 +482,7 @@ $ IATA_CODE_Reporting_Airline &lt;str&gt; 'YX', 'YX', 'YX', 'YX', 'YX', 'YX', 'Y
 </div>
 </div>
 </div>
-<div id="2536dde5" class="cell" data-execution_count="7">
+<div id="acc1f3c1" class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>flights[:, <span class="dv">0</span>:<span class="dv">9</span>].describe()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="6">
 <div><style>
@@ -638,7 +638,7 @@ $ IATA_CODE_Reporting_Airline &lt;str&gt; 'YX', 'YX', 'YX', 'YX', 'YX', 'YX', 'Y
 <section id="row-and-column-counting" class="level3" data-number="1.2.2">
 <h3 data-number="1.2.2" class="anchored" data-anchor-id="row-and-column-counting"><span class="header-section-number">1.2.2</span> Row and column counting</h3>
 <p>Determining the number of rows and columns in a polars DataFrame is as simple as checking the shape:</p>
-<div id="31cc1b6b" class="cell" data-execution_count="8">
+<div id="9bb2c8b5" class="cell" data-execution_count="8">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>flights.shape</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="7">
 <pre><code>(999, 110)</code></pre>
@@ -655,7 +655,7 @@ $ IATA_CODE_Reporting_Airline &lt;str&gt; 'YX', 'YX', 'YX', 'YX', 'YX', 'YX', 'Y
 <section id="converting-from-pandas" class="level3" data-number="1.2.3">
 <h3 data-number="1.2.3" class="anchored" data-anchor-id="converting-from-pandas"><span class="header-section-number">1.2.3</span> Converting from pandas</h3>
 <p>Transitioning from a Pandas DataFrame to a polars DataFrame is effortless with the <code>from_pandas()</code> method:</p>
-<div id="5b229902" class="cell" data-execution_count="9">
+<div id="77549bc8" class="cell" data-execution_count="9">
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>flights2 <span class="op">=</span> pl.from_pandas(pd.read_csv(<span class="st">'./data/flights.csv'</span>))</span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -682,7 +682,7 @@ $ IATA_CODE_Reporting_Airline &lt;str&gt; 'YX', 'YX', 'YX', 'YX', 'YX', 'YX', 'Y
 <ul>
 <li><code>Series</code> is <strong>1-dimensional</strong> data structure, akin to R’s atomic vector, where all elements must share the same data type.</li>
 </ul>
-<div id="5f5cba2c" class="cell" data-execution_count="10">
+<div id="a1b36c31" class="cell" data-execution_count="10">
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>s <span class="op">=</span> pl.Series(<span class="st">'a'</span>, [<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>])</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(s)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -695,7 +695,7 @@ Series: 'a' [i64]
 ]</code></pre>
 </div>
 </div>
-<div id="8f567a42" class="cell" data-execution_count="11">
+<div id="4b90f4b2" class="cell" data-execution_count="11">
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>s.dtype</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="10">
 <pre><code>Int64</code></pre>
@@ -704,13 +704,13 @@ Series: 'a' [i64]
 <ul>
 <li><code>Series</code> supports various <a href="https://docs.pola.rs/py-polars/html/reference/series/index.html">methods</a>, including operations like finding the maximum or calculating the mean.</li>
 </ul>
-<div id="86ee2732" class="cell" data-execution_count="12">
+<div id="0b6c56bb" class="cell" data-execution_count="12">
 <div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>s.<span class="bu">max</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="11">
 <pre><code>3</code></pre>
 </div>
 </div>
-<div id="45fede53" class="cell" data-execution_count="13">
+<div id="eba0c427" class="cell" data-execution_count="13">
 <div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>s.mean()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="12">
 <pre><code>2.0</code></pre>
@@ -719,7 +719,7 @@ Series: 'a' [i64]
 <ul>
 <li><code>DataFrames</code> are 2-dimensional structures backed by <code>Series</code>, similar to R’s <code>data.frame</code>. They come with several attributes for exploration:</li>
 </ul>
-<div id="b479a41a" class="cell" data-execution_count="14">
+<div id="f078b6b7" class="cell" data-execution_count="14">
 <div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>flights.columns</span>
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>flights.dtypes</span>
 <span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>flights.height</span>

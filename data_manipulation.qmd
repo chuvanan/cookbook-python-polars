@@ -35,8 +35,10 @@ full_flights['Year'].dtype
 
 ## Introduction to methods
 
+## Single table operation
 
-## Filtering rows
+
+### Filtering rows
 
 * Retrieving all flights from Oihio (filtering based on one condition)
 
@@ -97,27 +99,31 @@ eager_stmt = (
 )
 ```
 
-## Select columns
+### Select columns
 
 
-## Modify/Add column
+### Modify/Add column
 
 
-## Rename column
+### Rename column
 
 
-## Remove column
-
-## Aggregation by group
+### Remove column
 
 
-## Sort a DataFrame
+### Aggregation by group
 
 
-## Join DataFrames
+### Sort a DataFrame
+
+## Two tables operation
 
 
-## Concatenate DataFrames
+### Join DataFrames
+
+
+### Concatenate DataFrames
+
 
 ## Pivot a DataFrame
 
@@ -125,52 +131,8 @@ eager_stmt = (
 ## Dealing with missing values
 
 
-## Other useful methods
-
-
 ## Strings methods
-
 
 ## Handling datetime
 
-
-me'].value_counts()
-```
-
-
-## Select columns
-
-
-## Modify/Add column
-
-
-## Rename column
-
-
-## Remove column
-
-## Aggregation by group
-
-
-## Sort a DataFrame
-
-
-## Join DataFrames
-
-
-## Concatenate DataFrames
-
-## Pivot a DataFrame
-
-
-## Dealing with missing values
-
-
 ## Other useful methods
-
-
-## Strings methods
-
-
-## Handling datetime
-
