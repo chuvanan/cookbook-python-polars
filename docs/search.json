@@ -60,21 +60,21 @@
     ]
   },
   {
-    "objectID": "data_manipulation.html#data-type-conversion",
-    "href": "data_manipulation.html#data-type-conversion",
+    "objectID": "data_manipulation.html#introduction-to-methods",
+    "href": "data_manipulation.html#introduction-to-methods",
     "title": "2  Data manipulation",
-    "section": "2.2 Data type conversion",
-    "text": "2.2 Data type conversion",
+    "section": "2.2 Introduction to methods",
+    "text": "2.2 Introduction to methods",
     "crumbs": [
       "<span class='chapter-number'>2</span>  <span class='chapter-title'>Data manipulation</span>"
     ]
   },
   {
-    "objectID": "data_manipulation.html#filter-rows",
-    "href": "data_manipulation.html#filter-rows",
+    "objectID": "data_manipulation.html#filtering-rows",
+    "href": "data_manipulation.html#filtering-rows",
     "title": "2  Data manipulation",
-    "section": "2.3 Filter rows",
-    "text": "2.3 Filter rows\n\nRetrieving all flights from Oihio (filtering based on one condition)\n\n\n# recommended way\nflights_from_ohio = full_flights.filter(pl.col('OriginStateName') == 'Ohio')\n\n# alternative way (not recommended)\n# flights_from_ohio = full_flights[full_flights['OriginStateName'] == 'Ohio']\n\nflights_from_ohio['OriginStateName'].value_counts()\n\n\nshape: (1, 2)\n\n\n\nOriginStateName\ncount\n\n\nstr\nu32\n\n\n\n\n\"Ohio\"\n7434\n\n\n\n\n\n\n\nObtaining all flights from Ohio to Virginia (filtering based on multiple conditions)\n\n\n# note that each predicate must be enclosed within parentheses\nflights_from_ohio_to_virginia = full_flights.filter(\n    (pl.col('OriginStateName') == 'Ohio') & (pl.col('DestStateName') == 'Virginia')\n)\n\n# you can replace `&` with `,` to avoid parentheses\n# flights_from_ohio_to_virginia = full_flights.filter(\n#     pl.col('OriginStateName') == 'Ohio', \n#     pl.col('DestStateName') == 'Virginia'\n# )\n\nflights_from_ohio_to_virginia['DestStateName'].value_counts()\n\n\nshape: (1, 2)\n\n\n\nDestStateName\ncount\n\n\nstr\nu32\n\n\n\n\n\"Virginia\"\n564\n\n\n\n\n\n\n\nFetching all flights from Ohito to any state except Virginia (filtering based on negative condition)\n\n\nflights_from_ohio_except_to_virginia = full_flights.filter(\n    pl.col('OriginStateName') == 'Ohio', \n    ~(pl.col('DestStateName') == 'Virginia')\n)\nflights_from_ohio_except_to_virginia['DestStateName'].value_counts(sort=True).head()\n\n\nshape: (5, 2)\n\n\n\nDestStateName\ncount\n\n\nstr\nu32\n\n\n\n\n\"Florida\"\n1349\n\n\n\"New York\"\n988\n\n\n\"Illinois\"\n617\n\n\n\"North Carolina…\n564\n\n\n\"Georgia\"\n526\n\n\n\n\n\n\n\nWhy using the .filter() method? The reason is to leverage lazy execution and query optimization\n\n\n%%time\n# this code is optimized by polars query engine before reading any data into memory\nlazy_stmt = (\n    pl.scan_csv('./data/On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2022_1.csv')\n    .filter(pl.col('OriginStateName') == 'Ohio')\n    .collect()\n)\n\nCPU times: user 3.31 s, sys: 360 ms, total: 3.67 s\nWall time: 563 ms\n\n\n\n%%time\neager_stmt = (\n    pl.read_csv('./data/On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2022_1.csv')\n    .filter(pl.col('OriginStateName') == 'Ohio')\n)\n\nCPU times: user 3.57 s, sys: 787 ms, total: 4.36 s\nWall time: 714 ms",
+    "section": "2.3 Filtering rows",
+    "text": "2.3 Filtering rows\n\nRetrieving all flights from Oihio (filtering based on one condition)\n\n\n# recommended way\nflights_from_ohio = full_flights.filter(pl.col('OriginStateName') == 'Ohio')\n\n# alternative way (not recommended)\n# flights_from_ohio = full_flights[full_flights['OriginStateName'] == 'Ohio']\n\nflights_from_ohio['OriginStateName'].value_counts()\n\n\nshape: (1, 2)\n\n\n\nOriginStateName\ncount\n\n\nstr\nu32\n\n\n\n\n\"Ohio\"\n7434\n\n\n\n\n\n\n\nObtaining all flights from Ohio to Virginia (filtering based on multiple conditions)\n\n\n# note that each predicate must be enclosed within parentheses\nflights_from_ohio_to_virginia = full_flights.filter(\n    (pl.col('OriginStateName') == 'Ohio') & (pl.col('DestStateName') == 'Virginia')\n)\n\n# you can replace `&` with `,` to avoid parentheses\n# flights_from_ohio_to_virginia = full_flights.filter(\n#     pl.col('OriginStateName') == 'Ohio', \n#     pl.col('DestStateName') == 'Virginia'\n# )\n\nflights_from_ohio_to_virginia['DestStateName'].value_counts()\n\n\nshape: (1, 2)\n\n\n\nDestStateName\ncount\n\n\nstr\nu32\n\n\n\n\n\"Virginia\"\n564\n\n\n\n\n\n\n\nFetching all flights from Ohito to any state except Virginia (filtering based on negative condition)\n\n\nflights_from_ohio_except_to_virginia = full_flights.filter(\n    pl.col('OriginStateName') == 'Ohio', \n    ~(pl.col('DestStateName') == 'Virginia')\n)\nflights_from_ohio_except_to_virginia['DestStateName'].value_counts(sort=True).head()\n\n\nshape: (5, 2)\n\n\n\nDestStateName\ncount\n\n\nstr\nu32\n\n\n\n\n\"Florida\"\n1349\n\n\n\"New York\"\n988\n\n\n\"Illinois\"\n617\n\n\n\"North Carolina…\n564\n\n\n\"Georgia\"\n526\n\n\n\n\n\n\n\nWhy using the .filter() method? The reason is to leverage lazy execution and query optimization\n\n\n%%time\n# this code is optimized by polars query engine before reading any data into memory\nlazy_stmt = (\n    pl.scan_csv('./data/On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2022_1.csv')\n    .filter(pl.col('OriginStateName') == 'Ohio')\n    .collect()\n)\n\nCPU times: user 3.24 s, sys: 366 ms, total: 3.61 s\nWall time: 484 ms\n\n\n\n%%time\neager_stmt = (\n    pl.read_csv('./data/On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2022_1.csv')\n    .filter(pl.col('OriginStateName') == 'Ohio')\n)\n\nCPU times: user 3.68 s, sys: 670 ms, total: 4.35 s\nWall time: 631 ms",
     "crumbs": [
       "<span class='chapter-number'>2</span>  <span class='chapter-title'>Data manipulation</span>"
     ]
@@ -160,16 +160,6 @@
     ]
   },
   {
-    "objectID": "data_manipulation.html#pivot",
-    "href": "data_manipulation.html#pivot",
-    "title": "2  Data manipulation",
-    "section": "2.12 Pivot",
-    "text": "2.12 Pivot",
-    "crumbs": [
-      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Data manipulation</span>"
-    ]
-  },
-  {
     "objectID": "data_manipulation.html#pivot-a-dataframe",
     "href": "data_manipulation.html#pivot-a-dataframe",
     "title": "2  Data manipulation",
@@ -215,16 +205,6 @@
     "title": "2  Data manipulation",
     "section": "2.16 Handling datetime",
     "text": "2.16 Handling datetime\nme’].value_counts() ```",
-    "crumbs": [
-      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Data manipulation</span>"
-    ]
-  },
-  {
-    "objectID": "data_manipulation.html#introduction-to-methods",
-    "href": "data_manipulation.html#introduction-to-methods",
-    "title": "2  Data manipulation",
-    "section": "2.2 Introduction to methods",
-    "text": "2.2 Introduction to methods",
     "crumbs": [
       "<span class='chapter-number'>2</span>  <span class='chapter-title'>Data manipulation</span>"
     ]
