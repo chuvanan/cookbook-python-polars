@@ -1,0 +1,176 @@
+# Data manipulation
+
+```{python}
+#| include: false
+import polars as pl
+```
+
+To showcase the robust syntax and efficiency of the polars package, we will leverage a moderately-sized dataset, comprising approximately 530,000 rows.
+
+```{python}
+full_flights = pl.read_csv('./data/On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2022_1.csv')
+full_flights.shape
+```
+
+```{python}
+full_flights.estimated_size('mb')
+```
+
+## Data type conversion
+
+In R, you work with four main types of vectors: logical, integer, double, and character. When you mix different types, they get automatically adjusted in a specific order: character → double → integer → logical. If you want to intentionally adjust them, you can use functions like `as.integer()`, `as.double()`, `as.logical()`, and `as.character()`.
+
+On the other hand, in polars, there's a wider variety of data types, and you need to purposefully adjust them when needed.
+
+```{python}
+full_flights['Year'].dtype
+```
+
+```{python}
+full_flights = full_flights.with_columns(
+    pl.col('Year').cast(pl.Utf8)
+)
+full_flights['Year'].dtype
+```
+
+## Introduction to methods
+
+
+## Filter rows
+
+* Retrieving all flights from Oihio (filtering based on one condition)
+
+```{python}
+# recommended way
+flights_from_ohio = full_flights.filter(pl.col('OriginStateName') == 'Ohio')
+
+# alternative way (not recommended)
+# flights_from_ohio = full_flights[full_flights['OriginStateName'] == 'Ohio']
+
+flights_from_ohio['OriginStateName'].value_counts()
+```
+
+* Obtaining all flights from Ohio to Virginia (filtering based on multiple conditions)
+
+```{python}
+# note that each predicate must be enclosed within parentheses
+flights_from_ohio_to_virginia = full_flights.filter(
+    (pl.col('OriginStateName') == 'Ohio') & (pl.col('DestStateName') == 'Virginia')
+)
+
+# you can replace `&` with `,` to avoid parentheses
+# flights_from_ohio_to_virginia = full_flights.filter(
+#     pl.col('OriginStateName') == 'Ohio', 
+#     pl.col('DestStateName') == 'Virginia'
+# )
+
+flights_from_ohio_to_virginia['DestStateName'].value_counts()
+```
+
+* Fetching all flights from Ohito to any state except Virginia (filtering based on negative condition)
+
+```{python}
+flights_from_ohio_except_to_virginia = full_flights.filter(
+    pl.col('OriginStateName') == 'Ohio', 
+    ~(pl.col('DestStateName') == 'Virginia')
+)
+flights_from_ohio_except_to_virginia['DestStateName'].value_counts(sort=True).head()
+```
+
+* Why using the `.filter()` method? The reason is to leverage lazy execution and query optimization
+
+```{python}
+%%time
+# this code is optimized by polars query engine before reading any data into memory
+lazy_stmt = (
+    pl.scan_csv('./data/On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2022_1.csv')
+    .filter(pl.col('OriginStateName') == 'Ohio')
+    .collect()
+)
+```
+
+```{python}
+%%time
+eager_stmt = (
+    pl.read_csv('./data/On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2022_1.csv')
+    .filter(pl.col('OriginStateName') == 'Ohio')
+)
+```
+
+## Select columns
+
+
+## Modify/Add column
+
+
+## Rename column
+
+
+## Remove column
+
+## Aggregation by group
+
+
+## Sort a DataFrame
+
+
+## Join DataFrames
+
+
+## Concatenate DataFrames
+
+## Pivot a DataFrame
+
+
+## Dealing with missing values
+
+
+## Other useful methods
+
+
+## Strings methods
+
+
+## Handling datetime
+
+
+me'].value_counts()
+```
+
+
+## Select columns
+
+
+## Modify/Add column
+
+
+## Rename column
+
+
+## Remove column
+
+## Aggregation by group
+
+
+## Sort a DataFrame
+
+
+## Join DataFrames
+
+
+## Concatenate DataFrames
+
+## Pivot a DataFrame
+
+
+## Dealing with missing values
+
+
+## Other useful methods
+
+
+## Strings methods
+
+
+## Handling datetime
+

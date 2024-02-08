@@ -48,5 +48,315 @@
     "crumbs": [
       "<span class='chapter-number'>1</span>  <span class='chapter-title'>First steps with polars</span>"
     ]
+  },
+  {
+    "objectID": "data_manipulation.html",
+    "href": "data_manipulation.html",
+    "title": "2  Data manipulation",
+    "section": "",
+    "text": "2.1 Data type conversion\nIn R, you work with four main types of vectors: logical, integer, double, and character. When you mix different types, they get automatically adjusted in a specific order: character → double → integer → logical. If you want to intentionally adjust them, you can use functions like as.integer(), as.double(), as.logical(), and as.character().\nOn the other hand, in polars, there’s a wider variety of data types, and you need to purposefully adjust them when needed.\nfull_flights['Year'].dtype\n\nInt64\nfull_flights = full_flights.with_columns(\n    pl.col('Year').cast(pl.Utf8)\n)\nfull_flights['Year'].dtype\n\nString",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Data manipulation</span>"
+    ]
+  },
+  {
+    "objectID": "data_manipulation.html#data-type-conversion",
+    "href": "data_manipulation.html#data-type-conversion",
+    "title": "2  Data manipulation",
+    "section": "2.2 Data type conversion",
+    "text": "2.2 Data type conversion",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Data manipulation</span>"
+    ]
+  },
+  {
+    "objectID": "data_manipulation.html#filter-rows",
+    "href": "data_manipulation.html#filter-rows",
+    "title": "2  Data manipulation",
+    "section": "2.3 Filter rows",
+    "text": "2.3 Filter rows\n\nRetrieving all flights from Oihio (filtering based on one condition)\n\n\n# recommended way\nflights_from_ohio = full_flights.filter(pl.col('OriginStateName') == 'Ohio')\n\n# alternative way (not recommended)\n# flights_from_ohio = full_flights[full_flights['OriginStateName'] == 'Ohio']\n\nflights_from_ohio['OriginStateName'].value_counts()\n\n\nshape: (1, 2)\n\n\n\nOriginStateName\ncount\n\n\nstr\nu32\n\n\n\n\n\"Ohio\"\n7434\n\n\n\n\n\n\n\nObtaining all flights from Ohio to Virginia (filtering based on multiple conditions)\n\n\n# note that each predicate must be enclosed within parentheses\nflights_from_ohio_to_virginia = full_flights.filter(\n    (pl.col('OriginStateName') == 'Ohio') & (pl.col('DestStateName') == 'Virginia')\n)\n\n# you can replace `&` with `,` to avoid parentheses\n# flights_from_ohio_to_virginia = full_flights.filter(\n#     pl.col('OriginStateName') == 'Ohio', \n#     pl.col('DestStateName') == 'Virginia'\n# )\n\nflights_from_ohio_to_virginia['DestStateName'].value_counts()\n\n\nshape: (1, 2)\n\n\n\nDestStateName\ncount\n\n\nstr\nu32\n\n\n\n\n\"Virginia\"\n564\n\n\n\n\n\n\n\nFetching all flights from Ohito to any state except Virginia (filtering based on negative condition)\n\n\nflights_from_ohio_except_to_virginia = full_flights.filter(\n    pl.col('OriginStateName') == 'Ohio', \n    ~(pl.col('DestStateName') == 'Virginia')\n)\nflights_from_ohio_except_to_virginia['DestStateName'].value_counts(sort=True).head()\n\n\nshape: (5, 2)\n\n\n\nDestStateName\ncount\n\n\nstr\nu32\n\n\n\n\n\"Florida\"\n1349\n\n\n\"New York\"\n988\n\n\n\"Illinois\"\n617\n\n\n\"North Carolina…\n564\n\n\n\"Georgia\"\n526\n\n\n\n\n\n\n\nWhy using the .filter() method? The reason is to leverage lazy execution and query optimization\n\n\n%%time\n# this code is optimized by polars query engine before reading any data into memory\nlazy_stmt = (\n    pl.scan_csv('./data/On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2022_1.csv')\n    .filter(pl.col('OriginStateName') == 'Ohio')\n    .collect()\n)\n\nCPU times: user 3.31 s, sys: 360 ms, total: 3.67 s\nWall time: 563 ms\n\n\n\n%%time\neager_stmt = (\n    pl.read_csv('./data/On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2022_1.csv')\n    .filter(pl.col('OriginStateName') == 'Ohio')\n)\n\nCPU times: user 3.57 s, sys: 787 ms, total: 4.36 s\nWall time: 714 ms",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Data manipulation</span>"
+    ]
+  },
+  {
+    "objectID": "data_manipulation.html#select-columns",
+    "href": "data_manipulation.html#select-columns",
+    "title": "2  Data manipulation",
+    "section": "2.4 Select columns",
+    "text": "2.4 Select columns",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Data manipulation</span>"
+    ]
+  },
+  {
+    "objectID": "data_manipulation.html#modifyadd-column",
+    "href": "data_manipulation.html#modifyadd-column",
+    "title": "2  Data manipulation",
+    "section": "2.5 Modify/Add column",
+    "text": "2.5 Modify/Add column",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Data manipulation</span>"
+    ]
+  },
+  {
+    "objectID": "data_manipulation.html#rename-column",
+    "href": "data_manipulation.html#rename-column",
+    "title": "2  Data manipulation",
+    "section": "2.6 Rename column",
+    "text": "2.6 Rename column",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Data manipulation</span>"
+    ]
+  },
+  {
+    "objectID": "data_manipulation.html#remove-column",
+    "href": "data_manipulation.html#remove-column",
+    "title": "2  Data manipulation",
+    "section": "2.7 Remove column",
+    "text": "2.7 Remove column",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Data manipulation</span>"
+    ]
+  },
+  {
+    "objectID": "data_manipulation.html#aggregation-by-group",
+    "href": "data_manipulation.html#aggregation-by-group",
+    "title": "2  Data manipulation",
+    "section": "2.8 Aggregation by group",
+    "text": "2.8 Aggregation by group",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Data manipulation</span>"
+    ]
+  },
+  {
+    "objectID": "data_manipulation.html#sort-a-dataframe",
+    "href": "data_manipulation.html#sort-a-dataframe",
+    "title": "2  Data manipulation",
+    "section": "2.9 Sort a DataFrame",
+    "text": "2.9 Sort a DataFrame",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Data manipulation</span>"
+    ]
+  },
+  {
+    "objectID": "data_manipulation.html#join-dataframes",
+    "href": "data_manipulation.html#join-dataframes",
+    "title": "2  Data manipulation",
+    "section": "2.10 Join DataFrames",
+    "text": "2.10 Join DataFrames",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Data manipulation</span>"
+    ]
+  },
+  {
+    "objectID": "data_manipulation.html#concatenate-dataframes",
+    "href": "data_manipulation.html#concatenate-dataframes",
+    "title": "2  Data manipulation",
+    "section": "2.11 Concatenate DataFrames",
+    "text": "2.11 Concatenate DataFrames",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Data manipulation</span>"
+    ]
+  },
+  {
+    "objectID": "data_manipulation.html#pivot",
+    "href": "data_manipulation.html#pivot",
+    "title": "2  Data manipulation",
+    "section": "2.12 Pivot",
+    "text": "2.12 Pivot",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Data manipulation</span>"
+    ]
+  },
+  {
+    "objectID": "data_manipulation.html#pivot-a-dataframe",
+    "href": "data_manipulation.html#pivot-a-dataframe",
+    "title": "2  Data manipulation",
+    "section": "2.12 Pivot a DataFrame",
+    "text": "2.12 Pivot a DataFrame",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Data manipulation</span>"
+    ]
+  },
+  {
+    "objectID": "data_manipulation.html#dealing-with-missing-values",
+    "href": "data_manipulation.html#dealing-with-missing-values",
+    "title": "2  Data manipulation",
+    "section": "2.13 Dealing with missing values",
+    "text": "2.13 Dealing with missing values",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Data manipulation</span>"
+    ]
+  },
+  {
+    "objectID": "data_manipulation.html#other-useful-methods",
+    "href": "data_manipulation.html#other-useful-methods",
+    "title": "2  Data manipulation",
+    "section": "2.14 Other useful methods",
+    "text": "2.14 Other useful methods",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Data manipulation</span>"
+    ]
+  },
+  {
+    "objectID": "data_manipulation.html#strings-methods",
+    "href": "data_manipulation.html#strings-methods",
+    "title": "2  Data manipulation",
+    "section": "2.15 Strings methods",
+    "text": "2.15 Strings methods",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Data manipulation</span>"
+    ]
+  },
+  {
+    "objectID": "data_manipulation.html#handling-datetime",
+    "href": "data_manipulation.html#handling-datetime",
+    "title": "2  Data manipulation",
+    "section": "2.16 Handling datetime",
+    "text": "2.16 Handling datetime\nme’].value_counts() ```",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Data manipulation</span>"
+    ]
+  },
+  {
+    "objectID": "data_manipulation.html#introduction-to-methods",
+    "href": "data_manipulation.html#introduction-to-methods",
+    "title": "2  Data manipulation",
+    "section": "2.2 Introduction to methods",
+    "text": "2.2 Introduction to methods",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Data manipulation</span>"
+    ]
+  },
+  {
+    "objectID": "data_manipulation.html#select-columns-1",
+    "href": "data_manipulation.html#select-columns-1",
+    "title": "2  Data manipulation",
+    "section": "2.17 Select columns",
+    "text": "2.17 Select columns",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Data manipulation</span>"
+    ]
+  },
+  {
+    "objectID": "data_manipulation.html#modifyadd-column-1",
+    "href": "data_manipulation.html#modifyadd-column-1",
+    "title": "2  Data manipulation",
+    "section": "2.18 Modify/Add column",
+    "text": "2.18 Modify/Add column",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Data manipulation</span>"
+    ]
+  },
+  {
+    "objectID": "data_manipulation.html#rename-column-1",
+    "href": "data_manipulation.html#rename-column-1",
+    "title": "2  Data manipulation",
+    "section": "2.19 Rename column",
+    "text": "2.19 Rename column",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Data manipulation</span>"
+    ]
+  },
+  {
+    "objectID": "data_manipulation.html#remove-column-1",
+    "href": "data_manipulation.html#remove-column-1",
+    "title": "2  Data manipulation",
+    "section": "2.20 Remove column",
+    "text": "2.20 Remove column",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Data manipulation</span>"
+    ]
+  },
+  {
+    "objectID": "data_manipulation.html#aggregation-by-group-1",
+    "href": "data_manipulation.html#aggregation-by-group-1",
+    "title": "2  Data manipulation",
+    "section": "2.21 Aggregation by group",
+    "text": "2.21 Aggregation by group",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Data manipulation</span>"
+    ]
+  },
+  {
+    "objectID": "data_manipulation.html#sort-a-dataframe-1",
+    "href": "data_manipulation.html#sort-a-dataframe-1",
+    "title": "2  Data manipulation",
+    "section": "2.22 Sort a DataFrame",
+    "text": "2.22 Sort a DataFrame",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Data manipulation</span>"
+    ]
+  },
+  {
+    "objectID": "data_manipulation.html#join-dataframes-1",
+    "href": "data_manipulation.html#join-dataframes-1",
+    "title": "2  Data manipulation",
+    "section": "2.23 Join DataFrames",
+    "text": "2.23 Join DataFrames",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Data manipulation</span>"
+    ]
+  },
+  {
+    "objectID": "data_manipulation.html#concatenate-dataframes-1",
+    "href": "data_manipulation.html#concatenate-dataframes-1",
+    "title": "2  Data manipulation",
+    "section": "2.24 Concatenate DataFrames",
+    "text": "2.24 Concatenate DataFrames",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Data manipulation</span>"
+    ]
+  },
+  {
+    "objectID": "data_manipulation.html#pivot-a-dataframe-1",
+    "href": "data_manipulation.html#pivot-a-dataframe-1",
+    "title": "2  Data manipulation",
+    "section": "2.25 Pivot a DataFrame",
+    "text": "2.25 Pivot a DataFrame",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Data manipulation</span>"
+    ]
+  },
+  {
+    "objectID": "data_manipulation.html#dealing-with-missing-values-1",
+    "href": "data_manipulation.html#dealing-with-missing-values-1",
+    "title": "2  Data manipulation",
+    "section": "2.26 Dealing with missing values",
+    "text": "2.26 Dealing with missing values",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Data manipulation</span>"
+    ]
+  },
+  {
+    "objectID": "data_manipulation.html#other-useful-methods-1",
+    "href": "data_manipulation.html#other-useful-methods-1",
+    "title": "2  Data manipulation",
+    "section": "2.27 Other useful methods",
+    "text": "2.27 Other useful methods",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Data manipulation</span>"
+    ]
+  },
+  {
+    "objectID": "data_manipulation.html#strings-methods-1",
+    "href": "data_manipulation.html#strings-methods-1",
+    "title": "2  Data manipulation",
+    "section": "2.28 Strings methods",
+    "text": "2.28 Strings methods",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Data manipulation</span>"
+    ]
+  },
+  {
+    "objectID": "data_manipulation.html#handling-datetime-1",
+    "href": "data_manipulation.html#handling-datetime-1",
+    "title": "2  Data manipulation",
+    "section": "2.29 Handling datetime",
+    "text": "2.29 Handling datetime",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Data manipulation</span>"
+    ]
   }
 ]
