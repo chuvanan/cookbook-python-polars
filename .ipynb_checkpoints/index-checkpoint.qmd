@@ -1,3 +1,3 @@
 # Preface {.unnumbered}
 
-Welcome to the polars cookbook tailored for R users, including myself. The cookbook aims to assist seasoned R users in enhancing their Python skills in the year 2024.
+This book was initially inspired by a post written by Emily Riederer which recommended a set of Python *ergonomic* tool for R users.

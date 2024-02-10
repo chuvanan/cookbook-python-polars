@@ -203,7 +203,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#single-table-operation" id="toc-single-table-operation" class="nav-link" data-scroll-target="#single-table-operation"><span class="header-section-number">2.3</span> Single table operation</a>
   <ul class="collapse">
   <li><a href="#filtering-rows" id="toc-filtering-rows" class="nav-link" data-scroll-target="#filtering-rows"><span class="header-section-number">2.3.1</span> Filtering rows</a></li>
-  <li><a href="#select-columns" id="toc-select-columns" class="nav-link" data-scroll-target="#select-columns"><span class="header-section-number">2.3.2</span> Select columns</a></li>
+  <li><a href="#selecting-columns" id="toc-selecting-columns" class="nav-link" data-scroll-target="#selecting-columns"><span class="header-section-number">2.3.2</span> Selecting columns</a></li>
   <li><a href="#modifyadd-column" id="toc-modifyadd-column" class="nav-link" data-scroll-target="#modifyadd-column"><span class="header-section-number">2.3.3</span> Modify/Add column</a></li>
   <li><a href="#rename-column" id="toc-rename-column" class="nav-link" data-scroll-target="#rename-column"><span class="header-section-number">2.3.4</span> Rename column</a></li>
   <li><a href="#remove-column" id="toc-remove-column" class="nav-link" data-scroll-target="#remove-column"><span class="header-section-number">2.3.5</span> Remove column</a></li>
@@ -246,14 +246,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 <p>To showcase the robust syntax and efficiency of the polars package, we will leverage a moderately-sized dataset, comprising approximately 530,000 rows.</p>
-<div id="022a6a45" class="cell" data-execution_count="2">
+<div id="85357f19" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>full_flights <span class="op">=</span> pl.read_csv(<span class="st">'./data/On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2022_1.csv'</span>)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>full_flights.shape</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="2">
 <pre><code>(537902, 110)</code></pre>
 </div>
 </div>
-<div id="e03074bd" class="cell" data-execution_count="3">
+<div id="9415d39c" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>full_flights.estimated_size(<span class="st">'mb'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="3">
 <pre><code>729.5505456924438</code></pre>
@@ -263,13 +263,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 data-number="2.1" class="anchored" data-anchor-id="data-type-conversion"><span class="header-section-number">2.1</span> Data type conversion</h2>
 <p>In R, you work with four main types of vectors: logical, integer, double, and character. When you mix different types, they get automatically adjusted in a specific order: character → double → integer → logical. If you want to intentionally adjust them, you can use functions like <code>as.integer()</code>, <code>as.double()</code>, <code>as.logical()</code>, and <code>as.character()</code>.</p>
 <p>On the other hand, in polars, there’s a wider variety of data types, and you need to purposefully adjust them when needed.</p>
-<div id="57610b20" class="cell" data-execution_count="4">
+<div id="610e8546" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>full_flights[<span class="st">'Year'</span>].dtype</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="4">
 <pre><code>Int64</code></pre>
 </div>
 </div>
-<div id="c2e413e6" class="cell" data-execution_count="5">
+<div id="54da3bf0" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>full_flights <span class="op">=</span> full_flights.with_columns(</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    pl.col(<span class="st">'Year'</span>).cast(pl.Utf8)</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>)</span>
@@ -289,7 +289,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ul>
 <li>Retrieving all flights from Oihio (filtering based on one condition)</li>
 </ul>
-<div id="b577c91b" class="cell" data-execution_count="6">
+<div id="0cd98dff" class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># recommended way</span></span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>flights_from_ohio <span class="op">=</span> full_flights.<span class="bu">filter</span>(pl.col(<span class="st">'OriginStateName'</span>) <span class="op">==</span> <span class="st">'Ohio'</span>)</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -330,7 +330,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ul>
 <li>Obtaining all flights from Ohio to Virginia (filtering based on multiple conditions)</li>
 </ul>
-<div id="1f71dea7" class="cell" data-execution_count="7">
+<div id="dfecd416" class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># note that each predicate must be enclosed within parentheses</span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>flights_from_ohio_to_virginia <span class="op">=</span> full_flights.<span class="bu">filter</span>(</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    (pl.col(<span class="st">'OriginStateName'</span>) <span class="op">==</span> <span class="st">'Ohio'</span>) <span class="op">&amp;</span> (pl.col(<span class="st">'DestStateName'</span>) <span class="op">==</span> <span class="st">'Virginia'</span>)</span>
@@ -376,7 +376,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ul>
 <li>Fetching all flights from Ohito to any state except Virginia (filtering based on negative condition)</li>
 </ul>
-<div id="b6962094" class="cell" data-execution_count="8">
+<div id="27808149" class="cell" data-execution_count="8">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>flights_from_ohio_except_to_virginia <span class="op">=</span> full_flights.<span class="bu">filter</span>(</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    pl.col(<span class="st">'OriginStateName'</span>) <span class="op">==</span> <span class="st">'Ohio'</span>, </span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="op">~</span>(pl.col(<span class="st">'DestStateName'</span>) <span class="op">==</span> <span class="st">'Virginia'</span>)</span>
@@ -431,7 +431,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ul>
 <li>Why using the <code>.filter()</code> method? The reason is to leverage lazy execution and query optimization</li>
 </ul>
-<div id="666d1455" class="cell" data-execution_count="9">
+<div id="683238b6" class="cell" data-execution_count="9">
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>time</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="co"># this code is optimized by polars query engine before reading any data into memory</span></span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>lazy_stmt <span class="op">=</span> (</span>
@@ -440,24 +440,1115 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    .collect()</span>
 <span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>CPU times: user 3.26 s, sys: 363 ms, total: 3.63 s
-Wall time: 469 ms</code></pre>
+<pre><code>CPU times: user 3.35 s, sys: 304 ms, total: 3.65 s
+Wall time: 472 ms</code></pre>
 </div>
 </div>
-<div id="58060dd5" class="cell" data-execution_count="10">
+<div id="8ddea05b" class="cell" data-execution_count="10">
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>time</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>eager_stmt <span class="op">=</span> (</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    pl.read_csv(<span class="st">'./data/On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2022_1.csv'</span>)</span>
 <span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(pl.col(<span class="st">'OriginStateName'</span>) <span class="op">==</span> <span class="st">'Ohio'</span>)</span>
 <span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>CPU times: user 3.66 s, sys: 661 ms, total: 4.32 s
-Wall time: 620 ms</code></pre>
+<pre><code>CPU times: user 3.72 s, sys: 651 ms, total: 4.37 s
+Wall time: 633 ms</code></pre>
 </div>
 </div>
 </section>
-<section id="select-columns" class="level3" data-number="2.3.2">
-<h3 data-number="2.3.2" class="anchored" data-anchor-id="select-columns"><span class="header-section-number">2.3.2</span> Select columns</h3>
+<section id="selecting-columns" class="level3" data-number="2.3.2">
+<h3 data-number="2.3.2" class="anchored" data-anchor-id="selecting-columns"><span class="header-section-number">2.3.2</span> Selecting columns</h3>
+<p>Selecting variables within a DataFrame in polars is highly expressive, offering flexibility based on either variable names or types. Here’s a breakdown from simple to complex:</p>
+<ul>
+<li>Utilizing the <code>select</code> function to create a DataFrame from Series:</li>
+</ul>
+<div id="a19b64d6" class="cell" data-execution_count="11">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>foo <span class="op">=</span> pl.Series(<span class="st">'foo'</span>, [<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>])</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>bar <span class="op">=</span> pl.Series(<span class="st">'bar'</span>, [<span class="dv">4</span>, <span class="dv">5</span>, <span class="dv">6</span>])</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>pl.select(mmin <span class="op">=</span> pl.min_horizontal(foo, bar))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="11">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (3, 1)</small>
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">mmin</th>
+</tr>
+<tr class="odd">
+<th>i64</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+</tr>
+<tr class="even">
+<td>2</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<ul>
+<li>Selecting columns by names:</li>
+</ul>
+<div id="c8f4d797" class="cell" data-execution_count="12">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>full_flights.select([<span class="st">'FlightDate'</span>, <span class="st">'Tail_Number'</span>]).head(<span class="dv">3</span>)</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="co"># or </span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="co"># full_flights.select(pl.col(['FlightDate', 'Tail_Number'])).head(3)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="12">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (3, 2)</small>
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">FlightDate</th>
+<th data-quarto-table-cell-role="th">Tail_Number</th>
+</tr>
+<tr class="odd">
+<th>str</th>
+<th>str</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"2022-01-14"</td>
+<td>"N119HQ"</td>
+</tr>
+<tr class="even">
+<td>"2022-01-15"</td>
+<td>"N122HQ"</td>
+</tr>
+<tr class="odd">
+<td>"2022-01-16"</td>
+<td>"N412YX"</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<ul>
+<li>Selecting columns by types:</li>
+</ul>
+<div id="c2ba9fcc" class="cell" data-execution_count="13">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># select all integer columns</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>full_flights.select(pl.col(pl.Int64)).head(<span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="13">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (3, 22)</small>
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">Quarter</th>
+<th data-quarto-table-cell-role="th">Month</th>
+<th data-quarto-table-cell-role="th">DayofMonth</th>
+<th data-quarto-table-cell-role="th">DayOfWeek</th>
+<th data-quarto-table-cell-role="th">DOT_ID_Reporting_Airline</th>
+<th data-quarto-table-cell-role="th">Flight_Number_Reporting_Airline</th>
+<th data-quarto-table-cell-role="th">OriginAirportID</th>
+<th data-quarto-table-cell-role="th">OriginAirportSeqID</th>
+<th data-quarto-table-cell-role="th">OriginCityMarketID</th>
+<th data-quarto-table-cell-role="th">OriginStateFips</th>
+<th data-quarto-table-cell-role="th">OriginWac</th>
+<th data-quarto-table-cell-role="th">DestAirportID</th>
+<th data-quarto-table-cell-role="th">DestAirportSeqID</th>
+<th data-quarto-table-cell-role="th">DestCityMarketID</th>
+<th data-quarto-table-cell-role="th">DestStateFips</th>
+<th data-quarto-table-cell-role="th">DestWac</th>
+<th data-quarto-table-cell-role="th">CRSDepTime</th>
+<th data-quarto-table-cell-role="th">DepartureDelayGroups</th>
+<th data-quarto-table-cell-role="th">CRSArrTime</th>
+<th data-quarto-table-cell-role="th">ArrivalDelayGroups</th>
+<th data-quarto-table-cell-role="th">DistanceGroup</th>
+<th data-quarto-table-cell-role="th">DivAirportLandings</th>
+</tr>
+<tr class="odd">
+<th>i64</th>
+<th>i64</th>
+<th>i64</th>
+<th>i64</th>
+<th>i64</th>
+<th>i64</th>
+<th>i64</th>
+<th>i64</th>
+<th>i64</th>
+<th>i64</th>
+<th>i64</th>
+<th>i64</th>
+<th>i64</th>
+<th>i64</th>
+<th>i64</th>
+<th>i64</th>
+<th>i64</th>
+<th>i64</th>
+<th>i64</th>
+<th>i64</th>
+<th>i64</th>
+<th>i64</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>1</td>
+<td>14</td>
+<td>5</td>
+<td>20452</td>
+<td>4879</td>
+<td>11066</td>
+<td>1106606</td>
+<td>31066</td>
+<td>39</td>
+<td>44</td>
+<td>11278</td>
+<td>1127805</td>
+<td>30852</td>
+<td>51</td>
+<td>38</td>
+<td>1224</td>
+<td>-1</td>
+<td>1352</td>
+<td>0</td>
+<td>2</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td>1</td>
+<td>1</td>
+<td>15</td>
+<td>6</td>
+<td>20452</td>
+<td>4879</td>
+<td>11066</td>
+<td>1106606</td>
+<td>31066</td>
+<td>39</td>
+<td>44</td>
+<td>11278</td>
+<td>1127805</td>
+<td>30852</td>
+<td>51</td>
+<td>38</td>
+<td>1224</td>
+<td>-1</td>
+<td>1352</td>
+<td>-2</td>
+<td>2</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td>1</td>
+<td>1</td>
+<td>16</td>
+<td>7</td>
+<td>20452</td>
+<td>4879</td>
+<td>11066</td>
+<td>1106606</td>
+<td>31066</td>
+<td>39</td>
+<td>44</td>
+<td>11278</td>
+<td>1127805</td>
+<td>30852</td>
+<td>51</td>
+<td>38</td>
+<td>1224</td>
+<td>-1</td>
+<td>1352</td>
+<td>-1</td>
+<td>2</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div id="364efca8" class="cell" data-execution_count="14">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># select all numeric columns</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>full_flights.select(</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    pl.col(pl.Int64),</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    pl.col(pl.Float64)</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>).head(<span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="14">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (3, 44)</small>
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">Quarter</th>
+<th data-quarto-table-cell-role="th">Month</th>
+<th data-quarto-table-cell-role="th">DayofMonth</th>
+<th data-quarto-table-cell-role="th">DayOfWeek</th>
+<th data-quarto-table-cell-role="th">DOT_ID_Reporting_Airline</th>
+<th data-quarto-table-cell-role="th">Flight_Number_Reporting_Airline</th>
+<th data-quarto-table-cell-role="th">OriginAirportID</th>
+<th data-quarto-table-cell-role="th">OriginAirportSeqID</th>
+<th data-quarto-table-cell-role="th">OriginCityMarketID</th>
+<th data-quarto-table-cell-role="th">OriginStateFips</th>
+<th data-quarto-table-cell-role="th">OriginWac</th>
+<th data-quarto-table-cell-role="th">DestAirportID</th>
+<th data-quarto-table-cell-role="th">DestAirportSeqID</th>
+<th data-quarto-table-cell-role="th">DestCityMarketID</th>
+<th data-quarto-table-cell-role="th">DestStateFips</th>
+<th data-quarto-table-cell-role="th">DestWac</th>
+<th data-quarto-table-cell-role="th">CRSDepTime</th>
+<th data-quarto-table-cell-role="th">DepartureDelayGroups</th>
+<th data-quarto-table-cell-role="th">CRSArrTime</th>
+<th data-quarto-table-cell-role="th">ArrivalDelayGroups</th>
+<th data-quarto-table-cell-role="th">DistanceGroup</th>
+<th data-quarto-table-cell-role="th">DivAirportLandings</th>
+<th data-quarto-table-cell-role="th">DepDelay</th>
+<th data-quarto-table-cell-role="th">DepDelayMinutes</th>
+<th data-quarto-table-cell-role="th">DepDel15</th>
+<th data-quarto-table-cell-role="th">TaxiOut</th>
+<th data-quarto-table-cell-role="th">TaxiIn</th>
+<th data-quarto-table-cell-role="th">ArrDelay</th>
+<th data-quarto-table-cell-role="th">ArrDelayMinutes</th>
+<th data-quarto-table-cell-role="th">ArrDel15</th>
+<th data-quarto-table-cell-role="th">Cancelled</th>
+<th data-quarto-table-cell-role="th">Diverted</th>
+<th data-quarto-table-cell-role="th">CRSElapsedTime</th>
+<th data-quarto-table-cell-role="th">ActualElapsedTime</th>
+<th data-quarto-table-cell-role="th">AirTime</th>
+<th data-quarto-table-cell-role="th">Flights</th>
+<th data-quarto-table-cell-role="th">Distance</th>
+<th data-quarto-table-cell-role="th">CarrierDelay</th>
+<th data-quarto-table-cell-role="th">WeatherDelay</th>
+<th data-quarto-table-cell-role="th">NASDelay</th>
+<th data-quarto-table-cell-role="th">SecurityDelay</th>
+<th data-quarto-table-cell-role="th">LateAircraftDelay</th>
+<th data-quarto-table-cell-role="th">TotalAddGTime</th>
+<th data-quarto-table-cell-role="th">LongestAddGTime</th>
+</tr>
+<tr class="odd">
+<th>i64</th>
+<th>i64</th>
+<th>i64</th>
+<th>i64</th>
+<th>i64</th>
+<th>i64</th>
+<th>i64</th>
+<th>i64</th>
+<th>i64</th>
+<th>i64</th>
+<th>i64</th>
+<th>i64</th>
+<th>i64</th>
+<th>i64</th>
+<th>i64</th>
+<th>i64</th>
+<th>i64</th>
+<th>i64</th>
+<th>i64</th>
+<th>i64</th>
+<th>i64</th>
+<th>i64</th>
+<th>f64</th>
+<th>f64</th>
+<th>f64</th>
+<th>f64</th>
+<th>f64</th>
+<th>f64</th>
+<th>f64</th>
+<th>f64</th>
+<th>f64</th>
+<th>f64</th>
+<th>f64</th>
+<th>f64</th>
+<th>f64</th>
+<th>f64</th>
+<th>f64</th>
+<th>f64</th>
+<th>f64</th>
+<th>f64</th>
+<th>f64</th>
+<th>f64</th>
+<th>f64</th>
+<th>f64</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>1</td>
+<td>14</td>
+<td>5</td>
+<td>20452</td>
+<td>4879</td>
+<td>11066</td>
+<td>1106606</td>
+<td>31066</td>
+<td>39</td>
+<td>44</td>
+<td>11278</td>
+<td>1127805</td>
+<td>30852</td>
+<td>51</td>
+<td>38</td>
+<td>1224</td>
+<td>-1</td>
+<td>1352</td>
+<td>0</td>
+<td>2</td>
+<td>0</td>
+<td>-3.0</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>28.0</td>
+<td>4.0</td>
+<td>4.0</td>
+<td>4.0</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>88.0</td>
+<td>95.0</td>
+<td>63.0</td>
+<td>1.0</td>
+<td>323.0</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+</tr>
+<tr class="even">
+<td>1</td>
+<td>1</td>
+<td>15</td>
+<td>6</td>
+<td>20452</td>
+<td>4879</td>
+<td>11066</td>
+<td>1106606</td>
+<td>31066</td>
+<td>39</td>
+<td>44</td>
+<td>11278</td>
+<td>1127805</td>
+<td>30852</td>
+<td>51</td>
+<td>38</td>
+<td>1224</td>
+<td>-1</td>
+<td>1352</td>
+<td>-2</td>
+<td>2</td>
+<td>0</td>
+<td>-10.0</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>19.0</td>
+<td>5.0</td>
+<td>-24.0</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>88.0</td>
+<td>74.0</td>
+<td>50.0</td>
+<td>1.0</td>
+<td>323.0</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+</tr>
+<tr class="odd">
+<td>1</td>
+<td>1</td>
+<td>16</td>
+<td>7</td>
+<td>20452</td>
+<td>4879</td>
+<td>11066</td>
+<td>1106606</td>
+<td>31066</td>
+<td>39</td>
+<td>44</td>
+<td>11278</td>
+<td>1127805</td>
+<td>30852</td>
+<td>51</td>
+<td>38</td>
+<td>1224</td>
+<td>-1</td>
+<td>1352</td>
+<td>-1</td>
+<td>2</td>
+<td>0</td>
+<td>-6.0</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>16.0</td>
+<td>12.0</td>
+<td>-13.0</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>88.0</td>
+<td>81.0</td>
+<td>53.0</td>
+<td>1.0</td>
+<td>323.0</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<ul>
+<li>Complex column selection with Selectors, analogous to dplyr’s <a href="https://dplyr.tidyverse.org/reference/select.html">selection helpers</a></li>
+</ul>
+<div id="6c3b6591" class="cell" data-execution_count="15">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars.selectors <span class="im">as</span> cs</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="co"># match all variables. Same as dplyr's `everything()`</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>full_flights.select(cs.<span class="bu">all</span>()).head(<span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="15">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (3, 110)</small>
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">Year</th>
+<th data-quarto-table-cell-role="th">Quarter</th>
+<th data-quarto-table-cell-role="th">Month</th>
+<th data-quarto-table-cell-role="th">DayofMonth</th>
+<th data-quarto-table-cell-role="th">DayOfWeek</th>
+<th data-quarto-table-cell-role="th">FlightDate</th>
+<th data-quarto-table-cell-role="th">Reporting_Airline</th>
+<th data-quarto-table-cell-role="th">DOT_ID_Reporting_Airline</th>
+<th data-quarto-table-cell-role="th">IATA_CODE_Reporting_Airline</th>
+<th data-quarto-table-cell-role="th">Tail_Number</th>
+<th data-quarto-table-cell-role="th">Flight_Number_Reporting_Airline</th>
+<th data-quarto-table-cell-role="th">OriginAirportID</th>
+<th data-quarto-table-cell-role="th">OriginAirportSeqID</th>
+<th data-quarto-table-cell-role="th">OriginCityMarketID</th>
+<th data-quarto-table-cell-role="th">Origin</th>
+<th data-quarto-table-cell-role="th">OriginCityName</th>
+<th data-quarto-table-cell-role="th">OriginState</th>
+<th data-quarto-table-cell-role="th">OriginStateFips</th>
+<th data-quarto-table-cell-role="th">OriginStateName</th>
+<th data-quarto-table-cell-role="th">OriginWac</th>
+<th data-quarto-table-cell-role="th">DestAirportID</th>
+<th data-quarto-table-cell-role="th">DestAirportSeqID</th>
+<th data-quarto-table-cell-role="th">DestCityMarketID</th>
+<th data-quarto-table-cell-role="th">Dest</th>
+<th data-quarto-table-cell-role="th">DestCityName</th>
+<th data-quarto-table-cell-role="th">DestState</th>
+<th data-quarto-table-cell-role="th">DestStateFips</th>
+<th data-quarto-table-cell-role="th">DestStateName</th>
+<th data-quarto-table-cell-role="th">DestWac</th>
+<th data-quarto-table-cell-role="th">CRSDepTime</th>
+<th data-quarto-table-cell-role="th">DepTime</th>
+<th data-quarto-table-cell-role="th">DepDelay</th>
+<th data-quarto-table-cell-role="th">DepDelayMinutes</th>
+<th data-quarto-table-cell-role="th">DepDel15</th>
+<th data-quarto-table-cell-role="th">DepartureDelayGroups</th>
+<th data-quarto-table-cell-role="th">DepTimeBlk</th>
+<th data-quarto-table-cell-role="th">TaxiOut</th>
+<th data-quarto-table-cell-role="th">…</th>
+<th data-quarto-table-cell-role="th">Div1TotalGTime</th>
+<th data-quarto-table-cell-role="th">Div1LongestGTime</th>
+<th data-quarto-table-cell-role="th">Div1WheelsOff</th>
+<th data-quarto-table-cell-role="th">Div1TailNum</th>
+<th data-quarto-table-cell-role="th">Div2Airport</th>
+<th data-quarto-table-cell-role="th">Div2AirportID</th>
+<th data-quarto-table-cell-role="th">Div2AirportSeqID</th>
+<th data-quarto-table-cell-role="th">Div2WheelsOn</th>
+<th data-quarto-table-cell-role="th">Div2TotalGTime</th>
+<th data-quarto-table-cell-role="th">Div2LongestGTime</th>
+<th data-quarto-table-cell-role="th">Div2WheelsOff</th>
+<th data-quarto-table-cell-role="th">Div2TailNum</th>
+<th data-quarto-table-cell-role="th">Div3Airport</th>
+<th data-quarto-table-cell-role="th">Div3AirportID</th>
+<th data-quarto-table-cell-role="th">Div3AirportSeqID</th>
+<th data-quarto-table-cell-role="th">Div3WheelsOn</th>
+<th data-quarto-table-cell-role="th">Div3TotalGTime</th>
+<th data-quarto-table-cell-role="th">Div3LongestGTime</th>
+<th data-quarto-table-cell-role="th">Div3WheelsOff</th>
+<th data-quarto-table-cell-role="th">Div3TailNum</th>
+<th data-quarto-table-cell-role="th">Div4Airport</th>
+<th data-quarto-table-cell-role="th">Div4AirportID</th>
+<th data-quarto-table-cell-role="th">Div4AirportSeqID</th>
+<th data-quarto-table-cell-role="th">Div4WheelsOn</th>
+<th data-quarto-table-cell-role="th">Div4TotalGTime</th>
+<th data-quarto-table-cell-role="th">Div4LongestGTime</th>
+<th data-quarto-table-cell-role="th">Div4WheelsOff</th>
+<th data-quarto-table-cell-role="th">Div4TailNum</th>
+<th data-quarto-table-cell-role="th">Div5Airport</th>
+<th data-quarto-table-cell-role="th">Div5AirportID</th>
+<th data-quarto-table-cell-role="th">Div5AirportSeqID</th>
+<th data-quarto-table-cell-role="th">Div5WheelsOn</th>
+<th data-quarto-table-cell-role="th">Div5TotalGTime</th>
+<th data-quarto-table-cell-role="th">Div5LongestGTime</th>
+<th data-quarto-table-cell-role="th">Div5WheelsOff</th>
+<th data-quarto-table-cell-role="th">Div5TailNum</th>
+<th data-quarto-table-cell-role="th"></th>
+</tr>
+<tr class="odd">
+<th>str</th>
+<th>i64</th>
+<th>i64</th>
+<th>i64</th>
+<th>i64</th>
+<th>str</th>
+<th>str</th>
+<th>i64</th>
+<th>str</th>
+<th>str</th>
+<th>i64</th>
+<th>i64</th>
+<th>i64</th>
+<th>i64</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>i64</th>
+<th>str</th>
+<th>i64</th>
+<th>i64</th>
+<th>i64</th>
+<th>i64</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>i64</th>
+<th>str</th>
+<th>i64</th>
+<th>i64</th>
+<th>str</th>
+<th>f64</th>
+<th>f64</th>
+<th>f64</th>
+<th>i64</th>
+<th>str</th>
+<th>f64</th>
+<th>…</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"2022"</td>
+<td>1</td>
+<td>1</td>
+<td>14</td>
+<td>5</td>
+<td>"2022-01-14"</td>
+<td>"YX"</td>
+<td>20452</td>
+<td>"YX"</td>
+<td>"N119HQ"</td>
+<td>4879</td>
+<td>11066</td>
+<td>1106606</td>
+<td>31066</td>
+<td>"CMH"</td>
+<td>"Columbus, OH"</td>
+<td>"OH"</td>
+<td>39</td>
+<td>"Ohio"</td>
+<td>44</td>
+<td>11278</td>
+<td>1127805</td>
+<td>30852</td>
+<td>"DCA"</td>
+<td>"Washington, DC…</td>
+<td>"VA"</td>
+<td>51</td>
+<td>"Virginia"</td>
+<td>38</td>
+<td>1224</td>
+<td>"1221"</td>
+<td>-3.0</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>-1</td>
+<td>"1200-1259"</td>
+<td>28.0</td>
+<td>…</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>""</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>""</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>""</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>""</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>""</td>
+<td>null</td>
+</tr>
+<tr class="even">
+<td>"2022"</td>
+<td>1</td>
+<td>1</td>
+<td>15</td>
+<td>6</td>
+<td>"2022-01-15"</td>
+<td>"YX"</td>
+<td>20452</td>
+<td>"YX"</td>
+<td>"N122HQ"</td>
+<td>4879</td>
+<td>11066</td>
+<td>1106606</td>
+<td>31066</td>
+<td>"CMH"</td>
+<td>"Columbus, OH"</td>
+<td>"OH"</td>
+<td>39</td>
+<td>"Ohio"</td>
+<td>44</td>
+<td>11278</td>
+<td>1127805</td>
+<td>30852</td>
+<td>"DCA"</td>
+<td>"Washington, DC…</td>
+<td>"VA"</td>
+<td>51</td>
+<td>"Virginia"</td>
+<td>38</td>
+<td>1224</td>
+<td>"1214"</td>
+<td>-10.0</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>-1</td>
+<td>"1200-1259"</td>
+<td>19.0</td>
+<td>…</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>""</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>""</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>""</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>""</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>""</td>
+<td>null</td>
+</tr>
+<tr class="odd">
+<td>"2022"</td>
+<td>1</td>
+<td>1</td>
+<td>16</td>
+<td>7</td>
+<td>"2022-01-16"</td>
+<td>"YX"</td>
+<td>20452</td>
+<td>"YX"</td>
+<td>"N412YX"</td>
+<td>4879</td>
+<td>11066</td>
+<td>1106606</td>
+<td>31066</td>
+<td>"CMH"</td>
+<td>"Columbus, OH"</td>
+<td>"OH"</td>
+<td>39</td>
+<td>"Ohio"</td>
+<td>44</td>
+<td>11278</td>
+<td>1127805</td>
+<td>30852</td>
+<td>"DCA"</td>
+<td>"Washington, DC…</td>
+<td>"VA"</td>
+<td>51</td>
+<td>"Virginia"</td>
+<td>38</td>
+<td>1224</td>
+<td>"1218"</td>
+<td>-6.0</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>-1</td>
+<td>"1200-1259"</td>
+<td>16.0</td>
+<td>…</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>""</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>""</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>""</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>""</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>""</td>
+<td>null</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div id="3a1a5c10" class="cell" data-execution_count="16">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># match variables by prefix or suffix</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>full_flights.select(</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    cs.starts_with(<span class="st">'Flight'</span>) <span class="op">|</span> cs.ends_with(<span class="st">'Delay'</span>)</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>).head(<span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="16">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (3, 11)</small>
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">FlightDate</th>
+<th data-quarto-table-cell-role="th">Flight_Number_Reporting_Airline</th>
+<th data-quarto-table-cell-role="th">Flights</th>
+<th data-quarto-table-cell-role="th">DepDelay</th>
+<th data-quarto-table-cell-role="th">ArrDelay</th>
+<th data-quarto-table-cell-role="th">CarrierDelay</th>
+<th data-quarto-table-cell-role="th">WeatherDelay</th>
+<th data-quarto-table-cell-role="th">NASDelay</th>
+<th data-quarto-table-cell-role="th">SecurityDelay</th>
+<th data-quarto-table-cell-role="th">LateAircraftDelay</th>
+<th data-quarto-table-cell-role="th">DivArrDelay</th>
+</tr>
+<tr class="odd">
+<th>str</th>
+<th>i64</th>
+<th>f64</th>
+<th>f64</th>
+<th>f64</th>
+<th>f64</th>
+<th>f64</th>
+<th>f64</th>
+<th>f64</th>
+<th>f64</th>
+<th>str</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"2022-01-14"</td>
+<td>4879</td>
+<td>1.0</td>
+<td>-3.0</td>
+<td>4.0</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+</tr>
+<tr class="even">
+<td>"2022-01-15"</td>
+<td>4879</td>
+<td>1.0</td>
+<td>-10.0</td>
+<td>-24.0</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+</tr>
+<tr class="odd">
+<td>"2022-01-16"</td>
+<td>4879</td>
+<td>1.0</td>
+<td>-6.0</td>
+<td>-13.0</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>A detailed comparison between dplyr and polars column selection helpers:</p>
+<table class="table">
+<colgroup>
+<col style="width: 58%">
+<col style="width: 26%">
+<col style="width: 15%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>dplyr action</th>
+<th>dplyr function</th>
+<th>polars function</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>matches all columns</td>
+<td><code>everything()</code></td>
+<td><code>cs.all()</code></td>
+</tr>
+<tr class="even">
+<td>matches all integer columns</td>
+<td><code>where(is.integer())</code></td>
+<td><code>cs.integer()</code></td>
+</tr>
+<tr class="odd">
+<td>matches all factor/categorical columns</td>
+<td><code>where(is.factor())</code></td>
+<td><code>cs.categorical()</code></td>
+</tr>
+<tr class="even">
+<td>matches all float columns</td>
+<td><code>where(is.double())</code></td>
+<td><code>cs.float()</code></td>
+</tr>
+<tr class="odd">
+<td>matches all string columns</td>
+<td><code>where(is.character())</code></td>
+<td><code>cs.string()</code></td>
+</tr>
+<tr class="even">
+<td>matches all date columns</td>
+<td><code>where(\(x) class(x) == "Date")</code></td>
+<td><code>cs.date()</code></td>
+</tr>
+<tr class="odd">
+<td>match all datetime columns</td>
+<td>not available</td>
+<td><code>cs.datetime()</code></td>
+</tr>
+<tr class="even">
+<td>match all time columns</td>
+<td>not available</td>
+<td><code>cs.time()</code></td>
+</tr>
+<tr class="odd">
+<td>match all date/datetime columns</td>
+<td>not available</td>
+<td><code>cs.temporal()</code></td>
+</tr>
+<tr class="even">
+<td>select the last column</td>
+<td><code>last_col()</code></td>
+<td><code>cs.last()</code></td>
+</tr>
+<tr class="odd">
+<td>starts with a prefix</td>
+<td><code>starts_with()</code></td>
+<td><code>cs.starts_with()</code></td>
+</tr>
+<tr class="even">
+<td>ends with a suffix</td>
+<td><code>end_with()</code></td>
+<td><code>cs.ends_with()</code></td>
+</tr>
+<tr class="odd">
+<td>contains a literal string</td>
+<td><code>contains()</code></td>
+<td><code>cs.contains()</code></td>
+</tr>
+<tr class="even">
+<td>matches a regular expression</td>
+<td><code>matches()</code></td>
+<td><code>cs.matches()</code></td>
+</tr>
+<tr class="odd">
+<td>takes the complement of a set of columns</td>
+<td><code>!</code></td>
+<td><code>~</code></td>
+</tr>
+<tr class="even">
+<td>takes the difference between a set of columns</td>
+<td>not available</td>
+<td><code>-</code></td>
+</tr>
+<tr class="odd">
+<td>selects a range of consecutive columns</td>
+<td><code>col1:col10</code></td>
+<td>not available</td>
+</tr>
+<tr class="even">
+<td>matches all column names in a list, no error thrown for non-existing names</td>
+<td><code>any_of()</code></td>
+<td>not available</td>
+</tr>
+</tbody>
+</table>
 </section>
 <section id="modifyadd-column" class="level3" data-number="2.3.3">
 <h3 data-number="2.3.3" class="anchored" data-anchor-id="modifyadd-column"><span class="header-section-number">2.3.3</span> Modify/Add column</h3>

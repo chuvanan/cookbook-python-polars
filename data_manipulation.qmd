@@ -99,8 +99,82 @@ eager_stmt = (
 )
 ```
 
-### Select columns
+### Selecting columns
 
+Selecting variables within a DataFrame in polars is highly expressive, offering flexibility based on either variable names or types. Here's a breakdown from simple to complex:
+
+* Utilizing the `select` function to create a DataFrame from Series:
+
+```{python}
+foo = pl.Series('foo', [1, 2, 3])
+bar = pl.Series('bar', [4, 5, 6])
+
+pl.select(mmin = pl.min_horizontal(foo, bar))
+```
+
+* Selecting columns by names:
+
+
+```{python}
+full_flights.select(['FlightDate', 'Tail_Number']).head(3)
+# or 
+# full_flights.select(pl.col(['FlightDate', 'Tail_Number'])).head(3)
+```
+
+* Selecting columns by types:
+
+```{python}
+# select all integer columns
+full_flights.select(pl.col(pl.Int64)).head(3)
+```
+
+```{python}
+# select all numeric columns
+full_flights.select(
+    pl.col(pl.Int64),
+    pl.col(pl.Float64)
+).head(3)
+```
+
+* Complex column selection with Selectors, analogous to dplyr's [selection helpers](https://dplyr.tidyverse.org/reference/select.html)
+
+```{python}
+import polars.selectors as cs
+
+# match all variables. Same as dplyr's `everything()`
+full_flights.select(cs.all()).head(3)
+```
+
+
+```{python}
+# match variables by prefix or suffix
+full_flights.select(
+    cs.starts_with('Flight') | cs.ends_with('Delay')
+).head(3)
+```
+
+A detailed comparison between dplyr and polars column selection helpers:
+
+| dplyr action                                                               	| dplyr function                   	| polars function    	|
+|----------------------------------------------------------------------------	|----------------------------------	|--------------------	|
+| matches all columns                                                        	| `everything()`                   	| `cs.all()`         	|
+| matches all integer columns                                                	| `where(is.integer())`            	| `cs.integer()`     	|
+| matches all factor/categorical columns                                     	| `where(is.factor())`             	| `cs.categorical()` 	|
+| matches all float columns                                                  	| `where(is.double())`             	| `cs.float()`       	|
+| matches all string columns                                                 	| `where(is.character())`          	| `cs.string()`      	|
+| matches all date columns                                                   	| `where(\(x) class(x) == "Date")` 	| `cs.date()`        	|
+| match all datetime columns                                                 	| not available                    	| `cs.datetime()`    	|
+| match all time columns                                                     	| not available                    	| `cs.time()`        	|
+| match all date/datetime columns                                            	| not available                    	| `cs.temporal()`    	|
+| select the last column                                                     	| `last_col()`                     	| `cs.last()`        	|
+| starts with a prefix                                                       	| `starts_with()`                  	| `cs.starts_with()` 	|
+| ends with a suffix                                                         	| `end_with()`                     	| `cs.ends_with()`   	|
+| contains a literal string                                                  	| `contains()`                     	| `cs.contains()`    	|
+| matches a regular expression                                               	| `matches()`                      	| `cs.matches()`     	|
+| takes the complement of a set of columns                                   	| `!`                              	| `~`                	|
+| takes the difference between a set of columns                              	| not available                    	| `-`                	|
+| selects a range of consecutive columns                                     	| `col1:col10`                     	| not available      	|
+| matches all column names in a list, no error thrown for non-existing names 	| `any_of()`                       	| not available      	|
 
 ### Modify/Add column
 
