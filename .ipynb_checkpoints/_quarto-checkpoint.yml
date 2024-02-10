@@ -24,6 +24,7 @@ format:
     theme: cosmo
     code-fold: false
     monofont: Fira Mono
+    css: custom.css
   pdf:
     documentclass: scrreprt
 
