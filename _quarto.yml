@@ -3,7 +3,7 @@ project:
   output-dir: docs
 
 book:
-  title: "Cookbook polars for Python"
+  title: "Python's polars cookbook for tidyverse users"
   author: "An Chu"
   date: "2/4/2024"
   keyword: polars, python, dataframe

@@ -1,3 +1,40 @@
 # Preface {.unnumbered}
 
 This book was initially inspired by a post written by Emily Riederer which recommended a set of Python *ergonomic* tool for R users.
+
+
+## Run the code from this book
+
+* Clone the book repository:
+
+```bash
+git clone https://github.com/chuvanan/cookbook-python-polars.git python-polars-cookbook
+cd python-polars-cookbook
+python3 -m venv env
+source env/bin/activate
+```
+
+* You can install the exact packages that the book uses with the `requirements.txt` file:
+
+```bash
+python3 -m pip install -r requirements.txt
+```
+
+* Download the data (source: [Reporting carrier on-time performance](https://transtats.bts.gov/TableInfo.asp?gnoyr_VQ=FGJ&QO_fu146_anzr=b0-gvzr&V0s1_b0yB=D))
+
+```bash
+python download-data.py
+```
+
+## What is polars?
+
+* A query engine (writtern in Rust) with a DataFrame front-end
+
+
+## Who is this for?
+
+As stated in the title, this book is an introduction to polars library for R's `tidyverse` users.
+
+## Contributing
+
+Feel free to open an [issue](https://github.com/chuvanan/cookbook-python-polars/issues) if you notice any problems with this book. It's free and open source, and your feedback is valuable to me.

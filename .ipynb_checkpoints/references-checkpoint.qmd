@@ -1,6 +1,23 @@
-# References {.unnumbered}
+# Summary & references {.unnumbered}
 
-Here is a compilation of resources, including talks, articles, blogs and tutorials, that I utilized in crafting this book.
+## Summary
+
+* Zen of polars (a.k.a. the polars design principles). If you're into tidyverse, you might find the polars API design guideline familiar with [tidy design principles](https://design.tidyverse.org/)
+
+
+|         - readability over saving keystrokes
+|         - explicit over implicit
+|         - aim for a single return dtype per expression
+|         - API should nudge to fast code
+|         - pure over in-place
+|         - undersore over concatenated words
+|         - minimize ambiguity
+
+## References
+
+Here is a compilation of resources, including talks, articles, blogs and tutorials, that I studied in crafting this book.
+
+* Must watch: [Ritchie Vink's (author of polars) keynote at EuroSciPy 2023](https://www.youtube.com/watch?v=GTVm3QyJ-3I&t=43s)
 
 * [Polars user guide](https://docs.pola.rs/)
 

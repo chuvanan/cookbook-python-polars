@@ -1,0 +1,30 @@
+
+# Import/Export
+
+An overview of polars I/O capabilities:
+
+
+| Format                                                           	| Implementation             	| Read 	| Write 	| Scan                         	|
+|------------------------------------------------------------------	|----------------------------	|------	|-------	|------------------------------	|
+| CSV                                                              	| native Rust implementation 	| x    	| x     	| x                            	|
+| Excel (+ ods)                                                    	| external libraries         	| x    	| x     	|                              	|
+| Parquet                                                          	| native                     	| x    	| x     	| x                            	|
+| JSON                                                             	| native                     	| x    	| x     	| x (NDJSON only)              	|
+| Database                                                         	| uri/SQLAlchemy             	| x    	| x     	|                              	|
+| Cloud storage (AWS S3, Azure blob storage, Google cloud storage) 	| native                     	| x    	| x     	| x (for remote parquet files) 	|
+
+
+Note on `scan`: Comparable to the concept of [lazy reading](https://www.tidyverse.org/blog/2021/11/readr-2-1-0-lazy/) in `readr` package, polars allows you to `scan` an input file, which defers the actual parsing of the file and provides a `LazyFrame`, a lazy computation holder. This feature offers notable performance benefits:
+
+* reduction of memory usage by reading only the necessary data
+
+* various optimizations by query planner
+
+
+## Import data
+
+
+
+
+
+## Export data

@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Cookbook polars for Python</title>
+<title>Python’s polars cookbook for tidyverse users - 3&nbsp; Import/Export</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -73,7 +73,7 @@ ul.task-list li input[type="checkbox"] {
 <link rel="stylesheet" href="custom.css">
 </head>
 
-<body class="nav-sidebar floating fullcontent">
+<body class="nav-sidebar floating">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -82,7 +82,7 @@ ul.task-list li input[type="checkbox"] {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./import_export.html"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">import_export.html</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./import_export.html"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Import/Export</span></a></li></ol></nav>
         <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
@@ -97,7 +97,7 @@ ul.task-list li input[type="checkbox"] {
   <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
     <div class="pt-lg-2 mt-2 text-left sidebar-header">
     <div class="sidebar-title mb-0 py-0">
-      <a href="./">Cookbook polars for Python</a> 
+      <a href="./">Python’s polars cookbook for tidyverse users</a> 
         <div class="sidebar-tools-main">
     <a href="https://chuvanan.github.io/cookbook-python-polars/" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-git"></i></a>
 </div>
@@ -131,7 +131,7 @@ ul.task-list li input[type="checkbox"] {
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./import_export.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">import_export.html</span></span></a>
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Import/Export</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
@@ -149,7 +149,7 @@ ul.task-list li input[type="checkbox"] {
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./references.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">References</span></a>
+ <span class="menu-text">Summary &amp; references</span></a>
   </div>
 </li>
     </ul>
@@ -157,15 +157,114 @@ ul.task-list li input[type="checkbox"] {
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#import-data" id="toc-import-data" class="nav-link active" data-scroll-target="#import-data"><span class="header-section-number">3.1</span> Import data</a></li>
+  <li><a href="#export-data" id="toc-export-data" class="nav-link" data-scroll-target="#export-data"><span class="header-section-number">3.2</span> Export data</a></li>
+  </ul>
+</nav>
+    </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Import/Export</span></h1>
+</div>
 
 
 
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
 
 
+</header>
+
+
+<p>An overview of polars I/O capabilities:</p>
+<table class="table">
+<colgroup>
+<col style="width: 48%">
+<col style="width: 20%">
+<col style="width: 4%">
+<col style="width: 5%">
+<col style="width: 21%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Format</th>
+<th>Implementation</th>
+<th>Read</th>
+<th>Write</th>
+<th>Scan</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>CSV</td>
+<td>native Rust implementation</td>
+<td>x</td>
+<td>x</td>
+<td>x</td>
+</tr>
+<tr class="even">
+<td>Excel (+ ods)</td>
+<td>external libraries</td>
+<td>x</td>
+<td>x</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>Parquet</td>
+<td>native</td>
+<td>x</td>
+<td>x</td>
+<td>x</td>
+</tr>
+<tr class="even">
+<td>JSON</td>
+<td>native</td>
+<td>x</td>
+<td>x</td>
+<td>x (NDJSON only)</td>
+</tr>
+<tr class="odd">
+<td>Database</td>
+<td>uri/SQLAlchemy</td>
+<td>x</td>
+<td>x</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Cloud storage (AWS S3, Azure blob storage, Google cloud storage)</td>
+<td>native</td>
+<td>x</td>
+<td>x</td>
+<td>x (for remote parquet files)</td>
+</tr>
+</tbody>
+</table>
+<p>Note on <code>scan</code>: Comparable to the concept of <a href="https://www.tidyverse.org/blog/2021/11/readr-2-1-0-lazy/">lazy reading</a> in <code>readr</code> package, polars allows you to <code>scan</code> an input file, which defers the actual parsing of the file and provides a <code>LazyFrame</code>, a lazy computation holder. This feature offers notable performance benefits:</p>
+<ul>
+<li><p>reduction of memory usage by reading only the necessary data</p></li>
+<li><p>various optimizations by query planner</p></li>
+</ul>
+<section id="import-data" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="import-data"><span class="header-section-number">3.1</span> Import data</h2>
+</section>
+<section id="export-data" class="level2" data-number="3.2">
+<h2 data-number="3.2" class="anchored" data-anchor-id="export-data"><span class="header-section-number">3.2</span> Export data</h2>
+
+
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
