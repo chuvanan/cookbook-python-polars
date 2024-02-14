@@ -1,6 +1,12 @@
 # Preface {.unnumbered}
 
-This book was initially inspired by a post written by Emily Riederer which recommended a set of Python *ergonomic* tool for R users.
+This book arose from a series of [blog posts](https://www.emilyriederer.com/post/py-rgo-polars/) recommending a Pythonic data science stack that mirrors the comfort and familiarity of R's
+tidyverse packages. Specifically, this book explores the `polars` library - a rising star in the DataFrame space (alongside established players like Pandas, Dask, Modin, Ray, Vaex).
+
+In short, polars is described as a [query engine with a DataFrame front-end](https://pola.rs/posts/polars_birds_eye_view/). It offers a rich set of intuitive functions and principled workflows for 
+data manipulation and analysis. Designed from the ground up with performance in mind, polars is known for its [lightning-fast execution speed](https://www.ritchievink.com/blog/2021/02/28/i-wrote-one-of-the-fastest-dataframe-libraries/).
+
+The bulk of this book features structured examples of data wrangling tasks showcasing idiomatic polars and corresponding dplyr/tidyr code for comparison. Examples might include commentary on the API choices.
 
 
 ## Run the code from this book
@@ -26,14 +32,9 @@ python3 -m pip install -r requirements.txt
 python download-data.py
 ```
 
-## What is polars?
+## Credit
 
-* A query engine (writtern in Rust) with a DataFrame front-end
-
-
-## Who is this for?
-
-As stated in the title, this book is an introduction to polars library for R's `tidyverse` users.
+This work builds upon the organizational style of [https://ddotta.github.io/cookbook-rpolars/](https://ddotta.github.io/cookbook-rpolars/) but the content and examples are tailored to Python's polars library. So credit goes to [Damien Dotta](https://github.com/ddotta), all remaining errors are mine.
 
 ## Contributing
 

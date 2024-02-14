@@ -3,7 +3,7 @@ project:
   output-dir: docs
 
 book:
-  title: "Python's polars cookbook for tidyverse users"
+  title: "A tidyverse user's guide to polars library"
   author: "An Chu"
   date: "2/4/2024"
   keyword: polars, python, dataframe
@@ -27,6 +27,8 @@ format:
     css: custom.css
   pdf:
     documentclass: scrreprt
+filters:
+  - line-highlight
 
 
 

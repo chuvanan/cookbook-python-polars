@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Python’s polars cookbook for tidyverse users - 1&nbsp; First steps with polars</title>
+<title>A tidyverse user’s guide to polars library - 1&nbsp; First steps with polars</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -75,6 +75,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/quarto-contrib/line-highlight-1.0.0/line-highlight.css" rel="stylesheet">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -134,7 +135,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
     <div class="pt-lg-2 mt-2 text-left sidebar-header">
     <div class="sidebar-title mb-0 py-0">
-      <a href="./">Python’s polars cookbook for tidyverse users</a> 
+      <a href="./">A tidyverse user’s guide to polars library</a> 
         <div class="sidebar-tools-main">
     <a href="https://chuvanan.github.io/cookbook-python-polars/" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-git"></i></a>
 </div>
@@ -236,12 +237,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="installation" class="level2" data-number="1.1">
 <h2 data-number="1.1" class="anchored" data-anchor-id="installation"><span class="header-section-number">1.1</span> Installation</h2>
 <p>Let’s kick off our journey into the world of data manipulation with the polars library. First things first, we need to install polars and set up a virtual environment for a clean installation. Use the following commands:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># you better setting up a virtual enviroment before </span></span>
+<div class="sourceCode" id="cb1" data-code-line-numbers=""><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># you better setting up a virtual enviroment before </span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co"># installing any python libraries</span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install polars</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>To gain insights into the installed polars package, including version details and enabled features, utilize the <code>build_info()</code> method in Python:</p>
-<div id="2a96b325" class="cell" data-execution_count="1">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
+<div id="62446f96" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb2" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>pl.build_info()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
@@ -250,16 +251,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="reading-data-with-polars" class="level3" data-number="1.2.1">
 <h3 data-number="1.2.1" class="anchored" data-anchor-id="reading-data-with-polars"><span class="header-section-number">1.2.1</span> Reading data with polars</h3>
 <p>Reading a CSV file using polars is not only straightforward but also efficient. Let’s take a quick look:</p>
-<div id="1adf82cc" class="cell" data-execution_count="2">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
+<div id="53c8dd6a" class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb3" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>flights <span class="op">=</span> pl.read_csv(<span class="st">'./data/flights.csv'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>If you’re coming from an R background, checking the data types in polars might seem overwhelming due to the numerous available types. Here’s a quick way to inspect them:</p>
-<div id="11f49b11" class="cell" data-execution_count="3">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 10 sample columns</span></span>
+<div id="e75e733f" class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb4" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 10 sample columns</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>flights[:,<span class="dv">0</span>:<span class="dv">9</span>].schema</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="2">
-<pre><code>OrderedDict([('Year', Int64),
+<pre data-code-line-numbers=""><code>OrderedDict([('Year', Int64),
              ('Quarter', Int64),
              ('Month', Int64),
              ('DayofMonth', Int64),
@@ -271,10 +272,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <p>For those familiar with R’s dplyr, a similar method called <code>glimpse()</code> is available:</p>
-<div id="a072f5c2" class="cell" data-execution_count="4">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>flights[:, <span class="dv">0</span>:<span class="dv">9</span>].glimpse()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="5f882e09" class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb6" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>flights[:, <span class="dv">0</span>:<span class="dv">9</span>].glimpse()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Rows: 999
+<pre data-code-line-numbers=""><code>Rows: 999
 Columns: 9
 $ Year                        &lt;i64&gt; 2022, 2022, 2022, 2022, 2022, 2022, 2022, 2022, 2022, 2022
 $ Quarter                     &lt;i64&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
@@ -289,8 +290,8 @@ $ IATA_CODE_Reporting_Airline &lt;str&gt; 'YX', 'YX', 'YX', 'YX', 'YX', 'YX', 'Y
 </div>
 </div>
 <p>Standard commands from pandas such as <code>head()</code>, <code>tail()</code>, and <code>describe()</code> can be used seamlessly:</p>
-<div id="d38336b1" class="cell" data-execution_count="5">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>flights[:, <span class="dv">0</span>:<span class="dv">9</span>].head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="e3a021b6" class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb8" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>flights[:, <span class="dv">0</span>:<span class="dv">9</span>].head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="4">
 <div><style>
 .dataframe > thead > tr,
@@ -386,8 +387,8 @@ $ IATA_CODE_Reporting_Airline &lt;str&gt; 'YX', 'YX', 'YX', 'YX', 'YX', 'YX', 'Y
 </div>
 </div>
 </div>
-<div id="e408b964" class="cell" data-execution_count="6">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>flights[:, <span class="dv">0</span>:<span class="dv">9</span>].tail()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="bad8a391" class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb9" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>flights[:, <span class="dv">0</span>:<span class="dv">9</span>].tail()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="5">
 <div><style>
 .dataframe > thead > tr,
@@ -483,8 +484,8 @@ $ IATA_CODE_Reporting_Airline &lt;str&gt; 'YX', 'YX', 'YX', 'YX', 'YX', 'YX', 'Y
 </div>
 </div>
 </div>
-<div id="fc19d868" class="cell" data-execution_count="7">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>flights[:, <span class="dv">0</span>:<span class="dv">9</span>].describe()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="c0da4f94" class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb10" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>flights[:, <span class="dv">0</span>:<span class="dv">9</span>].describe()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="6">
 <div><style>
 .dataframe > thead > tr,
@@ -639,10 +640,10 @@ $ IATA_CODE_Reporting_Airline &lt;str&gt; 'YX', 'YX', 'YX', 'YX', 'YX', 'YX', 'Y
 <section id="row-and-column-counting" class="level3" data-number="1.2.2">
 <h3 data-number="1.2.2" class="anchored" data-anchor-id="row-and-column-counting"><span class="header-section-number">1.2.2</span> Row and column counting</h3>
 <p>Determining the number of rows and columns in a polars DataFrame is as simple as checking the shape:</p>
-<div id="867ec9ac" class="cell" data-execution_count="8">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>flights.shape</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="a498031c" class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb11" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>flights.shape</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="7">
-<pre><code>(999, 110)</code></pre>
+<pre data-code-line-numbers=""><code>(999, 110)</code></pre>
 </div>
 </div>
 <p>The output from polars comes with some useful features:</p>
@@ -656,13 +657,13 @@ $ IATA_CODE_Reporting_Airline &lt;str&gt; 'YX', 'YX', 'YX', 'YX', 'YX', 'YX', 'Y
 <section id="converting-from-pandas" class="level3" data-number="1.2.3">
 <h3 data-number="1.2.3" class="anchored" data-anchor-id="converting-from-pandas"><span class="header-section-number">1.2.3</span> Converting from pandas</h3>
 <p>Transitioning from a Pandas DataFrame to a polars DataFrame is effortless with the <code>from_pandas()</code> method:</p>
-<div id="b6632a78" class="cell" data-execution_count="9">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<div id="36b567d7" class="cell" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb13" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>flights2 <span class="op">=</span> pl.from_pandas(pd.read_csv(<span class="st">'./data/flights.csv'</span>))</span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>flights2[:,<span class="dv">0</span>:<span class="dv">9</span>].glimpse()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Rows: 999
+<pre data-code-line-numbers=""><code>Rows: 999
 Columns: 9
 $ Year                        &lt;i64&gt; 2022, 2022, 2022, 2022, 2022, 2022, 2022, 2022, 2022, 2022
 $ Quarter                     &lt;i64&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
@@ -683,11 +684,11 @@ $ IATA_CODE_Reporting_Airline &lt;str&gt; 'YX', 'YX', 'YX', 'YX', 'YX', 'YX', 'Y
 <ul>
 <li><code>Series</code> is <strong>1-dimensional</strong> data structure, akin to R’s atomic vector, where all elements must share the same data type.</li>
 </ul>
-<div id="94d54542" class="cell" data-execution_count="10">
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>s <span class="op">=</span> pl.Series(<span class="st">'a'</span>, [<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>])</span>
+<div id="7da9093f" class="cell" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb15" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>s <span class="op">=</span> pl.Series(<span class="st">'a'</span>, [<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>])</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(s)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>shape: (3,)
+<pre data-code-line-numbers=""><code>shape: (3,)
 Series: 'a' [i64]
 [
     1
@@ -696,32 +697,32 @@ Series: 'a' [i64]
 ]</code></pre>
 </div>
 </div>
-<div id="fe6c9e72" class="cell" data-execution_count="11">
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>s.dtype</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="e0521f81" class="cell" data-execution_count="11">
+<div class="sourceCode cell-code" id="cb17" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>s.dtype</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="10">
-<pre><code>Int64</code></pre>
+<pre data-code-line-numbers=""><code>Int64</code></pre>
 </div>
 </div>
 <ul>
 <li><code>Series</code> supports various <a href="https://docs.pola.rs/py-polars/html/reference/series/index.html">methods</a>, including operations like finding the maximum or calculating the mean.</li>
 </ul>
-<div id="fc3c4ca1" class="cell" data-execution_count="12">
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>s.<span class="bu">max</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="b4c4f92f" class="cell" data-execution_count="12">
+<div class="sourceCode cell-code" id="cb19" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>s.<span class="bu">max</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="11">
-<pre><code>3</code></pre>
+<pre data-code-line-numbers=""><code>3</code></pre>
 </div>
 </div>
-<div id="42c8ce64" class="cell" data-execution_count="13">
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>s.mean()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="6d367253" class="cell" data-execution_count="13">
+<div class="sourceCode cell-code" id="cb21" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>s.mean()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="12">
-<pre><code>2.0</code></pre>
+<pre data-code-line-numbers=""><code>2.0</code></pre>
 </div>
 </div>
 <ul>
 <li><code>DataFrames</code> are 2-dimensional structures backed by <code>Series</code>, similar to R’s <code>data.frame</code>. They come with several attributes for exploration:</li>
 </ul>
-<div id="615e15c2" class="cell" data-execution_count="14">
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>flights.columns</span>
+<div id="786b86af" class="cell" data-execution_count="14">
+<div class="sourceCode cell-code" id="cb23" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>flights.columns</span>
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>flights.dtypes</span>
 <span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>flights.height</span>
 <span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>flights.width</span>
@@ -729,7 +730,7 @@ Series: 'a' [i64]
 <span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>flights.shape</span>
 <span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>flights[:,<span class="dv">0</span>:<span class="dv">9</span>].flags</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="13">
-<pre><code>{'Year': {'SORTED_ASC': False, 'SORTED_DESC': False},
+<pre data-code-line-numbers=""><code>{'Year': {'SORTED_ASC': False, 'SORTED_DESC': False},
  'Quarter': {'SORTED_ASC': False, 'SORTED_DESC': False},
  'Month': {'SORTED_ASC': False, 'SORTED_DESC': False},
  'DayofMonth': {'SORTED_ASC': False, 'SORTED_DESC': False},
@@ -1154,4 +1155,5 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 
 
 
+<script src="site_libs/quarto-contrib/line-highlight-1.0.0/line-highlight.js" defer="true"></script>
 </body></html>

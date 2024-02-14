@@ -9,7 +9,7 @@
 <meta name="author" content="An Chu">
 <meta name="dcterms.date" content="2024-02-04">
 
-<title>Python’s polars cookbook for tidyverse users</title>
+<title>A tidyverse user’s guide to polars library</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -76,6 +76,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/quarto-contrib/line-highlight-1.0.0/line-highlight.css" rel="stylesheet">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -132,7 +133,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
     <div class="pt-lg-2 mt-2 text-left sidebar-header">
     <div class="sidebar-title mb-0 py-0">
-      <a href="./">Python’s polars cookbook for tidyverse users</a> 
+      <a href="./">A tidyverse user’s guide to polars library</a> 
         <div class="sidebar-tools-main">
     <a href="https://chuvanan.github.io/cookbook-python-polars/" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-git"></i></a>
 </div>
@@ -200,8 +201,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#preface" id="toc-preface" class="nav-link active" data-scroll-target="#preface">Preface</a>
   <ul class="collapse">
   <li><a href="#run-the-code-from-this-book" id="toc-run-the-code-from-this-book" class="nav-link" data-scroll-target="#run-the-code-from-this-book">Run the code from this book</a></li>
-  <li><a href="#what-is-polars" id="toc-what-is-polars" class="nav-link" data-scroll-target="#what-is-polars">What is polars?</a></li>
-  <li><a href="#who-is-this-for" id="toc-who-is-this-for" class="nav-link" data-scroll-target="#who-is-this-for">Who is this for?</a></li>
+  <li><a href="#credit" id="toc-credit" class="nav-link" data-scroll-target="#credit">Credit</a></li>
   <li><a href="#contributing" id="toc-contributing" class="nav-link" data-scroll-target="#contributing">Contributing</a></li>
   </ul></li>
   </ul>
@@ -212,7 +212,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Python’s polars cookbook for tidyverse users</h1>
+<h1 class="title">A tidyverse user’s guide to polars library</h1>
 </div>
 
 
@@ -243,34 +243,30 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <section id="preface" class="level1 unnumbered">
 <h1 class="unnumbered">Preface</h1>
-<p>This book was initially inspired by a post written by Emily Riederer which recommended a set of Python <em>ergonomic</em> tool for R users.</p>
+<p>This book arose from a series of <a href="https://www.emilyriederer.com/post/py-rgo-polars/">blog posts</a> recommending a Pythonic data science stack that mirrors the comfort and familiarity of R’s tidyverse packages. Specifically, this book explores the <code>polars</code> library - a rising star in the DataFrame space (alongside established players like Pandas, Dask, Modin, Ray, Vaex).</p>
+<p>In short, polars is described as a <a href="https://pola.rs/posts/polars_birds_eye_view/">query engine with a DataFrame front-end</a>. It offers a rich set of intuitive functions and principled workflows for data manipulation and analysis. Designed from the ground up with performance in mind, polars is known for its <a href="https://www.ritchievink.com/blog/2021/02/28/i-wrote-one-of-the-fastest-dataframe-libraries/">lightning-fast execution speed</a>.</p>
+<p>The bulk of this book features structured examples of data wrangling tasks showcasing idiomatic polars and corresponding dplyr/tidyr code for comparison. Examples might include commentary on the API choices.</p>
 <section id="run-the-code-from-this-book" class="level2">
 <h2 class="anchored" data-anchor-id="run-the-code-from-this-book">Run the code from this book</h2>
 <ul>
 <li>Clone the book repository:</li>
 </ul>
-<div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> clone https://github.com/chuvanan/cookbook-python-polars.git python-polars-cookbook</span>
+<div class="sourceCode" id="cb1" data-code-line-numbers=""><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> clone https://github.com/chuvanan/cookbook-python-polars.git python-polars-cookbook</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> python-polars-cookbook</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="ex">python3</span> <span class="at">-m</span> venv env</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="bu">source</span> env/bin/activate</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <ul>
 <li>You can install the exact packages that the book uses with the <code>requirements.txt</code> file:</li>
 </ul>
-<div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">python3</span> <span class="at">-m</span> pip install <span class="at">-r</span> requirements.txt</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb2" data-code-line-numbers=""><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">python3</span> <span class="at">-m</span> pip install <span class="at">-r</span> requirements.txt</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <ul>
 <li>Download the data (source: <a href="https://transtats.bts.gov/TableInfo.asp?gnoyr_VQ=FGJ&amp;QO_fu146_anzr=b0-gvzr&amp;V0s1_b0yB=D">Reporting carrier on-time performance</a>)</li>
 </ul>
-<div class="sourceCode" id="cb3"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> download-data.py</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb3" data-code-line-numbers=""><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> download-data.py</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
-<section id="what-is-polars" class="level2">
-<h2 class="anchored" data-anchor-id="what-is-polars">What is polars?</h2>
-<ul>
-<li>A query engine (writtern in Rust) with a DataFrame front-end</li>
-</ul>
-</section>
-<section id="who-is-this-for" class="level2">
-<h2 class="anchored" data-anchor-id="who-is-this-for">Who is this for?</h2>
-<p>As stated in the title, this book is an introduction to polars library for R’s <code>tidyverse</code> users.</p>
+<section id="credit" class="level2">
+<h2 class="anchored" data-anchor-id="credit">Credit</h2>
+<p>This work builds upon the organizational style of <a href="https://ddotta.github.io/cookbook-rpolars/">https://ddotta.github.io/cookbook-rpolars/</a> but the content and examples are tailored to Python’s polars library. So credit goes to <a href="https://github.com/ddotta">Damien Dotta</a>, all remaining errors are mine.</p>
 </section>
 <section id="contributing" class="level2">
 <h2 class="anchored" data-anchor-id="contributing">Contributing</h2>
@@ -682,4 +678,5 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 
 
 
+<script src="site_libs/quarto-contrib/line-highlight-1.0.0/line-highlight.js" defer="true"></script>
 </body></html>

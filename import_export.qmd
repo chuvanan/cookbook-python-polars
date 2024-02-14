@@ -23,8 +23,110 @@ Note on `scan`: Comparable to the concept of [lazy reading](https://www.tidyvers
 
 ## Import data
 
+### Delimited file (CSV, TSV)
+
+For a complete list of parameter options to use with polars CSV readers, see this [page](https://docs.pola.rs/py-polars/html/reference/api/polars.read_csv.html). These parameters
+provides the same functionality as readr's arguments but with slightly different names. Here's an example:
+
+```{python}
+import polars as pl
+
+# Read a CSV file
+flights_202212 = pl.read_csv(
+    source='./data/On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2022_12.csv',
+    separator=',',                  # single character used to separate fields, default=True
+    has_header=True,                # flag indicating whether the first row contains header, default=True
+    infer_schema_length=1000,       # maximum number of lines to read for schema inference, default=100
+    n_rows=10                       # maximum number of lines to read
+)
+
+# Display the first 3 rows and 10 columns
+flights_202212[:3,:10]
+```
+
+In a complex data set, it is common to override data types for specific columns
+
+```{python}
+#| class-source: "numberLines"
+
+# Read the CSV file with specified data types for selected columns
+flights_202212 = pl.read_csv(
+    source='./data/On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2022_12.csv',
+    separator=',',                  # single character used to separate fields, default=True
+    has_header=True,                # flag the first row has header or not, default=True
+    infer_schema_length=1000,       # maximum number of lines to read to infer schema, default=100
+    n_rows=10,                      # maximum number of lines to read
+    try_parse_dates=True, #<<
+    dtypes={'Year':pl.Int32, 'Quarter':pl.Int32, 'Month': pl.Int32, 'Reporting_Airline': pl.Categorical} #<<
+)
+
+flights_202212[:3,:10]
+```
+
+### Reading multiple files
+
+polars `scan_*()` method is a really neat technique for reading multiple files efficiently. In 
+
+```{python}
+from pathlib import Path
+
+def convert_bytes(size):
+    """ Convert bytes to KB, or MB or GB"""
+    for x in ['bytes', 'KB', 'MB', 'GB', 'TB']:
+        if size < 1024.0:
+            return "%3.1f %s" % (size, x)
+        size /= 1024.0
+
+for p in Path.cwd().rglob('data/On_Time*.csv'):
+    print(p.name, ":", convert_bytes(p.stat().st_size))
+```
+
+To read multiple files into a single DataFrame, we can use globbing patterns:
+
+```{python}
+%%time
+no_flights_each_month = (
+    pl.scan_csv('./data/On_Time*.csv')
+    .group_by(['Year', 'Month'])
+    .agg(
+        pl.len().alias('Rows Count')
+    )
+    .sort('Month')
+    .collect()
+)
+
+no_flights_each_month
+```
+
+If your files don't have to be in a single table you can also build a query plan for each file and execute them in parallel on the Polars thread pool.
+
+All query plan execution is embarrassingly parallel and doesn't require any communication.
+
+```{python}
+queries = []
+for p in Path.cwd().rglob('data/On_Time*.csv'):
+    q = (
+        pl.scan_csv(p)
+        .group_by(['Year', 'Month'])
+        .agg(
+            pl.len().alias('Rows Count')
+        )
+    )
+    queries.append(q)
+
+dfs = pl.collect_all(queries)
+dfs[:3]
+```
+
+### Reading spreadsheets
 
 
+
+### Reading a SQL table
+
+
+
+### Reading S3
 
 
 ## Export data
