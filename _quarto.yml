@@ -7,7 +7,15 @@ book:
   author: "An Chu"
   date: "2/4/2024"
   keyword: polars, python, dataframe
-  repo-url: https://chuvanan.github.io/cookbook-python-polars/
+  url: https://chuvanan.github.io/cookbook-python-polars/
+  repo-branch: main
+  repo-url: https://github.com/chuvanan/cookbook-python-polars
+  repo-actions: [edit, issue, source]
+  sharing: [twitter, linkedin]
+  page-navigation: true
+  sidebar:
+    logo: polars.jpg
+    search: true
   chapters:
     - index.qmd
     - first_steps.qmd
@@ -21,7 +29,9 @@ bibliography: references.bib
 
 format:
   html:
-    theme: cosmo
+    theme:
+      light: cosmo
+      dark: solar
     code-fold: false
     monofont: Fira Mono
     css: custom.css
