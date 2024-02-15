@@ -1,12 +1,15 @@
 # Preface {.unnumbered}
 
-This book arose from a series of [blog posts](https://www.emilyriederer.com/post/py-rgo-polars/) recommending a Pythonic data science stack that mirrors the comfort and familiarity of R's
+This book stems from a series of [blog posts](https://www.emilyriederer.com/post/py-rgo-polars/) recommending a Pythonic data science stack that mirrors the comfort and familiarity of R's
 tidyverse packages. Specifically, this book explores the `polars` library - a rising star in the DataFrame space (alongside established players like Pandas, Dask, Modin, Ray, Vaex).
 
 In short, polars is described as a [query engine with a DataFrame front-end](https://pola.rs/posts/polars_birds_eye_view/). It offers a rich set of intuitive functions and principled workflows for 
-data manipulation and analysis. Designed from the ground up with performance in mind, polars is known for its [lightning-fast execution speed](https://www.ritchievink.com/blog/2021/02/28/i-wrote-one-of-the-fastest-dataframe-libraries/).
+data manipulation and analysis. Designed from the ground up with performance in mind, polars is also known for its [lightning-fast execution speed](https://www.ritchievink.com/blog/2021/02/28/i-wrote-one-of-the-fastest-dataframe-libraries/). While rapidly gaining popularity, polars is still in its early phase and under active development.
 
 The bulk of this book features structured examples of data wrangling tasks showcasing idiomatic polars and corresponding dplyr/tidyr code for comparison. Examples might include commentary on the API choices.
+
+
+![](stars-history.png)
 
 
 ## Run the code from this book
