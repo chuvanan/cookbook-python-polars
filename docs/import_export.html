@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>A tidyverse user’s guide to polars library - 3&nbsp; Import/Export</title>
+<title>A tidyverse user’s guide to polars library - 3&nbsp; Reading and writing data with polars</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -122,7 +122,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./import_export.html"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Import/Export</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./import_export.html"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Reading and writing data with polars</span></a></li></ol></nav>
         <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
@@ -192,7 +192,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./import_export.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Import/Export</span></span></a>
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Reading and writing data with polars</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
@@ -223,7 +223,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#import-data" id="toc-import-data" class="nav-link active" data-scroll-target="#import-data"><span class="header-section-number">3.1</span> Import data</a>
+  <li><a href="#reading-data" id="toc-reading-data" class="nav-link active" data-scroll-target="#reading-data"><span class="header-section-number">3.1</span> Reading data</a>
   <ul class="collapse">
   <li><a href="#delimited-file-csv-tsv" id="toc-delimited-file-csv-tsv" class="nav-link" data-scroll-target="#delimited-file-csv-tsv"><span class="header-section-number">3.1.1</span> Delimited file (CSV, TSV)</a></li>
   <li><a href="#reading-multiple-files" id="toc-reading-multiple-files" class="nav-link" data-scroll-target="#reading-multiple-files"><span class="header-section-number">3.1.2</span> Reading multiple files</a></li>
@@ -231,7 +231,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#reading-a-sql-table" id="toc-reading-a-sql-table" class="nav-link" data-scroll-target="#reading-a-sql-table"><span class="header-section-number">3.1.4</span> Reading a SQL table</a></li>
   <li><a href="#reading-s3" id="toc-reading-s3" class="nav-link" data-scroll-target="#reading-s3"><span class="header-section-number">3.1.5</span> Reading S3</a></li>
   </ul></li>
-  <li><a href="#export-data" id="toc-export-data" class="nav-link" data-scroll-target="#export-data"><span class="header-section-number">3.2</span> Export data</a></li>
+  <li><a href="#writing-data" id="toc-writing-data" class="nav-link" data-scroll-target="#writing-data"><span class="header-section-number">3.2</span> Writing data</a></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/chuvanan/cookbook-python-polars/edit/main/import_export.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/chuvanan/cookbook-python-polars/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li><li><a href="https://github.com/chuvanan/cookbook-python-polars/blob/main/import_export.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li></ul></div></nav>
     </div>
@@ -240,7 +240,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Import/Export</span></h1>
+<h1 class="title"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Reading and writing data with polars</span></h1>
 </div>
 
 
@@ -257,14 +257,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p>An overview of polars I/O capabilities:</p>
+<p>An overview of polars I/O capabilities (at version <code>0.20.7</code>):</p>
 <table class="table">
 <colgroup>
-<col style="width: 48%">
+<col style="width: 55%">
 <col style="width: 20%">
-<col style="width: 4%">
 <col style="width: 5%">
-<col style="width: 21%">
+<col style="width: 5%">
+<col style="width: 14%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -277,21 +277,21 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </thead>
 <tbody>
 <tr class="odd">
-<td>CSV</td>
-<td>native Rust implementation</td>
+<td>Delimited files (CSV, TSV)</td>
+<td>native</td>
 <td>x</td>
 <td>x</td>
 <td>x</td>
 </tr>
 <tr class="even">
-<td>Excel (+ ods)</td>
-<td>external libraries</td>
+<td>Spreadsheets (Excel, ODS)</td>
+<td>via external libraries</td>
 <td>x</td>
 <td>x</td>
 <td></td>
 </tr>
 <tr class="odd">
-<td>Parquet</td>
+<td>Parquet/Avro/IPC</td>
 <td>native</td>
 <td>x</td>
 <td>x</td>
@@ -306,7 +306,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tr>
 <tr class="odd">
 <td>Database</td>
-<td>uri/SQLAlchemy</td>
+<td>via external libraries</td>
 <td>x</td>
 <td>x</td>
 <td></td>
@@ -316,21 +316,22 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td>native</td>
 <td>x</td>
 <td>x</td>
-<td>x (for remote parquet files)</td>
+<td>x</td>
 </tr>
 </tbody>
 </table>
+<p>Note on <code>implementation</code>:</p>
 <p>Note on <code>scan</code>: Comparable to the concept of <a href="https://www.tidyverse.org/blog/2021/11/readr-2-1-0-lazy/">lazy reading</a> in <code>readr</code> package, polars allows you to <code>scan</code> an input file, which defers the actual parsing of the file and provides a <code>LazyFrame</code>, a lazy computation holder. This feature offers notable performance benefits:</p>
 <ul>
 <li><p>reduction of memory usage by reading only the necessary data</p></li>
 <li><p>various optimizations by query planner</p></li>
 </ul>
-<section id="import-data" class="level2" data-number="3.1">
-<h2 data-number="3.1" class="anchored" data-anchor-id="import-data"><span class="header-section-number">3.1</span> Import data</h2>
+<section id="reading-data" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="reading-data"><span class="header-section-number">3.1</span> Reading data</h2>
 <section id="delimited-file-csv-tsv" class="level3" data-number="3.1.1">
 <h3 data-number="3.1.1" class="anchored" data-anchor-id="delimited-file-csv-tsv"><span class="header-section-number">3.1.1</span> Delimited file (CSV, TSV)</h3>
 <p>For a complete list of parameter options to use with polars CSV readers, see this <a href="https://docs.pola.rs/py-polars/html/reference/api/polars.read_csv.html">page</a>. These parameters provides the same functionality as readr’s arguments but with slightly different names. Here’s an example:</p>
-<div id="c67aa941" class="cell" data-execution_count="1">
+<div id="e20db647" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Read a CSV file</span></span>
@@ -422,8 +423,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
+<p><br></p>
 <p>In a complex data set, it is common to override data types for specific columns</p>
-<div id="226b3b1b" class="cell" data-class-source="numberLines" data-execution_count="2">
+<div id="4d10f379" class="cell" data-class-source="numberLines" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb2" data-source-line-numbers="nil" data-code-line-numbers="8,9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Read the CSV file with specified data types for selected columns</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>flights_202212 <span class="op">=</span> pl.read_csv(</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    source<span class="op">=</span><span class="st">'./data/On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2022_12.csv'</span>,</span>
@@ -518,7 +520,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="reading-multiple-files" class="level3" data-number="3.1.2">
 <h3 data-number="3.1.2" class="anchored" data-anchor-id="reading-multiple-files"><span class="header-section-number">3.1.2</span> Reading multiple files</h3>
 <p>polars <code>scan_*()</code> method is a really neat technique for reading multiple files efficiently. In</p>
-<div id="c4b7480b" class="cell" data-execution_count="3">
+<div id="dbf2701e" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb3" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> convert_bytes(size):</span>
@@ -546,7 +548,7 @@ On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2022_11.csv : 235.7
 </div>
 </div>
 <p>To read multiple files into a single DataFrame, we can use globbing patterns:</p>
-<div id="30c46eb1" class="cell" data-execution_count="4">
+<div id="74ace192" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb5" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>time</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>no_flights_each_month <span class="op">=</span> (</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    pl.scan_csv(<span class="st">'./data/On_Time*.csv'</span>)</span>
@@ -559,143 +561,23 @@ On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2022_11.csv : 235.7
 <span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>no_flights_each_month</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre data-code-line-numbers=""><code>CPU times: user 4.98 s, sys: 464 ms, total: 5.44 s
-Wall time: 811 ms</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre data-code-line-numbers=""><code>PARTITIONED DS</code></pre>
-</div>
-<div class="cell-output cell-output-display" data-execution_count="4">
-<div><style>
-.dataframe > thead > tr,
-.dataframe > tbody > tr {
-  text-align: right;
-  white-space: pre-wrap;
-}
-</style>
-<small>shape: (12, 3)</small>
-<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
-<thead>
-<tr class="header">
-<th data-quarto-table-cell-role="th">Year</th>
-<th data-quarto-table-cell-role="th">Month</th>
-<th data-quarto-table-cell-role="th">Rows Count</th>
-</tr>
-<tr class="odd">
-<th>i64</th>
-<th>i64</th>
-<th>u32</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>2022</td>
-<td>1</td>
-<td>537902</td>
-</tr>
-<tr class="even">
-<td>2022</td>
-<td>2</td>
-<td>495713</td>
-</tr>
-<tr class="odd">
-<td>2022</td>
-<td>3</td>
-<td>564853</td>
-</tr>
-<tr class="even">
-<td>2022</td>
-<td>4</td>
-<td>556502</td>
-</tr>
-<tr class="odd">
-<td>2022</td>
-<td>5</td>
-<td>578819</td>
-</tr>
-<tr class="even">
-<td>2022</td>
-<td>6</td>
-<td>577283</td>
-</tr>
-<tr class="odd">
-<td>2022</td>
-<td>7</td>
-<td>594957</td>
-</tr>
-<tr class="even">
-<td>2022</td>
-<td>8</td>
-<td>589810</td>
-</tr>
-<tr class="odd">
-<td>2022</td>
-<td>9</td>
-<td>557494</td>
-</tr>
-<tr class="even">
-<td>2022</td>
-<td>10</td>
-<td>572287</td>
-</tr>
-<tr class="odd">
-<td>2022</td>
-<td>11</td>
-<td>546410</td>
-</tr>
-<tr class="even">
-<td>2022</td>
-<td>12</td>
-<td>557095</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
 </div>
 <p>If your files don’t have to be in a single table you can also build a query plan for each file and execute them in parallel on the Polars thread pool.</p>
 <p>All query plan execution is embarrassingly parallel and doesn’t require any communication.</p>
-<div id="bd4a1027" class="cell" data-execution_count="5">
-<div class="sourceCode cell-code" id="cb8" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>queries <span class="op">=</span> []</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> p <span class="kw">in</span> Path.cwd().rglob(<span class="st">'data/On_Time*.csv'</span>):</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    q <span class="op">=</span> (</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>        pl.scan_csv(p)</span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>        .group_by([<span class="st">'Year'</span>, <span class="st">'Month'</span>])</span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>        .agg(</span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>            pl.<span class="bu">len</span>().alias(<span class="st">'Rows Count'</span>)</span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    queries.append(q)</span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>dfs <span class="op">=</span> pl.collect_all(queries)</span>
-<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>dfs[:<span class="dv">3</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="5">
-<pre data-code-line-numbers=""><code>[shape: (1, 3)
- ┌──────┬───────┬────────────┐
- │ Year ┆ Month ┆ Rows Count │
- │ ---  ┆ ---   ┆ ---        │
- │ i64  ┆ i64   ┆ u32        │
- ╞══════╪═══════╪════════════╡
- │ 2022 ┆ 5     ┆ 578819     │
- └──────┴───────┴────────────┘,
- shape: (1, 3)
- ┌──────┬───────┬────────────┐
- │ Year ┆ Month ┆ Rows Count │
- │ ---  ┆ ---   ┆ ---        │
- │ i64  ┆ i64   ┆ u32        │
- ╞══════╪═══════╪════════════╡
- │ 2022 ┆ 1     ┆ 537902     │
- └──────┴───────┴────────────┘,
- shape: (1, 3)
- ┌──────┬───────┬────────────┐
- │ Year ┆ Month ┆ Rows Count │
- │ ---  ┆ ---   ┆ ---        │
- │ i64  ┆ i64   ┆ u32        │
- ╞══════╪═══════╪════════════╡
- │ 2022 ┆ 8     ┆ 589810     │
- └──────┴───────┴────────────┘]</code></pre>
-</div>
+<div id="2e656513" class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb6" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>queries <span class="op">=</span> []</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> p <span class="kw">in</span> Path.cwd().rglob(<span class="st">'data/On_Time*.csv'</span>):</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    q <span class="op">=</span> (</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>        pl.scan_csv(p)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>        .group_by([<span class="st">'Year'</span>, <span class="st">'Month'</span>])</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>        .agg(</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>            pl.<span class="bu">len</span>().alias(<span class="st">'Rows Count'</span>)</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    queries.append(q)</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>dfs <span class="op">=</span> pl.collect_all(queries)</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>dfs[:<span class="dv">3</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="reading-spreadsheets" class="level3" data-number="3.1.3">
@@ -708,8 +590,8 @@ Wall time: 811 ms</code></pre>
 <h3 data-number="3.1.5" class="anchored" data-anchor-id="reading-s3"><span class="header-section-number">3.1.5</span> Reading S3</h3>
 </section>
 </section>
-<section id="export-data" class="level2" data-number="3.2">
-<h2 data-number="3.2" class="anchored" data-anchor-id="export-data"><span class="header-section-number">3.2</span> Export data</h2>
+<section id="writing-data" class="level2" data-number="3.2">
+<h2 data-number="3.2" class="anchored" data-anchor-id="writing-data"><span class="header-section-number">3.2</span> Writing data</h2>
 
 
 </section>

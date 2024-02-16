@@ -59,7 +59,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </style>
 
 
-<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="site_libs/quarto-nav/quarto-nav.js"></script>
 <script src="site_libs/quarto-nav/headroom.min.js"></script>
 <script src="site_libs/clipboard/clipboard.min.js"></script>
 <script src="site_libs/quarto-search/autocomplete.umd.js"></script>
@@ -106,6 +106,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     "search-label": "Search"
   }
 }</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
 
 <link rel="stylesheet" href="custom.css">
@@ -190,7 +193,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./import_export.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Import/Export</span></span></a>
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Reading and writing data with polars</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
@@ -269,24 +272,424 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>This book stems from a series of <a href="https://www.emilyriederer.com/post/py-rgo-polars/">blog posts</a> recommending a Pythonic data science stack that mirrors the comfort and familiarity of R’s tidyverse packages. Specifically, this book explores the <code>polars</code> library - a rising star in the DataFrame space (alongside established players like Pandas, Dask, Modin, Ray, Vaex).</p>
 <p>In short, polars is described as a <a href="https://pola.rs/posts/polars_birds_eye_view/">query engine with a DataFrame front-end</a>. It offers a rich set of intuitive functions and principled workflows for data manipulation and analysis. Designed from the ground up with performance in mind, polars is also known for its <a href="https://www.ritchievink.com/blog/2021/02/28/i-wrote-one-of-the-fastest-dataframe-libraries/">lightning-fast execution speed</a>. While rapidly gaining popularity, polars is still in its early phase and under active development.</p>
 <p>The bulk of this book features structured examples of data wrangling tasks showcasing idiomatic polars and corresponding dplyr/tidyr code for comparison. Examples might include commentary on the API choices.</p>
-<p><img src="stars-history.png" class="img-fluid"></p>
+<div id="9d79ede5" class="cell" data-execution_count="1">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> lets_plot <span class="im">import</span> <span class="op">*</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>LetsPlot.setup_html(isolated_frame<span class="op">=</span><span class="va">False</span>, offline<span class="op">=</span><span class="va">True</span>, no_js<span class="op">=</span><span class="va">True</span>, show_status<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>stars <span class="op">=</span> pl.read_csv(<span class="st">'./data/star-history-2024215.csv'</span>, has_header<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>stars <span class="op">=</span> stars.rename({<span class="st">'column_1'</span>: <span class="st">'project'</span>, <span class="st">'column_2'</span>: <span class="st">'date'</span>, <span class="st">'column_3'</span>: <span class="st">'stars'</span>})</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>stars <span class="op">=</span> (</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    stars.with_columns(</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">'date'</span>).<span class="bu">str</span>.<span class="bu">slice</span>(<span class="dv">0</span>, <span class="dv">15</span>).alias(<span class="st">'short_date'</span>)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">'short_date'</span>).<span class="bu">str</span>.to_date(<span class="st">'%a %b </span><span class="sc">%d</span><span class="st"> %Y'</span>).alias(<span class="st">'short_date'</span>)</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    .sort(<span class="st">'short_date'</span>)</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    ggplot(stars.to_pandas(), aes(x<span class="op">=</span><span class="st">'short_date'</span>, y<span class="op">=</span><span class="st">'stars'</span>, color<span class="op">=</span><span class="st">'project'</span>)) <span class="op">+</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    geom_line(size<span class="op">=</span><span class="fl">1.5</span>) <span class="op">+</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    labs(y<span class="op">=</span><span class="st">'Github stars'</span>, title<span class="op">=</span><span class="st">'Polars is surging in popularity'</span>) <span class="op">+</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>    scale_x_datetime(name<span class="op">=</span><span class="st">'Date'</span>) <span class="op">+</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>    theme(legend_title<span class="op">=</span>element_blank(), </span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>          text<span class="op">=</span>element_text(family<span class="op">=</span><span class="st">'Roboto Condensed'</span>, size<span class="op">=</span><span class="dv">15</span>),</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>         plot_title<span class="op">=</span>element_text(face<span class="op">=</span><span class="st">'bold'</span>, size<span class="op">=</span><span class="dv">18</span>)) <span class="op">+</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>    scale_y_continuous(breaks<span class="op">=</span>[<span class="dv">0</span>, <span class="dv">10_000</span>, <span class="dv">20_000</span>, <span class="dv">30_000</span>, <span class="dv">40_000</span>], <span class="bu">format</span><span class="op">=</span><span class="st">'0,'</span>, expand<span class="op">=</span>[<span class="fl">0.01</span>,<span class="fl">0.01</span>]) <span class="op">+</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>    ggsize(<span class="dv">700</span>,<span class="dv">380</span>)</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="1">
+<svg xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" class="plt-container" width="700.0" height="380.0">
+  <style type="text/css">
+  .plt-container {
+   font-family: Lucida Grande, sans-serif;
+   user-select: none;
+   -webkit-user-select: none;
+   -moz-user-select: none;
+   -ms-user-select: none;
+}
+text {
+   text-rendering: optimizeLegibility;
+}
+#pAusMe5 .plot-title {
+   fill: #474747;
+   font-family: Roboto Condensed;
+   font-size: 18.0px;
+   font-weight: bold;
+   font-style: normal;   
+}
+#pAusMe5 .plot-subtitle {
+   fill: #474747;
+   font-family: Roboto Condensed;
+   font-size: 15.0px;
+   font-weight: normal;
+   font-style: normal;   
+}
+#pAusMe5 .plot-caption {
+   fill: #474747;
+   font-family: Roboto Condensed;
+   font-size: 13.0px;
+   font-weight: normal;
+   font-style: normal;   
+}
+#pAusMe5 .legend-title {
+   fill: #474747;
+   font-family: Roboto Condensed;
+   font-size: 15.0px;
+   font-weight: normal;
+   font-style: normal;   
+}
+#pAusMe5 .legend-item {
+   fill: #474747;
+   font-family: Roboto Condensed;
+   font-size: 15.0px;
+   font-weight: normal;
+   font-style: normal;   
+}
+#pAusMe5 .axis-title-x {
+   fill: #474747;
+   font-family: Roboto Condensed;
+   font-size: 15.0px;
+   font-weight: normal;
+   font-style: normal;   
+}
+#pAusMe5 .axis-text-x {
+   fill: #474747;
+   font-family: Roboto Condensed;
+   font-size: 15.0px;
+   font-weight: normal;
+   font-style: normal;   
+}
+#dG2LrVI .axis-tooltip-text-x {
+   fill: #ffffff;
+   font-family: Roboto Condensed;
+   font-size: 15.0px;
+   font-weight: normal;
+   font-style: normal;   
+}
+#pAusMe5 .axis-title-y {
+   fill: #474747;
+   font-family: Roboto Condensed;
+   font-size: 15.0px;
+   font-weight: normal;
+   font-style: normal;   
+}
+#pAusMe5 .axis-text-y {
+   fill: #474747;
+   font-family: Roboto Condensed;
+   font-size: 15.0px;
+   font-weight: normal;
+   font-style: normal;   
+}
+#dG2LrVI .axis-tooltip-text-y {
+   fill: #ffffff;
+   font-family: Roboto Condensed;
+   font-size: 15.0px;
+   font-weight: normal;
+   font-style: normal;   
+}
+#pAusMe5 .facet-strip-text-x {
+   fill: #474747;
+   font-family: Roboto Condensed;
+   font-size: 15.0px;
+   font-weight: normal;
+   font-style: normal;   
+}
+#pAusMe5 .facet-strip-text-y {
+   fill: #474747;
+   font-family: Roboto Condensed;
+   font-size: 15.0px;
+   font-weight: normal;
+   font-style: normal;   
+}
+#dG2LrVI .tooltip-text {
+   fill: #474747;
+   font-family: Roboto Condensed;
+   font-size: 15.0px;
+   font-weight: normal;
+   font-style: normal;   
+}
+#dG2LrVI .tooltip-title {
+   fill: #474747;
+   font-family: Roboto Condensed;
+   font-size: 15.0px;
+   font-weight: bold;
+   font-style: normal;   
+}
+#dG2LrVI .tooltip-label {
+   fill: #474747;
+   font-family: Roboto Condensed;
+   font-size: 15.0px;
+   font-weight: bold;
+   font-style: normal;   
+}
+
+  </style>
+  <g id="pAusMe5">
+    <path fill-rule="evenodd" fill="rgb(255,255,255)" fill-opacity="1.0" d="M0.0 0.0 L0.0 380.0 L700.0 380.0 L700.0 0.0 Z">
+    </path>
+    <g transform="translate(23.0 36.0 ) ">
+      <g transform="translate(57.89598183079157 0.0 ) ">
+        <line x1="134.17439465465736" y1="296.0" x2="134.17439465465736" y2="0.0" stroke="rgb(233,233,233)" stroke-opacity="1.0" stroke-width="1.0" fill="none">
+        </line>
+        <line x1="267.53446032126294" y1="296.0" x2="267.53446032126294" y2="0.0" stroke="rgb(233,233,233)" stroke-opacity="1.0" stroke-width="1.0" fill="none">
+        </line>
+      </g>
+      <g transform="translate(57.89598183079157 296.0 ) ">
+        <g transform="translate(0.8143289880520115 0.0 ) ">
+          <line stroke-width="1.0" stroke="rgb(71,71,71)" stroke-opacity="1.0" x2="0.0" y2="4.0">
+          </line>
+          <g transform="translate(0.0 7.0 ) ">
+            <text class="axis-text-x" text-anchor="middle" dy="0.7em">
+              <tspan>2010</tspan>
+            </text>
+          </g>
+        </g>
+        <g transform="translate(134.17439465465736 0.0 ) ">
+          <line stroke-width="1.0" stroke="rgb(71,71,71)" stroke-opacity="1.0" x2="0.0" y2="4.0">
+          </line>
+          <g transform="translate(0.0 7.0 ) ">
+            <text class="axis-text-x" text-anchor="middle" dy="0.7em">
+              <tspan>2015</tspan>
+            </text>
+          </g>
+        </g>
+        <g transform="translate(267.53446032126294 0.0 ) ">
+          <line stroke-width="1.0" stroke="rgb(71,71,71)" stroke-opacity="1.0" x2="0.0" y2="4.0">
+          </line>
+          <g transform="translate(0.0 7.0 ) ">
+            <text class="axis-text-x" text-anchor="middle" dy="0.7em">
+              <tspan>2020</tspan>
+            </text>
+          </g>
+        </g>
+        <line x1="0.0" y1="0.0" x2="395.50096582933656" y2="0.0" stroke-width="1.0" stroke="rgb(71,71,71)" stroke-opacity="1.0">
+        </line>
+      </g>
+      <g transform="translate(57.89598183079157 0.0 ) ">
+        <line x1="0.0" y1="222.67744544788405" x2="395.50096582933656" y2="222.67744544788405" stroke="rgb(233,233,233)" stroke-opacity="1.0" stroke-width="1.0" fill="none">
+        </line>
+        <line x1="0.0" y1="152.25692071981197" x2="395.50096582933656" y2="152.25692071981197" stroke="rgb(233,233,233)" stroke-opacity="1.0" stroke-width="1.0" fill="none">
+        </line>
+        <line x1="0.0" y1="81.83639599173986" x2="395.50096582933656" y2="81.83639599173986" stroke="rgb(233,233,233)" stroke-opacity="1.0" stroke-width="1.0" fill="none">
+        </line>
+        <line x1="0.0" y1="11.415871263667782" x2="395.50096582933656" y2="11.415871263667782" stroke="rgb(233,233,233)" stroke-opacity="1.0" stroke-width="1.0" fill="none">
+        </line>
+      </g>
+      <g transform="translate(57.89598183079157 0.0 ) ">
+        <g transform="translate(0.0 293.09797017595616 ) ">
+          <g transform="translate(-3.0 0.0 ) ">
+            <text class="axis-text-y" text-anchor="end" dy="0.35em">
+              <tspan>0</tspan>
+            </text>
+          </g>
+        </g>
+        <g transform="translate(0.0 222.67744544788405 ) ">
+          <g transform="translate(-3.0 0.0 ) ">
+            <text class="axis-text-y" text-anchor="end" dy="0.35em">
+              <tspan>10,000</tspan>
+            </text>
+          </g>
+        </g>
+        <g transform="translate(0.0 152.25692071981197 ) ">
+          <g transform="translate(-3.0 0.0 ) ">
+            <text class="axis-text-y" text-anchor="end" dy="0.35em">
+              <tspan>20,000</tspan>
+            </text>
+          </g>
+        </g>
+        <g transform="translate(0.0 81.83639599173986 ) ">
+          <g transform="translate(-3.0 0.0 ) ">
+            <text class="axis-text-y" text-anchor="end" dy="0.35em">
+              <tspan>30,000</tspan>
+            </text>
+          </g>
+        </g>
+        <g transform="translate(0.0 11.415871263667782 ) ">
+          <g transform="translate(-3.0 0.0 ) ">
+            <text class="axis-text-y" text-anchor="end" dy="0.35em">
+              <tspan>40,000</tspan>
+            </text>
+          </g>
+        </g>
+      </g>
+      <g transform="translate(57.89598183079157 0.0 ) " clip-path="url(#cFygeFV)" clip-bounds-jfx="[rect (0.0, 0.0), (395.50096582933656, 296.0)]">
+        <defs>
+          <clippath id="cFygeFV">
+            <rect x="0.0" y="0.0" width="395.50096582933656" height="296.0">
+            </rect>
+          </clippath>
+        </defs>
+        <g>
+          <path d="M17.97731662860633 293.09797017595616 L17.97731662860633 293.09797017595616 L117.8147809036609 274.7182132219293 L166.45541821689153 255.9159331195341 L192.23641667270294 237.11365301713886 L210.05671022289562 218.31137291474357 L224.59047422489698 199.50909281234834 L238.46693231726022 180.70681270995308 L252.48945838954273 161.90453260755783 L265.4164746124284 143.31351407934682 L278.48955881523375 124.51123397695156 L293.6075947369136 105.7089538745563 L308.4334946987542 86.90667377216104 L325.01221041963004 68.10439366976581 L340.49541629110877 49.302113567370554 L354.5179423633915 30.499833464975325 L369.63597828507136 11.697553362580038 L377.52364920073046 2.9020298240438365 " fill="none" stroke-width="3.3000000000000003" stroke="rgb(228,26,28)" stroke-opacity="1.0">
+          </path>
+        </g>
+        <g>
+          <path d="M134.6125985944161 293.09797017595616 L134.6125985944161 293.09797017595616 L174.63522509238987 288.027692395535 L199.24767970884432 282.53489146674536 L218.23651709839396 276.8308289637715 L231.3096013011991 271.3380280349819 L242.7029037349289 265.8452271061923 L251.8321524799046 260.35242617740266 L261.83780910439805 254.859625248613 L275.12999527708257 249.15556274563917 L287.9109435200487 243.66276181684955 L299.5963819136175 238.16996088805993 L313.98407793569936 232.67715995927028 L324.7200744597908 227.18435903048066 L340.2763143212294 221.48029652750682 L357.95053989150256 215.9874955987172 L376.5011733412932 210.49469466992758 L377.52364920073046 210.13554999381444 " fill="none" stroke-width="3.3000000000000003" stroke="rgb(55,126,184)" stroke-opacity="1.0">
+          </path>
+        </g>
+        <g>
+          <path d="M163.82619457833857 293.09797017595616 L163.82619457833857 293.09797017595616 L239.5624421666571 289.7177849890087 L248.47258894175343 285.91507665369284 L259.9389253654431 282.1123683183769 L265.85467855218735 278.0983984088768 L269.9445819899365 274.29569007356093 L275.7873011867209 270.492981738245 L278.48955881523375 266.6902734029291 L280.7536125039876 262.88756506761325 L286.5963317007722 259.08485673229734 L294.7031045863107 255.28214839698146 L303.4671833814873 251.47944006166554 L315.29868975497584 247.46547015216544 L334.72573108428423 243.66276181684955 L347.7988152870894 239.86005348153367 L375.55173147181563 236.05734514621776 L377.52364920073046 235.83199946708794 " fill="none" stroke-width="3.3000000000000003" stroke="rgb(77,175,74)" stroke-opacity="1.0">
+          </path>
+        </g>
+        <g>
+          <path d="M226.7814939236912 293.09797017595616 L226.7814939236912 293.09797017595616 L236.20287862850614 289.08400026645603 L244.6748214638435 284.85876878277173 L248.5456229317133 280.42227572490316 L257.96700763652825 275.98578266703464 L264.32096476303127 271.5492896091661 L266.8041204216647 267.32405812548177 L273.52324749796685 262.88756506761325 L284.5513799818975 258.4510720097447 L299.2312119638186 254.01457895187616 L311.64699025698565 249.7893474681918 L326.5459242087859 245.3528544103233 L335.09090103408334 240.91636135245474 L347.87184927704925 236.4798682945862 L360.14155959029654 232.25463681090187 L375.9899354115746 227.81814375303333 L377.52364920073046 227.44491497197453 " fill="none" stroke-width="3.3000000000000003" stroke="rgb(152,78,163)" stroke-opacity="1.0">
+          </path>
+        </g>
+        <g>
+          <path d="M280.242374574269 293.09797017595616 L280.242374574269 293.09797017595616 L303.6862853513667 282.1123683183769 L319.2425252128053 270.70424331242924 L326.76502617866527 259.29611830648156 L334.433595124445 247.88799330053388 L341.29879018066663 236.4798682945862 L346.26510149793353 225.07174328863852 L347.87184927704925 213.66361828269083 L349.69769902604435 202.46675485092737 L352.1808546846778 191.0586298449797 L355.24828226298973 179.650504839032 L359.99549161037703 168.24237983308433 L364.3044970180056 156.83425482713665 L369.416876315192 145.42612982118897 L374.3831876324589 134.01800481524128 L377.4506152107706 122.6098798092936 L377.52364920073046 122.34228181532694 " fill="none" stroke-width="3.3000000000000003" stroke="rgb(255,127,0)" stroke-opacity="1.0">
+          </path>
+        </g>
+      </g>
+    </g>
+    <g transform="translate(80.89598183079157 16.6 ) ">
+      <text class="plot-title" y="0.0">
+        <tspan>Polars is surging in popularity</tspan>
+      </text>
+    </g>
+    <g transform="translate(14.5 184.0 ) rotate(-90.0 ) ">
+      <text class="axis-title-y" y="0.0" text-anchor="middle">
+        <tspan>Github stars</tspan>
+      </text>
+    </g>
+    <g transform="translate(278.64646474545987 371.5 ) ">
+      <text class="axis-title-x" y="0.0" text-anchor="middle">
+        <tspan>Date</tspan>
+      </text>
+    </g>
+    <g transform="translate(486.39694766012815 112.75 ) ">
+      <rect x="5.0" y="5.0" height="132.5" width="203.60305233987182" stroke="rgb(71,71,71)" stroke-opacity="1.0" stroke-width="0.0" fill="rgb(255,255,255)" fill-opacity="1.0">
+      </rect>
+      <g transform="translate(10.0 10.0 ) ">
+        <g transform="translate(0.0 7.5 ) ">
+          <g transform="">
+            <g>
+              <rect x="0.0" y="0.0" height="23.0" width="23.0" stroke-width="0.0" fill="rgb(255,255,255)" fill-opacity="1.0">
+              </rect>
+              <g transform="translate(1.0 1.0 ) ">
+                <g>
+                  <line x1="0.0" y1="10.5" x2="21.0" y2="10.5" stroke="rgb(228,26,28)" stroke-opacity="1.0" fill="rgb(255,255,255)" fill-opacity="1.0" stroke-width="1.6500000000000001">
+                  </line>
+                </g>
+              </g>
+              <rect x="0.0" y="0.0" height="23.0" width="23.0" stroke="rgb(255,255,255)" stroke-opacity="1.0" stroke-width="1.0" fill-opacity="0.0">
+              </rect>
+            </g>
+            <g transform="translate(27.604195455077807 16.75 ) ">
+              <text class="legend-item" y="0.0">
+                <tspan>pandas-dev/pandas</tspan>
+              </text>
+            </g>
+          </g>
+          <g transform="translate(0.0 23.0 ) ">
+            <g>
+              <rect x="0.0" y="0.0" height="23.0" width="23.0" stroke-width="0.0" fill="rgb(255,255,255)" fill-opacity="1.0">
+              </rect>
+              <g transform="translate(1.0 1.0 ) ">
+                <g>
+                  <line x1="0.0" y1="10.5" x2="21.0" y2="10.5" stroke="rgb(55,126,184)" stroke-opacity="1.0" fill="rgb(255,255,255)" fill-opacity="1.0" stroke-width="1.6500000000000001">
+                  </line>
+                </g>
+              </g>
+              <rect x="0.0" y="0.0" height="23.0" width="23.0" stroke="rgb(255,255,255)" stroke-opacity="1.0" stroke-width="1.0" fill-opacity="0.0">
+              </rect>
+            </g>
+            <g transform="translate(27.604195455077807 16.75 ) ">
+              <text class="legend-item" y="0.0">
+                <tspan>dask/dask</tspan>
+              </text>
+            </g>
+          </g>
+          <g transform="translate(0.0 46.0 ) ">
+            <g>
+              <rect x="0.0" y="0.0" height="23.0" width="23.0" stroke-width="0.0" fill="rgb(255,255,255)" fill-opacity="1.0">
+              </rect>
+              <g transform="translate(1.0 1.0 ) ">
+                <g>
+                  <line x1="0.0" y1="10.5" x2="21.0" y2="10.5" stroke="rgb(77,175,74)" stroke-opacity="1.0" fill="rgb(255,255,255)" fill-opacity="1.0" stroke-width="1.6500000000000001">
+                  </line>
+                </g>
+              </g>
+              <rect x="0.0" y="0.0" height="23.0" width="23.0" stroke="rgb(255,255,255)" stroke-opacity="1.0" stroke-width="1.0" fill-opacity="0.0">
+              </rect>
+            </g>
+            <g transform="translate(27.604195455077807 16.75 ) ">
+              <text class="legend-item" y="0.0">
+                <tspan>vaexio/vaex</tspan>
+              </text>
+            </g>
+          </g>
+          <g transform="translate(0.0 69.0 ) ">
+            <g>
+              <rect x="0.0" y="0.0" height="23.0" width="23.0" stroke-width="0.0" fill="rgb(255,255,255)" fill-opacity="1.0">
+              </rect>
+              <g transform="translate(1.0 1.0 ) ">
+                <g>
+                  <line x1="0.0" y1="10.5" x2="21.0" y2="10.5" stroke="rgb(152,78,163)" stroke-opacity="1.0" fill="rgb(255,255,255)" fill-opacity="1.0" stroke-width="1.6500000000000001">
+                  </line>
+                </g>
+              </g>
+              <rect x="0.0" y="0.0" height="23.0" width="23.0" stroke="rgb(255,255,255)" stroke-opacity="1.0" stroke-width="1.0" fill-opacity="0.0">
+              </rect>
+            </g>
+            <g transform="translate(27.604195455077807 16.75 ) ">
+              <text class="legend-item" y="0.0">
+                <tspan>modin-project/modin</tspan>
+              </text>
+            </g>
+          </g>
+          <g transform="translate(0.0 92.0 ) ">
+            <g>
+              <rect x="0.0" y="0.0" height="23.0" width="23.0" stroke-width="0.0" fill="rgb(255,255,255)" fill-opacity="1.0">
+              </rect>
+              <g transform="translate(1.0 1.0 ) ">
+                <g>
+                  <line x1="0.0" y1="10.5" x2="21.0" y2="10.5" stroke="rgb(255,127,0)" stroke-opacity="1.0" fill="rgb(255,255,255)" fill-opacity="1.0" stroke-width="1.6500000000000001">
+                  </line>
+                </g>
+              </g>
+              <rect x="0.0" y="0.0" height="23.0" width="23.0" stroke="rgb(255,255,255)" stroke-opacity="1.0" stroke-width="1.0" fill-opacity="0.0">
+              </rect>
+            </g>
+            <g transform="translate(27.604195455077807 16.75 ) ">
+              <text class="legend-item" y="0.0">
+                <tspan>pola-rs/polars</tspan>
+              </text>
+            </g>
+          </g>
+        </g>
+      </g>
+    </g>
+    <path fill="rgb(0,0,0)" fill-opacity="0.0" stroke="rgb(71,71,71)" stroke-opacity="1.0" stroke-width="0.0" d="M0.0 0.0 L0.0 380.0 L700.0 380.0 L700.0 0.0 Z">
+    </path>
+  </g>
+  <g id="dG2LrVI">
+  </g>
+</svg>
+</div>
+</div>
 <section id="run-the-code-from-this-book" class="level2">
 <h2 class="anchored" data-anchor-id="run-the-code-from-this-book">Run the code from this book</h2>
 <ul>
 <li>Clone the book repository:</li>
 </ul>
-<div class="sourceCode" id="cb1" data-code-line-numbers=""><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> clone https://github.com/chuvanan/cookbook-python-polars.git python-polars-cookbook</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> python-polars-cookbook</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="ex">python3</span> <span class="at">-m</span> venv env</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="bu">source</span> env/bin/activate</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb2" data-code-line-numbers=""><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> clone https://github.com/chuvanan/cookbook-python-polars.git python-polars-cookbook</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> python-polars-cookbook</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="ex">python3</span> <span class="at">-m</span> venv env</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="bu">source</span> env/bin/activate</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <ul>
 <li>You can install the exact packages that the book uses with the <code>requirements.txt</code> file:</li>
 </ul>
-<div class="sourceCode" id="cb2" data-code-line-numbers=""><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">python3</span> <span class="at">-m</span> pip install <span class="at">-r</span> requirements.txt</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb3" data-code-line-numbers=""><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">python3</span> <span class="at">-m</span> pip install <span class="at">-r</span> requirements.txt</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <ul>
 <li>Download the data (source: <a href="https://transtats.bts.gov/TableInfo.asp?gnoyr_VQ=FGJ&amp;QO_fu146_anzr=b0-gvzr&amp;V0s1_b0yB=D">Reporting carrier on-time performance</a>)</li>
 </ul>
-<div class="sourceCode" id="cb3" data-code-line-numbers=""><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> download-data.py</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb4" data-code-line-numbers=""><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> download-data.py</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 <section id="credit" class="level2">
 <h2 class="anchored" data-anchor-id="credit">Credit</h2>
