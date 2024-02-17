@@ -259,47 +259,72 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <section id="installation" class="level2" data-number="1.1">
 <h2 data-number="1.1" class="anchored" data-anchor-id="installation"><span class="header-section-number">1.1</span> Installation</h2>
-<p>Let’s kick off our journey into the world of data manipulation with the polars library. First things first, we need to install polars and set up a virtual environment for a clean installation. Use the following commands:</p>
-<div class="sourceCode" id="cb1" data-code-line-numbers=""><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># you better setting up a virtual enviroment before </span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co"># installing any python libraries</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install polars</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>To gain insights into the installed polars package, including version details and enabled features, utilize the <code>build_info()</code> method in Python:</p>
-<div id="fe667662" class="cell" data-execution_count="1">
-<div class="sourceCode cell-code" id="cb2" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>pl.build_info()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Let’s kick off our journey into the world of data manipulation with the polars library. First things first, we need to <a href="https://realpython.com/python-virtual-environments-a-primer/#how-can-you-work-with-a-python-virtual-environment">set up a virtual environment</a> for a clean installation. Install the latest stable version with:</p>
+<div class="sourceCode" id="cb1" data-code-line-numbers=""><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install polars</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Depending on your use case, you might want to install the <a href="https://docs.pola.rs/user-guide/installation/#feature-flags">optional dependencies</a> as well:</p>
+<div class="sourceCode" id="cb2" data-code-line-numbers=""><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install <span class="st">'polars[numpy,pandas,pyarrow]'</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>To gain insights into the installed polars package, including version details and enabled features, utilize the <code>show_versions()</code> function:</p>
+<div id="83af3a19" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb3" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>pl.show_versions()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre data-code-line-numbers=""><code>--------Version info---------
+Polars:               0.20.9
+Index type:           UInt32
+Platform:             Linux-5.15.0-94-generic-x86_64-with-glibc2.35
+Python:               3.10.12 (main, Nov 20 2023, 15:14:05) [GCC 11.4.0]
+
+----Optional dependencies----
+adbc_driver_manager:  &lt;not installed&gt;
+cloudpickle:          &lt;not installed&gt;
+connectorx:           &lt;not installed&gt;
+deltalake:            &lt;not installed&gt;
+fsspec:               &lt;not installed&gt;
+gevent:               &lt;not installed&gt;
+hvplot:               &lt;not installed&gt;
+matplotlib:           &lt;not installed&gt;
+numpy:                1.26.3
+openpyxl:             &lt;not installed&gt;
+pandas:               2.2.0
+pyarrow:              15.0.0
+pydantic:             &lt;not installed&gt;
+pyiceberg:            &lt;not installed&gt;
+pyxlsb:               &lt;not installed&gt;
+sqlalchemy:           &lt;not installed&gt;
+xlsx2csv:             &lt;not installed&gt;
+xlsxwriter:           &lt;not installed&gt;</code></pre>
+</div>
 </div>
 </section>
 <section id="initial-exploration" class="level2" data-number="1.2">
 <h2 data-number="1.2" class="anchored" data-anchor-id="initial-exploration"><span class="header-section-number">1.2</span> Initial exploration</h2>
+<p>For better presentation, this book use polars’ <a href="https://docs.pola.rs/py-polars/html/reference/config.html">config options</a> to change the formatting of printed tables. Specifically:</p>
+<ul>
+<li>Limit the number of columns displayed in DataFrames to 10</li>
+<li>Cap the number of rows shown in DataFrames to 10</li>
+<li>Apply stylish formatting to the tables for pleasant reading experience</li>
+</ul>
+<div id="4b10222b" class="cell" data-message="false" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb5" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>pl.Config.set_tbl_cols(<span class="dv">10</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>pl.Config.set_tbl_rows(<span class="dv">10</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>pl.Config.set_tbl_formatting(rounded_corners<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="2">
+<pre data-code-line-numbers=""><code>polars.config.Config</code></pre>
+</div>
+</div>
 <section id="reading-data-with-polars" class="level3" data-number="1.2.1">
 <h3 data-number="1.2.1" class="anchored" data-anchor-id="reading-data-with-polars"><span class="header-section-number">1.2.1</span> Reading data with polars</h3>
-<p>Reading a CSV file using polars is not only straightforward but also efficient. Let’s take a quick look:</p>
-<div id="4b9987a9" class="cell" data-execution_count="2">
-<div class="sourceCode cell-code" id="cb3" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>flights <span class="op">=</span> pl.read_csv(<span class="st">'./data/flights.csv'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<p>If you’re coming from an R background, checking the data types in polars might seem overwhelming due to the numerous available types. Here’s a quick way to inspect them:</p>
-<div id="ae5691b2" class="cell" data-execution_count="3">
-<div class="sourceCode cell-code" id="cb4" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 10 sample columns</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>flights[:,<span class="dv">0</span>:<span class="dv">9</span>].schema</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="2">
-<pre data-code-line-numbers=""><code>OrderedDict([('Year', Int64),
-             ('Quarter', Int64),
-             ('Month', Int64),
-             ('DayofMonth', Int64),
-             ('DayOfWeek', Int64),
-             ('FlightDate', String),
-             ('Reporting_Airline', String),
-             ('DOT_ID_Reporting_Airline', Int64),
-             ('IATA_CODE_Reporting_Airline', String)])</code></pre>
-</div>
+<p>Reading a CSV file using polars is straightforward. Let’s take a quick look:</p>
+<div id="77a9ee26" class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb7" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>flights <span class="op">=</span> pl.read_csv(<span class="st">'./data/flights.csv'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>For those familiar with R’s dplyr, a similar method called <code>glimpse()</code> is available:</p>
-<div id="b9b86398" class="cell" data-execution_count="4">
-<div class="sourceCode cell-code" id="cb6" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>flights[:, <span class="dv">0</span>:<span class="dv">9</span>].glimpse()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="572bfb48" class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb8" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Glimpse the first 10 columns</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>flights[:,<span class="dv">0</span>:<span class="dv">10</span>].glimpse()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre data-code-line-numbers=""><code>Rows: 999
-Columns: 9
+Columns: 10
 $ Year                        &lt;i64&gt; 2022, 2022, 2022, 2022, 2022, 2022, 2022, 2022, 2022, 2022
 $ Quarter                     &lt;i64&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
 $ Month                       &lt;i64&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
@@ -309,13 +334,15 @@ $ FlightDate                  &lt;str&gt; '2022-01-14', '2022-01-15', '2022-01-1
 $ Reporting_Airline           &lt;str&gt; 'YX', 'YX', 'YX', 'YX', 'YX', 'YX', 'YX', 'YX', 'YX', 'YX'
 $ DOT_ID_Reporting_Airline    &lt;i64&gt; 20452, 20452, 20452, 20452, 20452, 20452, 20452, 20452, 20452, 20452
 $ IATA_CODE_Reporting_Airline &lt;str&gt; 'YX', 'YX', 'YX', 'YX', 'YX', 'YX', 'YX', 'YX', 'YX', 'YX'
+$ Tail_Number                 &lt;str&gt; 'N119HQ', 'N122HQ', 'N412YX', 'N405YX', 'N420YX', 'N446YX', 'N116HQ', 'N419YX', 'N137HQ', 'N110HQ'
 </code></pre>
 </div>
 </div>
+<p><br></p>
 <p>Standard commands from pandas such as <code>head()</code>, <code>tail()</code>, and <code>describe()</code> can be used seamlessly:</p>
-<div id="62946288" class="cell" data-execution_count="5">
-<div class="sourceCode cell-code" id="cb8" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>flights[:, <span class="dv">0</span>:<span class="dv">9</span>].head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="4">
+<div id="a674b896" class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb10" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>flights.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="5">
 <div><style>
 .dataframe > thead > tr,
 .dataframe > tbody > tr {
@@ -323,7 +350,7 @@ $ IATA_CODE_Reporting_Airline &lt;str&gt; 'YX', 'YX', 'YX', 'YX', 'YX', 'YX', 'Y
   white-space: pre-wrap;
 }
 </style>
-<small>shape: (5, 9)</small>
+<small>shape: (5, 110)</small>
 <table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
 <thead>
 <tr class="header">
@@ -332,10 +359,12 @@ $ IATA_CODE_Reporting_Airline &lt;str&gt; 'YX', 'YX', 'YX', 'YX', 'YX', 'YX', 'Y
 <th data-quarto-table-cell-role="th">Month</th>
 <th data-quarto-table-cell-role="th">DayofMonth</th>
 <th data-quarto-table-cell-role="th">DayOfWeek</th>
-<th data-quarto-table-cell-role="th">FlightDate</th>
-<th data-quarto-table-cell-role="th">Reporting_Airline</th>
-<th data-quarto-table-cell-role="th">DOT_ID_Reporting_Airline</th>
-<th data-quarto-table-cell-role="th">IATA_CODE_Reporting_Airline</th>
+<th data-quarto-table-cell-role="th">…</th>
+<th data-quarto-table-cell-role="th">Div5TotalGTime</th>
+<th data-quarto-table-cell-role="th">Div5LongestGTime</th>
+<th data-quarto-table-cell-role="th">Div5WheelsOff</th>
+<th data-quarto-table-cell-role="th">Div5TailNum</th>
+<th data-quarto-table-cell-role="th"></th>
 </tr>
 <tr class="odd">
 <th>i64</th>
@@ -343,9 +372,11 @@ $ IATA_CODE_Reporting_Airline &lt;str&gt; 'YX', 'YX', 'YX', 'YX', 'YX', 'YX', 'Y
 <th>i64</th>
 <th>i64</th>
 <th>i64</th>
+<th>…</th>
 <th>str</th>
 <th>str</th>
-<th>i64</th>
+<th>str</th>
+<th>str</th>
 <th>str</th>
 </tr>
 </thead>
@@ -356,10 +387,12 @@ $ IATA_CODE_Reporting_Airline &lt;str&gt; 'YX', 'YX', 'YX', 'YX', 'YX', 'YX', 'Y
 <td>1</td>
 <td>14</td>
 <td>5</td>
-<td>"2022-01-14"</td>
-<td>"YX"</td>
-<td>20452</td>
-<td>"YX"</td>
+<td>…</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>""</td>
+<td>null</td>
 </tr>
 <tr class="even">
 <td>2022</td>
@@ -367,10 +400,12 @@ $ IATA_CODE_Reporting_Airline &lt;str&gt; 'YX', 'YX', 'YX', 'YX', 'YX', 'YX', 'Y
 <td>1</td>
 <td>15</td>
 <td>6</td>
-<td>"2022-01-15"</td>
-<td>"YX"</td>
-<td>20452</td>
-<td>"YX"</td>
+<td>…</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>""</td>
+<td>null</td>
 </tr>
 <tr class="odd">
 <td>2022</td>
@@ -378,10 +413,12 @@ $ IATA_CODE_Reporting_Airline &lt;str&gt; 'YX', 'YX', 'YX', 'YX', 'YX', 'YX', 'Y
 <td>1</td>
 <td>16</td>
 <td>7</td>
-<td>"2022-01-16"</td>
-<td>"YX"</td>
-<td>20452</td>
-<td>"YX"</td>
+<td>…</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>""</td>
+<td>null</td>
 </tr>
 <tr class="even">
 <td>2022</td>
@@ -389,10 +426,12 @@ $ IATA_CODE_Reporting_Airline &lt;str&gt; 'YX', 'YX', 'YX', 'YX', 'YX', 'YX', 'Y
 <td>1</td>
 <td>17</td>
 <td>1</td>
-<td>"2022-01-17"</td>
-<td>"YX"</td>
-<td>20452</td>
-<td>"YX"</td>
+<td>…</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>""</td>
+<td>null</td>
 </tr>
 <tr class="odd">
 <td>2022</td>
@@ -400,19 +439,21 @@ $ IATA_CODE_Reporting_Airline &lt;str&gt; 'YX', 'YX', 'YX', 'YX', 'YX', 'YX', 'Y
 <td>1</td>
 <td>18</td>
 <td>2</td>
-<td>"2022-01-18"</td>
-<td>"YX"</td>
-<td>20452</td>
-<td>"YX"</td>
+<td>…</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>""</td>
+<td>null</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
 </div>
-<div id="15e2043f" class="cell" data-execution_count="6">
-<div class="sourceCode cell-code" id="cb9" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>flights[:, <span class="dv">0</span>:<span class="dv">9</span>].tail()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="5">
+<div id="94f77284" class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb11" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>flights.tail()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="6">
 <div><style>
 .dataframe > thead > tr,
 .dataframe > tbody > tr {
@@ -420,7 +461,7 @@ $ IATA_CODE_Reporting_Airline &lt;str&gt; 'YX', 'YX', 'YX', 'YX', 'YX', 'YX', 'Y
   white-space: pre-wrap;
 }
 </style>
-<small>shape: (5, 9)</small>
+<small>shape: (5, 110)</small>
 <table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
 <thead>
 <tr class="header">
@@ -429,10 +470,12 @@ $ IATA_CODE_Reporting_Airline &lt;str&gt; 'YX', 'YX', 'YX', 'YX', 'YX', 'YX', 'Y
 <th data-quarto-table-cell-role="th">Month</th>
 <th data-quarto-table-cell-role="th">DayofMonth</th>
 <th data-quarto-table-cell-role="th">DayOfWeek</th>
-<th data-quarto-table-cell-role="th">FlightDate</th>
-<th data-quarto-table-cell-role="th">Reporting_Airline</th>
-<th data-quarto-table-cell-role="th">DOT_ID_Reporting_Airline</th>
-<th data-quarto-table-cell-role="th">IATA_CODE_Reporting_Airline</th>
+<th data-quarto-table-cell-role="th">…</th>
+<th data-quarto-table-cell-role="th">Div5TotalGTime</th>
+<th data-quarto-table-cell-role="th">Div5LongestGTime</th>
+<th data-quarto-table-cell-role="th">Div5WheelsOff</th>
+<th data-quarto-table-cell-role="th">Div5TailNum</th>
+<th data-quarto-table-cell-role="th"></th>
 </tr>
 <tr class="odd">
 <th>i64</th>
@@ -440,9 +483,11 @@ $ IATA_CODE_Reporting_Airline &lt;str&gt; 'YX', 'YX', 'YX', 'YX', 'YX', 'YX', 'Y
 <th>i64</th>
 <th>i64</th>
 <th>i64</th>
+<th>…</th>
 <th>str</th>
 <th>str</th>
-<th>i64</th>
+<th>str</th>
+<th>str</th>
 <th>str</th>
 </tr>
 </thead>
@@ -453,10 +498,12 @@ $ IATA_CODE_Reporting_Airline &lt;str&gt; 'YX', 'YX', 'YX', 'YX', 'YX', 'YX', 'Y
 <td>1</td>
 <td>12</td>
 <td>3</td>
-<td>"2022-01-12"</td>
-<td>"YX"</td>
-<td>20452</td>
-<td>"YX"</td>
+<td>…</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>""</td>
+<td>null</td>
 </tr>
 <tr class="even">
 <td>2022</td>
@@ -464,10 +511,12 @@ $ IATA_CODE_Reporting_Airline &lt;str&gt; 'YX', 'YX', 'YX', 'YX', 'YX', 'YX', 'Y
 <td>1</td>
 <td>13</td>
 <td>4</td>
-<td>"2022-01-13"</td>
-<td>"YX"</td>
-<td>20452</td>
-<td>"YX"</td>
+<td>…</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>""</td>
+<td>null</td>
 </tr>
 <tr class="odd">
 <td>2022</td>
@@ -475,10 +524,12 @@ $ IATA_CODE_Reporting_Airline &lt;str&gt; 'YX', 'YX', 'YX', 'YX', 'YX', 'YX', 'Y
 <td>1</td>
 <td>14</td>
 <td>5</td>
-<td>"2022-01-14"</td>
-<td>"YX"</td>
-<td>20452</td>
-<td>"YX"</td>
+<td>…</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>""</td>
+<td>null</td>
 </tr>
 <tr class="even">
 <td>2022</td>
@@ -486,10 +537,12 @@ $ IATA_CODE_Reporting_Airline &lt;str&gt; 'YX', 'YX', 'YX', 'YX', 'YX', 'YX', 'Y
 <td>1</td>
 <td>17</td>
 <td>1</td>
-<td>"2022-01-17"</td>
-<td>"YX"</td>
-<td>20452</td>
-<td>"YX"</td>
+<td>…</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>""</td>
+<td>null</td>
 </tr>
 <tr class="odd">
 <td>2022</td>
@@ -497,19 +550,21 @@ $ IATA_CODE_Reporting_Airline &lt;str&gt; 'YX', 'YX', 'YX', 'YX', 'YX', 'YX', 'Y
 <td>1</td>
 <td>18</td>
 <td>2</td>
-<td>"2022-01-18"</td>
-<td>"YX"</td>
-<td>20452</td>
-<td>"YX"</td>
+<td>…</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>""</td>
+<td>null</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
 </div>
-<div id="056563af" class="cell" data-execution_count="7">
-<div class="sourceCode cell-code" id="cb10" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>flights[:, <span class="dv">0</span>:<span class="dv">9</span>].describe()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="6">
+<div id="b44a4764" class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb12" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>flights.describe()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="7">
 <div><style>
 .dataframe > thead > tr,
 .dataframe > tbody > tr {
@@ -517,7 +572,7 @@ $ IATA_CODE_Reporting_Airline &lt;str&gt; 'YX', 'YX', 'YX', 'YX', 'YX', 'YX', 'Y
   white-space: pre-wrap;
 }
 </style>
-<small>shape: (9, 10)</small>
+<small>shape: (9, 111)</small>
 <table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
 <thead>
 <tr class="header">
@@ -526,11 +581,12 @@ $ IATA_CODE_Reporting_Airline &lt;str&gt; 'YX', 'YX', 'YX', 'YX', 'YX', 'YX', 'Y
 <th data-quarto-table-cell-role="th">Quarter</th>
 <th data-quarto-table-cell-role="th">Month</th>
 <th data-quarto-table-cell-role="th">DayofMonth</th>
-<th data-quarto-table-cell-role="th">DayOfWeek</th>
-<th data-quarto-table-cell-role="th">FlightDate</th>
-<th data-quarto-table-cell-role="th">Reporting_Airline</th>
-<th data-quarto-table-cell-role="th">DOT_ID_Reporting_Airline</th>
-<th data-quarto-table-cell-role="th">IATA_CODE_Reporting_Airline</th>
+<th data-quarto-table-cell-role="th">…</th>
+<th data-quarto-table-cell-role="th">Div5TotalGTime</th>
+<th data-quarto-table-cell-role="th">Div5LongestGTime</th>
+<th data-quarto-table-cell-role="th">Div5WheelsOff</th>
+<th data-quarto-table-cell-role="th">Div5TailNum</th>
+<th data-quarto-table-cell-role="th"></th>
 </tr>
 <tr class="odd">
 <th>str</th>
@@ -538,10 +594,11 @@ $ IATA_CODE_Reporting_Airline &lt;str&gt; 'YX', 'YX', 'YX', 'YX', 'YX', 'YX', 'Y
 <th>f64</th>
 <th>f64</th>
 <th>f64</th>
-<th>f64</th>
+<th>…</th>
 <th>str</th>
 <th>str</th>
-<th>f64</th>
+<th>str</th>
+<th>str</th>
 <th>str</th>
 </tr>
 </thead>
@@ -552,11 +609,12 @@ $ IATA_CODE_Reporting_Airline &lt;str&gt; 'YX', 'YX', 'YX', 'YX', 'YX', 'YX', 'Y
 <td>999.0</td>
 <td>999.0</td>
 <td>999.0</td>
-<td>999.0</td>
+<td>…</td>
+<td>"0"</td>
+<td>"0"</td>
 <td>"999"</td>
 <td>"999"</td>
-<td>999.0</td>
-<td>"999"</td>
+<td>"0"</td>
 </tr>
 <tr class="even">
 <td>"null_count"</td>
@@ -564,11 +622,12 @@ $ IATA_CODE_Reporting_Airline &lt;str&gt; 'YX', 'YX', 'YX', 'YX', 'YX', 'YX', 'Y
 <td>0.0</td>
 <td>0.0</td>
 <td>0.0</td>
-<td>0.0</td>
+<td>…</td>
+<td>"999"</td>
+<td>"999"</td>
 <td>"0"</td>
 <td>"0"</td>
-<td>0.0</td>
-<td>"0"</td>
+<td>"999"</td>
 </tr>
 <tr class="odd">
 <td>"mean"</td>
@@ -576,10 +635,11 @@ $ IATA_CODE_Reporting_Airline &lt;str&gt; 'YX', 'YX', 'YX', 'YX', 'YX', 'YX', 'Y
 <td>1.0</td>
 <td>1.0</td>
 <td>16.2002</td>
-<td>3.934935</td>
+<td>…</td>
 <td>null</td>
 <td>null</td>
-<td>20452.0</td>
+<td>null</td>
+<td>null</td>
 <td>null</td>
 </tr>
 <tr class="even">
@@ -588,10 +648,11 @@ $ IATA_CODE_Reporting_Airline &lt;str&gt; 'YX', 'YX', 'YX', 'YX', 'YX', 'YX', 'Y
 <td>0.0</td>
 <td>0.0</td>
 <td>8.802666</td>
-<td>2.058944</td>
+<td>…</td>
 <td>null</td>
 <td>null</td>
-<td>0.0</td>
+<td>null</td>
+<td>null</td>
 <td>null</td>
 </tr>
 <tr class="odd">
@@ -600,11 +661,12 @@ $ IATA_CODE_Reporting_Airline &lt;str&gt; 'YX', 'YX', 'YX', 'YX', 'YX', 'YX', 'Y
 <td>1.0</td>
 <td>1.0</td>
 <td>1.0</td>
-<td>1.0</td>
-<td>"2022-01-01"</td>
-<td>"YX"</td>
-<td>20452.0</td>
-<td>"YX"</td>
+<td>…</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>""</td>
+<td>null</td>
 </tr>
 <tr class="even">
 <td>"25%"</td>
@@ -612,10 +674,11 @@ $ IATA_CODE_Reporting_Airline &lt;str&gt; 'YX', 'YX', 'YX', 'YX', 'YX', 'YX', 'Y
 <td>1.0</td>
 <td>1.0</td>
 <td>9.0</td>
-<td>2.0</td>
+<td>…</td>
 <td>null</td>
 <td>null</td>
-<td>20452.0</td>
+<td>null</td>
+<td>null</td>
 <td>null</td>
 </tr>
 <tr class="odd">
@@ -624,10 +687,11 @@ $ IATA_CODE_Reporting_Airline &lt;str&gt; 'YX', 'YX', 'YX', 'YX', 'YX', 'YX', 'Y
 <td>1.0</td>
 <td>1.0</td>
 <td>16.0</td>
-<td>4.0</td>
+<td>…</td>
 <td>null</td>
 <td>null</td>
-<td>20452.0</td>
+<td>null</td>
+<td>null</td>
 <td>null</td>
 </tr>
 <tr class="even">
@@ -636,10 +700,11 @@ $ IATA_CODE_Reporting_Airline &lt;str&gt; 'YX', 'YX', 'YX', 'YX', 'YX', 'YX', 'Y
 <td>1.0</td>
 <td>1.0</td>
 <td>24.0</td>
-<td>6.0</td>
+<td>…</td>
 <td>null</td>
 <td>null</td>
-<td>20452.0</td>
+<td>null</td>
+<td>null</td>
 <td>null</td>
 </tr>
 <tr class="odd">
@@ -648,27 +713,106 @@ $ IATA_CODE_Reporting_Airline &lt;str&gt; 'YX', 'YX', 'YX', 'YX', 'YX', 'YX', 'Y
 <td>1.0</td>
 <td>1.0</td>
 <td>31.0</td>
-<td>7.0</td>
-<td>"2022-01-31"</td>
-<td>"YX"</td>
-<td>20452.0</td>
-<td>"YX"</td>
+<td>…</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>""</td>
+<td>null</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
 </div>
-</section>
-<section id="row-and-column-counting" class="level3" data-number="1.2.2">
-<h3 data-number="1.2.2" class="anchored" data-anchor-id="row-and-column-counting"><span class="header-section-number">1.2.2</span> Row and column counting</h3>
-<p>Determining the number of rows and columns in a polars DataFrame is as simple as checking the shape:</p>
-<div id="272f2c0c" class="cell" data-execution_count="8">
-<div class="sourceCode cell-code" id="cb11" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>flights.shape</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="7">
-<pre data-code-line-numbers=""><code>(999, 110)</code></pre>
+<p><br></p>
+<p>If you want to take a peek at different parts of your DataFrame, here’s a neat trick: use the <code>sample()</code> method. This method randomly grabs <code>n</code> number of rows from the DataFrame and returns them for inspection.</p>
+<div id="1ec8bb4b" class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb13" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>flights.sample(<span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="8">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (3, 110)</small>
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">Year</th>
+<th data-quarto-table-cell-role="th">Quarter</th>
+<th data-quarto-table-cell-role="th">Month</th>
+<th data-quarto-table-cell-role="th">DayofMonth</th>
+<th data-quarto-table-cell-role="th">DayOfWeek</th>
+<th data-quarto-table-cell-role="th">…</th>
+<th data-quarto-table-cell-role="th">Div5TotalGTime</th>
+<th data-quarto-table-cell-role="th">Div5LongestGTime</th>
+<th data-quarto-table-cell-role="th">Div5WheelsOff</th>
+<th data-quarto-table-cell-role="th">Div5TailNum</th>
+<th data-quarto-table-cell-role="th"></th>
+</tr>
+<tr class="odd">
+<th>i64</th>
+<th>i64</th>
+<th>i64</th>
+<th>i64</th>
+<th>i64</th>
+<th>…</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>2022</td>
+<td>1</td>
+<td>1</td>
+<td>23</td>
+<td>7</td>
+<td>…</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>""</td>
+<td>null</td>
+</tr>
+<tr class="even">
+<td>2022</td>
+<td>1</td>
+<td>1</td>
+<td>13</td>
+<td>4</td>
+<td>…</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>""</td>
+<td>null</td>
+</tr>
+<tr class="odd">
+<td>2022</td>
+<td>1</td>
+<td>1</td>
+<td>15</td>
+<td>6</td>
+<td>…</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>""</td>
+<td>null</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
+</div>
+<p><br></p>
 <p>The output from polars comes with some useful features:</p>
 <ul>
 <li><p>Underneath each column name is a data type.</p></li>
@@ -677,14 +821,24 @@ $ IATA_CODE_Reporting_Airline &lt;str&gt; 'YX', 'YX', 'YX', 'YX', 'YX', 'YX', 'Y
 <li><p>Missing values are represented as <code>null</code>, applicable to all data types.</p></li>
 </ul>
 </section>
+<section id="row-and-column-counting" class="level3" data-number="1.2.2">
+<h3 data-number="1.2.2" class="anchored" data-anchor-id="row-and-column-counting"><span class="header-section-number">1.2.2</span> Row and column counting</h3>
+<p>Determining the number of rows and columns in a polars DataFrame is as simple as checking the shape:</p>
+<div id="0a51d23c" class="cell" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb14" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>flights.shape</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="9">
+<pre data-code-line-numbers=""><code>(999, 110)</code></pre>
+</div>
+</div>
+</section>
 <section id="converting-from-pandas" class="level3" data-number="1.2.3">
 <h3 data-number="1.2.3" class="anchored" data-anchor-id="converting-from-pandas"><span class="header-section-number">1.2.3</span> Converting from pandas</h3>
 <p>Transitioning from a Pandas DataFrame to a polars DataFrame is effortless with the <code>from_pandas()</code> method:</p>
-<div id="85fd0859" class="cell" data-execution_count="9">
-<div class="sourceCode cell-code" id="cb13" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>flights2 <span class="op">=</span> pl.from_pandas(pd.read_csv(<span class="st">'./data/flights.csv'</span>))</span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>flights2[:,<span class="dv">0</span>:<span class="dv">9</span>].glimpse()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="24f7e067" class="cell" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb16" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>flights2 <span class="op">=</span> pl.from_pandas(pd.read_csv(<span class="st">'./data/flights.csv'</span>))</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>flights2[:,<span class="dv">0</span>:<span class="dv">9</span>].glimpse()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre data-code-line-numbers=""><code>Rows: 999
 Columns: 9
@@ -707,61 +861,385 @@ $ IATA_CODE_Reporting_Airline &lt;str&gt; 'YX', 'YX', 'YX', 'YX', 'YX', 'YX', 'Y
 <ul>
 <li><code>Series</code> is <strong>1-dimensional</strong> data structure, akin to R’s atomic vector, where all elements must share the same data type.</li>
 </ul>
-<div id="168836b2" class="cell" data-execution_count="10">
-<div class="sourceCode cell-code" id="cb15" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>s <span class="op">=</span> pl.Series(<span class="st">'a'</span>, [<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>])</span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(s)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre data-code-line-numbers=""><code>shape: (3,)
-Series: 'a' [i64]
-[
-    1
-    2
-    3
-]</code></pre>
+<div id="589abc6f" class="cell" data-execution_count="11">
+<div class="sourceCode cell-code" id="cb18" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a named Series</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>s <span class="op">=</span> pl.Series(<span class="st">'a'</span>, [<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">2</span>, <span class="dv">5</span>])</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>s</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="11">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (5,)</small>
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">a</th>
+</tr>
+<tr class="odd">
+<th>i64</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+</tr>
+<tr class="even">
+<td>2</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+</tr>
+<tr class="even">
+<td>2</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
-<div id="165b10b3" class="cell" data-execution_count="11">
-<div class="sourceCode cell-code" id="cb17" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>s.dtype</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="10">
+</div>
+<div id="992a2406" class="cell" data-execution_count="12">
+<div class="sourceCode cell-code" id="cb19" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Note that dtype of `s` is automatically inferred as Int64</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>s.dtype</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="12">
 <pre data-code-line-numbers=""><code>Int64</code></pre>
 </div>
 </div>
-<ul>
-<li><code>Series</code> supports various <a href="https://docs.pola.rs/py-polars/html/reference/series/index.html">methods</a>, including operations like finding the maximum or calculating the mean.</li>
-</ul>
-<div id="27eb4285" class="cell" data-execution_count="12">
-<div class="sourceCode cell-code" id="cb19" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>s.<span class="bu">max</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="11">
-<pre data-code-line-numbers=""><code>3</code></pre>
-</div>
-</div>
-<div id="6a8a82a7" class="cell" data-execution_count="13">
-<div class="sourceCode cell-code" id="cb21" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>s.mean()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="12">
-<pre data-code-line-numbers=""><code>2.0</code></pre>
-</div>
-</div>
-<ul>
-<li><code>DataFrames</code> are 2-dimensional structures backed by <code>Series</code>, similar to R’s <code>data.frame</code>. They come with several attributes for exploration:</li>
-</ul>
-<div id="31b7e67c" class="cell" data-execution_count="14">
-<div class="sourceCode cell-code" id="cb23" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>flights.columns</span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>flights.dtypes</span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>flights.height</span>
-<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>flights.width</span>
-<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>flights.schema</span>
-<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>flights.shape</span>
-<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>flights[:,<span class="dv">0</span>:<span class="dv">9</span>].flags</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Constructing a Series with a specfic dtype:</p>
+<div id="b93eb313" class="cell" data-execution_count="13">
+<div class="sourceCode cell-code" id="cb21" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>s2 <span class="op">=</span> pl.Series(<span class="st">'a'</span>, [<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>], dtype<span class="op">=</span>pl.Float32)</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>s2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="13">
-<pre data-code-line-numbers=""><code>{'Year': {'SORTED_ASC': False, 'SORTED_DESC': False},
- 'Quarter': {'SORTED_ASC': False, 'SORTED_DESC': False},
- 'Month': {'SORTED_ASC': False, 'SORTED_DESC': False},
- 'DayofMonth': {'SORTED_ASC': False, 'SORTED_DESC': False},
- 'DayOfWeek': {'SORTED_ASC': False, 'SORTED_DESC': False},
- 'FlightDate': {'SORTED_ASC': False, 'SORTED_DESC': False},
- 'Reporting_Airline': {'SORTED_ASC': False, 'SORTED_DESC': False},
- 'DOT_ID_Reporting_Airline': {'SORTED_ASC': False, 'SORTED_DESC': False},
- 'IATA_CODE_Reporting_Airline': {'SORTED_ASC': False, 'SORTED_DESC': False}}</code></pre>
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (3,)</small>
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">a</th>
+</tr>
+<tr class="odd">
+<th>f32</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1.0</td>
+</tr>
+<tr class="even">
+<td>2.0</td>
+</tr>
+<tr class="odd">
+<td>3.0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<ul>
+<li><code>Series</code> provides a wide range of <a href="https://docs.pola.rs/py-polars/html/reference/series/index.html">methods</a> for various operations, including standard statistical functions like <code>.max()</code>, <code>.mean()</code>, as well as specialized ones such as <code>.quantile()</code> and <code>.unique_counts()</code>.</li>
+</ul>
+<div id="b6a12f39" class="cell" data-execution_count="14">
+<div class="sourceCode cell-code" id="cb22" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(s.<span class="bu">max</span>())</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(s.mean())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre data-code-line-numbers=""><code>5
+2.6</code></pre>
+</div>
+</div>
+<div id="745f049b" class="cell" data-execution_count="15">
+<div class="sourceCode cell-code" id="cb24" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>s.unique_counts()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="15">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (4,)</small>
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">a</th>
+</tr>
+<tr class="odd">
+<th>u32</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+</tr>
+<tr class="even">
+<td>2</td>
+</tr>
+<tr class="odd">
+<td>1</td>
+</tr>
+<tr class="even">
+<td>1</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<ul>
+<li><code>DataFrames</code> are 2-dimensional structures, similar to R’s <code>data.frame</code>, built on top of <code>Series</code>. In the examples below, borrowed from <a href="https://realpython.com/polars-python/">RealPython</a>, we create DataFrame using two different approaches:</li>
+</ul>
+<p>Creating DataFrame from a dictionary:</p>
+<div id="74b28a7d" class="cell" data-execution_count="16">
+<div class="sourceCode cell-code" id="cb25" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>num_rows <span class="op">=</span> <span class="dv">5000</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(seed<span class="op">=</span><span class="dv">7</span>)</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>buildings_data <span class="op">=</span> {</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>     <span class="st">"sqft"</span>: rng.exponential(scale<span class="op">=</span><span class="dv">1000</span>, size<span class="op">=</span>num_rows),</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>     <span class="st">"year"</span>: rng.integers(low<span class="op">=</span><span class="dv">1995</span>, high<span class="op">=</span><span class="dv">2023</span>, size<span class="op">=</span>num_rows),</span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>     <span class="st">"building_type"</span>: rng.choice([<span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"C"</span>], size<span class="op">=</span>num_rows),</span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a> }</span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>buildings <span class="op">=</span> pl.DataFrame(buildings_data)</span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>buildings</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="16">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (5_000, 3)</small>
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">sqft</th>
+<th data-quarto-table-cell-role="th">year</th>
+<th data-quarto-table-cell-role="th">building_type</th>
+</tr>
+<tr class="odd">
+<th>f64</th>
+<th>i64</th>
+<th>str</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>707.529256</td>
+<td>1996</td>
+<td>"C"</td>
+</tr>
+<tr class="even">
+<td>1025.203348</td>
+<td>2020</td>
+<td>"C"</td>
+</tr>
+<tr class="odd">
+<td>568.548657</td>
+<td>2012</td>
+<td>"A"</td>
+</tr>
+<tr class="even">
+<td>895.109864</td>
+<td>2000</td>
+<td>"A"</td>
+</tr>
+<tr class="odd">
+<td>206.532754</td>
+<td>2011</td>
+<td>"A"</td>
+</tr>
+<tr class="even">
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="odd">
+<td>710.435755</td>
+<td>2003</td>
+<td>"C"</td>
+</tr>
+<tr class="even">
+<td>408.872783</td>
+<td>2009</td>
+<td>"C"</td>
+</tr>
+<tr class="odd">
+<td>57.562059</td>
+<td>2019</td>
+<td>"C"</td>
+</tr>
+<tr class="even">
+<td>3728.088949</td>
+<td>2020</td>
+<td>"C"</td>
+</tr>
+<tr class="odd">
+<td>686.678345</td>
+<td>2011</td>
+<td>"C"</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>Creating DataFrame from multiple Series:</p>
+<div id="4ad11cac" class="cell" data-execution_count="17">
+<div class="sourceCode cell-code" id="cb26" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>s1 <span class="op">=</span> pl.Series(<span class="st">'sqrf'</span>, rng.exponential(scale<span class="op">=</span><span class="dv">1000</span>, size<span class="op">=</span>num_rows))</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>s2 <span class="op">=</span> pl.Series(<span class="st">'year'</span>, rng.integers(low<span class="op">=</span><span class="dv">1995</span>, high<span class="op">=</span><span class="dv">2023</span>, size<span class="op">=</span>num_rows))</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>s3 <span class="op">=</span> pl.Series(<span class="st">'building_type'</span>, rng.choice([<span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"C"</span>], size<span class="op">=</span>num_rows))</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>buildings2 <span class="op">=</span> pl.DataFrame([s1, s2, s3])</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>buildings2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="17">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (5_000, 3)</small>
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">sqrf</th>
+<th data-quarto-table-cell-role="th">year</th>
+<th data-quarto-table-cell-role="th">building_type</th>
+</tr>
+<tr class="odd">
+<th>f64</th>
+<th>i64</th>
+<th>str</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>220.644811</td>
+<td>1998</td>
+<td>"C"</td>
+</tr>
+<tr class="even">
+<td>966.183262</td>
+<td>2006</td>
+<td>"C"</td>
+</tr>
+<tr class="odd">
+<td>295.737178</td>
+<td>2010</td>
+<td>"A"</td>
+</tr>
+<tr class="even">
+<td>233.546019</td>
+<td>2009</td>
+<td>"C"</td>
+</tr>
+<tr class="odd">
+<td>2392.394417</td>
+<td>2022</td>
+<td>"B"</td>
+</tr>
+<tr class="even">
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="odd">
+<td>373.652761</td>
+<td>2011</td>
+<td>"A"</td>
+</tr>
+<tr class="even">
+<td>384.053786</td>
+<td>2010</td>
+<td>"B"</td>
+</tr>
+<tr class="odd">
+<td>1388.573406</td>
+<td>1999</td>
+<td>"A"</td>
+</tr>
+<tr class="even">
+<td>1225.981395</td>
+<td>2007</td>
+<td>"B"</td>
+</tr>
+<tr class="odd">
+<td>1206.351218</td>
+<td>2022</td>
+<td>"B"</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p><br></p>
+<p>DataFrames come with several attributes for exploration:</p>
+<div id="a82fe09c" class="cell" data-execution_count="18">
+<div class="sourceCode cell-code" id="cb27" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Get rows number</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>flights.height</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="18">
+<pre data-code-line-numbers=""><code>999</code></pre>
+</div>
+</div>
+<div id="27e86ccf" class="cell" data-execution_count="19">
+<div class="sourceCode cell-code" id="cb29" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Get columns number</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>flights.width</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="19">
+<pre data-code-line-numbers=""><code>110</code></pre>
+</div>
+</div>
+<div id="d555aeb1" class="cell" data-execution_count="20">
+<div class="sourceCode cell-code" id="cb31" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Get a list of column names</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>flights.columns[:<span class="dv">10</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="20">
+<pre data-code-line-numbers=""><code>['Year',
+ 'Quarter',
+ 'Month',
+ 'DayofMonth',
+ 'DayOfWeek',
+ 'FlightDate',
+ 'Reporting_Airline',
+ 'DOT_ID_Reporting_Airline',
+ 'IATA_CODE_Reporting_Airline',
+ 'Tail_Number']</code></pre>
+</div>
+</div>
+<div id="01c3441a" class="cell" data-execution_count="21">
+<div class="sourceCode cell-code" id="cb33" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Get a list of column dtype</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>flights.dtypes[:<span class="dv">10</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="21">
+<pre data-code-line-numbers=""><code>[Int64, Int64, Int64, Int64, Int64, String, String, Int64, String, String]</code></pre>
+</div>
+</div>
+<div id="7665ce10" class="cell" data-execution_count="22">
+<div class="sourceCode cell-code" id="cb35" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Get a dict of columns and their dtype</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>flights[:,:<span class="dv">10</span>].schema</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="22">
+<pre data-code-line-numbers=""><code>OrderedDict([('Year', Int64),
+             ('Quarter', Int64),
+             ('Month', Int64),
+             ('DayofMonth', Int64),
+             ('DayOfWeek', Int64),
+             ('FlightDate', String),
+             ('Reporting_Airline', String),
+             ('DOT_ID_Reporting_Airline', Int64),
+             ('IATA_CODE_Reporting_Airline', String),
+             ('Tail_Number', String)])</code></pre>
 </div>
 </div>
 </section>

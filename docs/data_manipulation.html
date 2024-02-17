@@ -271,14 +271,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 <p>To showcase the robust syntax and efficiency of the polars package, we will leverage a moderately-sized dataset, comprising approximately 530,000 rows.</p>
-<div id="1227043c" class="cell" data-execution_count="2">
+<div id="ea5efe1a" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb1" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>full_flights <span class="op">=</span> pl.read_csv(<span class="st">'./data/On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2022_1.csv'</span>)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>full_flights.shape</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="2">
 <pre data-code-line-numbers=""><code>(537902, 110)</code></pre>
 </div>
 </div>
-<div id="3c3b6e90" class="cell" data-execution_count="3">
+<div id="bc17f2de" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb3" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>full_flights.estimated_size(<span class="st">'mb'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="3">
 <pre data-code-line-numbers=""><code>729.5505456924438</code></pre>
@@ -288,13 +288,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 data-number="2.1" class="anchored" data-anchor-id="data-type-conversion"><span class="header-section-number">2.1</span> Data type conversion</h2>
 <p>In R, you work with four main types of vectors: logical, integer, double, and character. When you mix different types, they get automatically adjusted in a specific order: character → double → integer → logical. If you want to intentionally adjust them, you can use functions like <code>as.integer()</code>, <code>as.double()</code>, <code>as.logical()</code>, and <code>as.character()</code>.</p>
 <p>On the other hand, in polars, there’s a wider variety of data types, and you need to purposefully adjust them when needed.</p>
-<div id="35343d0b" class="cell" data-execution_count="4">
+<div id="7135c0e2" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb5" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>full_flights[<span class="st">'Year'</span>].dtype</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="4">
 <pre data-code-line-numbers=""><code>Int64</code></pre>
 </div>
 </div>
-<div id="bb6edeb2" class="cell" data-execution_count="5">
+<div id="a0b17b0f" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb7" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>full_flights <span class="op">=</span> full_flights.with_columns(</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    pl.col(<span class="st">'Year'</span>).cast(pl.Utf8)</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>)</span>
@@ -314,7 +314,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ul>
 <li>Retrieving all flights from Oihio (filtering based on one condition)</li>
 </ul>
-<div id="a98d56c8" class="cell" data-execution_count="6">
+<div id="0a512801" class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb9" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># recommended way</span></span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>flights_from_ohio <span class="op">=</span> full_flights.<span class="bu">filter</span>(pl.col(<span class="st">'OriginStateName'</span>) <span class="op">==</span> <span class="st">'Ohio'</span>)</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -355,7 +355,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ul>
 <li>Obtaining all flights from Ohio to Virginia (filtering based on multiple conditions)</li>
 </ul>
-<div id="cf745789" class="cell" data-execution_count="7">
+<div id="5e2f0368" class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb10" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># note that each predicate must be enclosed within parentheses</span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>flights_from_ohio_to_virginia <span class="op">=</span> full_flights.<span class="bu">filter</span>(</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    (pl.col(<span class="st">'OriginStateName'</span>) <span class="op">==</span> <span class="st">'Ohio'</span>) <span class="op">&amp;</span> (pl.col(<span class="st">'DestStateName'</span>) <span class="op">==</span> <span class="st">'Virginia'</span>)</span>
@@ -401,7 +401,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ul>
 <li>Fetching all flights from Ohito to any state except Virginia (filtering based on negative condition)</li>
 </ul>
-<div id="7f4680d5" class="cell" data-execution_count="8">
+<div id="855a18e9" class="cell" data-execution_count="8">
 <div class="sourceCode cell-code" id="cb11" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>flights_from_ohio_except_to_virginia <span class="op">=</span> full_flights.<span class="bu">filter</span>(</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    pl.col(<span class="st">'OriginStateName'</span>) <span class="op">==</span> <span class="st">'Ohio'</span>, </span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="op">~</span>(pl.col(<span class="st">'DestStateName'</span>) <span class="op">==</span> <span class="st">'Virginia'</span>)</span>
@@ -456,7 +456,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ul>
 <li>Why using the <code>.filter()</code> method? The reason is to leverage lazy execution and query optimization</li>
 </ul>
-<div id="fcea0c12" class="cell" data-execution_count="9">
+<div id="fe8f352a" class="cell" data-execution_count="9">
 <div class="sourceCode cell-code" id="cb12" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>time</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="co"># this code is optimized by polars query engine before reading any data into memory</span></span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>lazy_stmt <span class="op">=</span> (</span>
@@ -465,19 +465,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    .collect()</span>
 <span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre data-code-line-numbers=""><code>CPU times: user 3.24 s, sys: 328 ms, total: 3.57 s
-Wall time: 467 ms</code></pre>
+<pre data-code-line-numbers=""><code>CPU times: user 3.34 s, sys: 399 ms, total: 3.74 s
+Wall time: 484 ms</code></pre>
 </div>
 </div>
-<div id="d722e80e" class="cell" data-execution_count="10">
+<div id="a4f3f9f7" class="cell" data-execution_count="10">
 <div class="sourceCode cell-code" id="cb14" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>time</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>eager_stmt <span class="op">=</span> (</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    pl.read_csv(<span class="st">'./data/On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2022_1.csv'</span>)</span>
 <span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(pl.col(<span class="st">'OriginStateName'</span>) <span class="op">==</span> <span class="st">'Ohio'</span>)</span>
 <span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre data-code-line-numbers=""><code>CPU times: user 3.59 s, sys: 688 ms, total: 4.28 s
-Wall time: 628 ms</code></pre>
+<pre data-code-line-numbers=""><code>CPU times: user 3.78 s, sys: 644 ms, total: 4.43 s
+Wall time: 673 ms</code></pre>
 </div>
 </div>
 </section>
@@ -487,7 +487,7 @@ Wall time: 628 ms</code></pre>
 <ul>
 <li>Utilizing the <code>select</code> function to create a DataFrame from Series:</li>
 </ul>
-<div id="e8ba38c0" class="cell" data-execution_count="11">
+<div id="dbfff855" class="cell" data-execution_count="11">
 <div class="sourceCode cell-code" id="cb16" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>foo <span class="op">=</span> pl.Series(<span class="st">'foo'</span>, [<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>])</span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>bar <span class="op">=</span> pl.Series(<span class="st">'bar'</span>, [<span class="dv">4</span>, <span class="dv">5</span>, <span class="dv">6</span>])</span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -528,7 +528,7 @@ Wall time: 628 ms</code></pre>
 <ul>
 <li>Selecting columns by names:</li>
 </ul>
-<div id="ce226fe4" class="cell" data-execution_count="12">
+<div id="b518ff61" class="cell" data-execution_count="12">
 <div class="sourceCode cell-code" id="cb17" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>full_flights.select([<span class="st">'FlightDate'</span>, <span class="st">'Tail_Number'</span>]).head(<span class="dv">3</span>)</span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="co"># or </span></span>
 <span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="co"># full_flights.select(pl.col(['FlightDate', 'Tail_Number'])).head(3)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -573,7 +573,7 @@ Wall time: 628 ms</code></pre>
 <ul>
 <li>Selecting columns by types:</li>
 </ul>
-<div id="54e3651a" class="cell" data-execution_count="13">
+<div id="8fd3a753" class="cell" data-execution_count="13">
 <div class="sourceCode cell-code" id="cb18" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># select all integer columns</span></span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>full_flights.select(pl.col(pl.Int64)).head(<span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="13">
@@ -714,7 +714,7 @@ Wall time: 628 ms</code></pre>
 </div>
 </div>
 </div>
-<div id="ea3005ed" class="cell" data-execution_count="14">
+<div id="35895719" class="cell" data-execution_count="14">
 <div class="sourceCode cell-code" id="cb19" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># select all numeric columns</span></span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>full_flights.select(</span>
 <span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    pl.col(pl.Int64),</span>
@@ -971,7 +971,7 @@ Wall time: 628 ms</code></pre>
 <ul>
 <li>Complex column selection with Selectors, analogous to dplyr’s <a href="https://dplyr.tidyverse.org/reference/select.html">selection helpers</a></li>
 </ul>
-<div id="6592827f" class="cell" data-execution_count="15">
+<div id="06038561" class="cell" data-execution_count="15">
 <div class="sourceCode cell-code" id="cb20" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars.selectors <span class="im">as</span> cs</span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="co"># match all variables. Same as dplyr's `everything()`</span></span>
@@ -1379,7 +1379,7 @@ Wall time: 628 ms</code></pre>
 </div>
 </div>
 </div>
-<div id="c63f5496" class="cell" data-execution_count="16">
+<div id="c2e4bcd9" class="cell" data-execution_count="16">
 <div class="sourceCode cell-code" id="cb21" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># match variables by prefix or suffix</span></span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>full_flights.select(</span>
 <span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    cs.starts_with(<span class="st">'Flight'</span>) <span class="op">|</span> cs.ends_with(<span class="st">'Delay'</span>)</span>
