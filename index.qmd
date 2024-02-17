@@ -16,14 +16,11 @@ import polars as pl
 from lets_plot import *
 LetsPlot.setup_html(isolated_frame=False, offline=True, no_js=True, show_status=False)
 
-stars = pl.read_csv('./data/star-history-2024215.csv', has_header=False)
-stars = stars.rename({'column_1': 'project', 'column_2': 'date', 'column_3': 'stars'})
 stars = (
-    stars.with_columns(
-        pl.col('date').str.slice(0, 15).alias('short_date')
-    )
+    pl.read_csv('./data/star-history-2024215.csv', has_header=False)
+    .rename({'column_1': 'project', 'column_2': 'date', 'column_3': 'stars'})
     .with_columns(
-        pl.col('short_date').str.to_date('%a %b %d %Y').alias('short_date')
+        pl.col('date').str.slice(0, 15).str.to_date('%a %b %d %Y').alias('short_date')
     )
     .sort('short_date')
 )
