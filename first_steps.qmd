@@ -1,9 +1,9 @@
 
-# First steps with polars
+# First steps with Polars
 
 ## Installation
 
-Let's kick off our journey into the world of data manipulation with the polars library. First things first, we need to [set up a virtual environment](https://realpython.com/python-virtual-environments-a-primer/#how-can-you-work-with-a-python-virtual-environment) for a clean installation. Install the latest stable version with:
+Let's kick off our journey into the world of data manipulation with the Polars library. First things first, we need to [set up a virtual environment](https://realpython.com/python-virtual-environments-a-primer/#how-can-you-work-with-a-python-virtual-environment) for a clean installation. Install the latest stable version with:
 
 ```bash
 pip install polars
@@ -15,7 +15,7 @@ Depending on your use case, you might want to install the [optional dependencies
 pip install 'polars[numpy,pandas,pyarrow]'
 ```
 
-To gain insights into the installed polars package, including version details and enabled features, utilize the `show_versions()` function:
+To gain insights into the installed Polars package, including version details and enabled features, utilize the `show_versions()` function:
 
 ```{python}
 import polars as pl
@@ -25,10 +25,9 @@ pl.show_versions()
 
 ## Initial exploration
 
-For better presentation, this book use polars' [config options](https://docs.pola.rs/py-polars/html/reference/config.html) to change the formatting of printed tables. Specifically:
+For better presentation, this book use Polars' [configuration options](https://docs.pola.rs/py-polars/html/reference/config.html) to adjust the layout of printed tables. Specifically:
 
-- Limit the number of columns displayed in DataFrames to 10
-- Cap the number of rows shown in DataFrames to 10
+- Limit the number of columns and rows displayed in DataFrames to 10 each
 - Apply stylish formatting to the tables for pleasant reading experience
 
 
@@ -40,9 +39,9 @@ pl.Config.set_tbl_formatting(rounded_corners=True)
 ```
 
 
-### Reading data with polars
+### Reading data with Polars
 
-Reading a CSV file using polars is straightforward. Let's take a quick look:
+Reading a CSV file using Polars is straightforward. Let's take a quick look:
 
 ```{python}
 flights = pl.read_csv('./data/flights.csv')
@@ -74,8 +73,8 @@ flights.describe()
 
 <br/>
 
-If you want to take a peek at different parts of your DataFrame, here's a neat trick: use the `sample()` method. This method
-randomly grabs `n` number of rows from the DataFrame and returns them for inspection.
+If you want to take a peek at different parts of your DataFrame, here's a handy trick: use the `sample()` method. This method
+randomly picks `n` number of rows from the DataFrame and returns them for inspection.
 
 ```{python}
 flights.sample(3)
@@ -83,7 +82,7 @@ flights.sample(3)
 
 <br/>
 
-The output from polars comes with some useful features:
+The output from Polars comes with some useful features:
 
 * Underneath each column name is a data type.
 
@@ -95,7 +94,7 @@ The output from polars comes with some useful features:
 
 ### Row and column counting
 
-Determining the number of rows and columns in a polars DataFrame is as simple as checking the shape:
+Determining the number of rows and columns in a Polars DataFrame is as simple as checking the shape:
 
 ```{python}
 flights.shape
@@ -104,7 +103,14 @@ flights.shape
 
 ### Converting from pandas
 
-Transitioning from a Pandas DataFrame to a polars DataFrame is effortless with the `from_pandas()` method:
+Transitioning from a Pandas DataFrame to a Polars DataFrame is effortless with the `from_pandas()` method:
+
+:::{.column-margin}
+To clarify, [cheap conversion](https://pythonspeed.com/articles/polars-pandas-interopability/) from Polars to Pandas is achievable given the following prerequisites:
+
+- Pandas version 2.0 or later
+- Supported by the `pyarrow` library
+:::
 
 ```{python}
 import pandas as pd
@@ -115,7 +121,7 @@ flights2[:,0:9].glimpse()
 
 ### Understanding data structure
 
-The fundamental data structures in polars are `Series` and `DataFrames`:
+The fundamental data structures in Polars are `Series` and `DataFrames`:
 
 * `Series` is **1-dimensional** data structure, akin to R's atomic vector, where all elements must share the same data type.
 
@@ -139,8 +145,8 @@ s2
 ```
 
 
-* `Series` provides a wide range of [methods](https://docs.pola.rs/py-polars/html/reference/series/index.html) for various operations, including standard statistical functions 
-like `.max()`, `.mean()`, as well as specialized ones such as `.quantile()` and `.unique_counts()`.
+* `Series` provides a wide range of [methods](https://docs.pola.rs/py-Polars/html/reference/series/index.html) for various operations, including standard statistical functions 
+like `.max()`, `.mean()`, as well as specialized ones such as `.entropy()` and `.unique_counts()`.
 
 ```{python}
 print(s.max())
@@ -211,7 +217,7 @@ flights[:,:10].schema
 
 ## Summary
 
-At first glance, polars offers the ease of use reminiscent of R, blending with the familiarity of pandas (minus any potential frustrations).
+At first glance, Polars offers the ease of use reminiscent of R, blending with the familiarity of pandas (minus any potential frustrations).
 
 
 
