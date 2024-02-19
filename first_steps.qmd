@@ -39,7 +39,7 @@ pl.Config.set_tbl_formatting(rounded_corners=True)
 ```
 
 
-### Reading data with Polars
+### Data loading
 
 Reading a CSV file using Polars is straightforward. Let's take a quick look:
 
