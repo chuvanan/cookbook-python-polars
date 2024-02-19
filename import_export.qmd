@@ -1,7 +1,7 @@
 
-# Reading and writing data with polars
+# Reading and writing data with Polars
 
-An overview of polars I/O capabilities (at version `0.20.7`):
+An overview of Polars I/O capabilities (at version `0.20.9`):
 
 
 | Format                                                           	| Implementation         	| Read 	| Write 	| Scan            	|
@@ -14,9 +14,10 @@ An overview of polars I/O capabilities (at version `0.20.7`):
 | Cloud storage (AWS S3, Azure blob storage, Google cloud storage) 	| native                 	| x    	| x     	| x               	|
 
 
-Note on `implementation`: Polars functions or methods that are written in Rust 
+A note regarding `implementation`: A Polars function or method that is entirely written in Rust is referred to as 'native'. Though this definition may not be stricly accurate, it is acceptable
+to use it for distinguishing purpose, particularly in contrast to invoking functions/methods from external packages.
 
-Note on `scan`: Comparable to the concept of [lazy reading](https://www.tidyverse.org/blog/2021/11/readr-2-1-0-lazy/) in `readr` package, polars allows you to `scan` an input file, which defers the actual parsing of the file and provides a `LazyFrame`, a lazy computation holder. This feature offers notable performance benefits:
+A note about `scan`: Similar to the concept of [lazy reading](https://www.tidyverse.org/blog/2021/11/readr-2-1-0-lazy/) in the `readr` package, Polars allows you to `scan` an input file, which defers the actual parsing of the file and provides a `LazyFrame`, a lazy computation holder. This feature offers notable performance benefits:
 
 * reduction of memory usage by reading only the necessary data
 
@@ -34,7 +35,7 @@ pl.Config.set_tbl_cols(10)
 
 ### Delimited file (CSV, TSV)
 
-For a complete list of parameter options to use with polars CSV readers, see this [page](https://docs.pola.rs/py-polars/html/reference/api/polars.read_csv.html). These parameters
+For a complete list of parameter options to use with Polars CSV readers, see this [page](https://docs.pola.rs/py-polars/html/reference/api/polars.read_csv.html). These parameters
 provides the same functionality as readr's arguments but with slightly different names. Here's an example:
 
 ```{python}
@@ -74,7 +75,7 @@ flights_202212.head(3)
 
 ### Reading multiple files
 
-polars `scan_*()` method is a really neat technique for reading multiple files efficiently. In 
+Polars' `scan_*()` method is a really neat technique for reading multiple files efficiently.
 
 ```{python}
 from pathlib import Path
