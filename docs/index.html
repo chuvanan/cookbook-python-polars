@@ -181,7 +181,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./first_steps.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">First steps with polars</span></span></a>
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">First steps with Polars</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
@@ -193,7 +193,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./import_export.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Reading and writing data with polars</span></span></a>
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Reading and writing data with Polars</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
@@ -269,10 +269,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <section id="preface" class="level1 unnumbered">
 <h1 class="unnumbered">Preface</h1>
-<p>This book stems from a series of <a href="https://www.emilyriederer.com/post/py-rgo-polars/">blog posts</a> recommending a Pythonic data science stack that mirrors the comfort and familiarity of R’s tidyverse packages. Specifically, this book explores the <code>polars</code> library - a rising star in the DataFrame space (alongside established players like Pandas, Dask, Modin, Ray, Vaex).</p>
-<p>In short, polars is described as a <a href="https://pola.rs/posts/polars_birds_eye_view/">query engine with a DataFrame front-end</a>. It offers a rich set of intuitive functions and principled workflows for data manipulation and analysis. Designed from the ground up with performance in mind, polars is also known for its <a href="https://www.ritchievink.com/blog/2021/02/28/i-wrote-one-of-the-fastest-dataframe-libraries/">lightning-fast execution speed</a>. While rapidly gaining popularity, polars is still in its early phase and under active development.</p>
-<p>The bulk of this book features structured examples of data wrangling tasks showcasing idiomatic polars and corresponding dplyr/tidyr code for comparison. Examples might include commentary on the API choices.</p>
-<div id="0f5a19a9" class="cell" data-execution_count="1">
+<p>This book was inspired by a series of <a href="https://www.emilyriederer.com/post/py-rgo-polars/">blog posts</a> recommending a Pythonic data science stack that mimics the comfort and familiarity of R’s tidyverse tools. Particularly, this book explores the <code>Polars</code> library, a rising star in the DataFrame space (alongside established players like Pandas, Dask, Modin, Ray, and Vaex).</p>
+<p>In a nutshell, Polars is defined as a <a href="https://pola.rs/posts/polars_birds_eye_view/">query engine with a DataFrame front-end</a>. It offers a rich set of intuitive functions and principled workflows for data manipulation and analysis. Designed from the ground up with performance in mind, Polars is also noted for its <a href="https://www.ritchievink.com/blog/2021/02/28/i-wrote-one-of-the-fastest-dataframe-libraries/">lightning-fast execution speed</a>. Polars, despite its quick rise in popularity, is still in its early stages of development.</p>
+<p>The majority of this book contains structured examples of data wrangling tasks that demonstrates idiomatic Polars and related dplyr/tidyr code for comparison. Examples might include discussion on API choices.</p>
+<div id="280e30c2" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
@@ -313,112 +313,112 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 text {
    text-rendering: optimizeLegibility;
 }
-#pZgoRE2 .plot-title {
+#pwGMADs .plot-title {
    fill: #474747;
    font-family: Roboto Condensed;
    font-size: 18.0px;
    font-weight: bold;
    font-style: normal;   
 }
-#pZgoRE2 .plot-subtitle {
+#pwGMADs .plot-subtitle {
    fill: #474747;
    font-family: Roboto Condensed;
    font-size: 15.0px;
    font-weight: normal;
    font-style: normal;   
 }
-#pZgoRE2 .plot-caption {
+#pwGMADs .plot-caption {
    fill: #474747;
    font-family: Roboto Condensed;
    font-size: 13.0px;
    font-weight: normal;
    font-style: normal;   
 }
-#pZgoRE2 .legend-title {
+#pwGMADs .legend-title {
    fill: #474747;
    font-family: Roboto Condensed;
    font-size: 15.0px;
    font-weight: normal;
    font-style: normal;   
 }
-#pZgoRE2 .legend-item {
+#pwGMADs .legend-item {
    fill: #474747;
    font-family: Roboto Condensed;
    font-size: 15.0px;
    font-weight: normal;
    font-style: normal;   
 }
-#pZgoRE2 .axis-title-x {
+#pwGMADs .axis-title-x {
    fill: #474747;
    font-family: Roboto Condensed;
    font-size: 15.0px;
    font-weight: normal;
    font-style: normal;   
 }
-#pZgoRE2 .axis-text-x {
+#pwGMADs .axis-text-x {
    fill: #474747;
    font-family: Roboto Condensed;
    font-size: 15.0px;
    font-weight: normal;
    font-style: normal;   
 }
-#dZwwejw .axis-tooltip-text-x {
+#dsSSCV8 .axis-tooltip-text-x {
    fill: #ffffff;
    font-family: Roboto Condensed;
    font-size: 15.0px;
    font-weight: normal;
    font-style: normal;   
 }
-#pZgoRE2 .axis-title-y {
+#pwGMADs .axis-title-y {
    fill: #474747;
    font-family: Roboto Condensed;
    font-size: 15.0px;
    font-weight: normal;
    font-style: normal;   
 }
-#pZgoRE2 .axis-text-y {
+#pwGMADs .axis-text-y {
    fill: #474747;
    font-family: Roboto Condensed;
    font-size: 15.0px;
    font-weight: normal;
    font-style: normal;   
 }
-#dZwwejw .axis-tooltip-text-y {
+#dsSSCV8 .axis-tooltip-text-y {
    fill: #ffffff;
    font-family: Roboto Condensed;
    font-size: 15.0px;
    font-weight: normal;
    font-style: normal;   
 }
-#pZgoRE2 .facet-strip-text-x {
+#pwGMADs .facet-strip-text-x {
    fill: #474747;
    font-family: Roboto Condensed;
    font-size: 15.0px;
    font-weight: normal;
    font-style: normal;   
 }
-#pZgoRE2 .facet-strip-text-y {
+#pwGMADs .facet-strip-text-y {
    fill: #474747;
    font-family: Roboto Condensed;
    font-size: 15.0px;
    font-weight: normal;
    font-style: normal;   
 }
-#dZwwejw .tooltip-text {
+#dsSSCV8 .tooltip-text {
    fill: #474747;
    font-family: Roboto Condensed;
    font-size: 15.0px;
    font-weight: normal;
    font-style: normal;   
 }
-#dZwwejw .tooltip-title {
+#dsSSCV8 .tooltip-title {
    fill: #474747;
    font-family: Roboto Condensed;
    font-size: 15.0px;
    font-weight: bold;
    font-style: normal;   
 }
-#dZwwejw .tooltip-label {
+#dsSSCV8 .tooltip-label {
    fill: #474747;
    font-family: Roboto Condensed;
    font-size: 15.0px;
@@ -427,7 +427,7 @@ text {
 }
 
   </style>
-  <g id="pZgoRE2">
+  <g id="pwGMADs">
     <path fill-rule="evenodd" fill="rgb(255,255,255)" fill-opacity="1.0" d="M0.0 0.0 L0.0 380.0 L700.0 380.0 L700.0 0.0 Z">
     </path>
     <g transform="translate(23.0 36.0 ) ">
@@ -515,9 +515,9 @@ text {
           </g>
         </g>
       </g>
-      <g transform="translate(57.89598183079157 0.0 ) " clip-path="url(#czSQCZe)" clip-bounds-jfx="[rect (0.0, 0.0), (395.50096582933656, 296.0)]">
+      <g transform="translate(57.89598183079157 0.0 ) " clip-path="url(#cPy3pye)" clip-bounds-jfx="[rect (0.0, 0.0), (395.50096582933656, 296.0)]">
         <defs>
-          <clippath id="czSQCZe">
+          <clippath id="cPy3pye">
             <rect x="0.0" y="0.0" width="395.50096582933656" height="296.0">
             </rect>
           </clippath>
@@ -665,7 +665,7 @@ text {
     <path fill="rgb(0,0,0)" fill-opacity="0.0" stroke="rgb(71,71,71)" stroke-opacity="1.0" stroke-width="0.0" d="M0.0 0.0 L0.0 380.0 L700.0 380.0 L700.0 0.0 Z">
     </path>
   </g>
-  <g id="dZwwejw">
+  <g id="dsSSCV8">
   </g>
 </svg>
 </div>
@@ -690,7 +690,7 @@ text {
 </section>
 <section id="credit" class="level2">
 <h2 class="anchored" data-anchor-id="credit">Credit</h2>
-<p>This work builds upon the organizational style of <a href="https://ddotta.github.io/cookbook-rpolars/">https://ddotta.github.io/cookbook-rpolars/</a> but the content and examples are tailored to Python’s polars library. So credit goes to <a href="https://github.com/ddotta">Damien Dotta</a>, all remaining errors are mine.</p>
+<p>This work builds upon the organizational style of <a href="https://ddotta.github.io/cookbook-rpolars/">https://ddotta.github.io/cookbook-rpolars/</a> but the content and examples are tailored to Polars library in Python. So credit goes to <a href="https://github.com/ddotta">Damien Dotta</a>, all remaining errors are mine.</p>
 </section>
 <section id="contributing" class="level2">
 <h2 class="anchored" data-anchor-id="contributing">Contributing</h2>
@@ -1236,8 +1236,8 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   <div class="nav-page nav-page-previous">
   </div>
   <div class="nav-page nav-page-next">
-      <a href="./first_steps.html" class="pagination-link" aria-label="<span class='chapter-number'>1</span>&nbsp; <span class='chapter-title'>First steps with polars</span>">
-        <span class="nav-page-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">First steps with polars</span></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="./first_steps.html" class="pagination-link" aria-label="<span class='chapter-number'>1</span>&nbsp; <span class='chapter-title'>First steps with Polars</span>">
+        <span class="nav-page-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">First steps with Polars</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>
