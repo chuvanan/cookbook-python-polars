@@ -1,0 +1,368 @@
+
+# Polars in action
+
+## Why Pandas feels clunky after using R, but Polars doesn't
+
+
+The first example of *Polars in action* is not actually a real-world problem; it's more of a toy example. However, it's delibrately chosen to highlight Polars' fluent API, which,
+in my view, resonates with many `dplyr` users.
+
+### Reading data
+
+:::{.column-screen-inset}
+
+:::: {.columns}
+
+::: {.column width="26%"}
+
+
+```{r}
+#| message: false
+# R
+require(readr)
+purchases = readr::read_csv("./data/purchases.csv")
+purchases |> head()
+```
+
+:::
+
+::: {.column width="2%"}
+
+:::
+
+::: {.column width="34%"}
+
+```{python}
+# Pandas
+import pandas as pd
+purchases_pd = pd.read_csv("./data/purchases.csv")
+purchases_pd.head()
+```
+
+:::
+
+::: {.column width="2%"}
+
+:::
+
+::: {.column width="36%"}
+
+```{python}
+#| message: false
+# Polars
+import polars as pl
+purchases_pl = pl.read_csv("./data/purchases.csv")
+pl.Config.set_tbl_formatting('NOTHING')
+pl.Config.set_tbl_hide_column_data_types(True)
+print(purchases_pl.head())
+```
+
+:::
+
+::::
+
+:::
+
+
+### “How much do we sell..? Let’s take the total sum!”
+
+
+:::{.column-screen-inset}
+
+:::: {.columns}
+
+::: {.column width="26%"}
+
+```{r}
+# R
+purchases$amount |> sum()
+```
+
+:::
+
+::: {.column width="2%"}
+
+:::
+
+::: {.column width="34%"}
+
+```{python}
+# Pandas
+purchases_pd["amount"].sum()
+```
+
+:::
+
+::: {.column width="2%"}
+
+:::
+
+::: {.column width="36%"}
+
+```{python}
+# Polars
+purchases_pl['amount'].sum()
+```
+
+:::
+
+::::
+
+:::
+
+
+### “Ah, they wanted it by country…”
+
+
+
+:::{.column-screen-inset}
+
+:::: {.columns}
+
+::: {.column width="26%"}
+
+```{r}
+# R
+purchases |>
+  dplyr::group_by(country) |>
+  dplyr::summarize(total = sum(amount))
+```
+
+:::
+
+::: {.column width="2%"}
+
+:::
+
+::: {.column width="34%"}
+
+```{python}
+# Pandas
+(purchases_pd
+  .groupby("country")
+  .agg(total=("amount", "sum")) 
+  .reset_index()                
+)
+```
+
+:::
+
+::: {.column width="2%"}
+
+:::
+
+::: {.column width="36%"}
+
+```{python}
+# Polars
+print(purchases_pl
+  .group_by('country')
+  .agg(pl.col('amount').sum().alias('total'))
+  .sort('country')
+)
+```
+
+:::
+
+::::
+
+:::
+
+
+### “And I guess I should deduct the discount.”
+
+
+
+:::{.column-screen-inset}
+
+:::: {.columns}
+
+::: {.column width="26%"}
+
+```{r}
+# R
+purchases |> 
+  dplyr::group_by(country) |> 
+  dplyr::summarize(total = sum(amount - discount))
+```
+
+:::
+
+::: {.column width="2%"}
+
+:::
+
+::: {.column width="34%"}
+
+```{python}
+#| warning: false
+# Pandas
+(purchases_pd
+  .groupby("country")
+  .apply(lambda df: (df["amount"] - df["discount"]).sum())
+  .reset_index()
+  .rename(columns={0: "total"})                           
+)
+```
+
+:::
+
+::: {.column width="2%"}
+
+:::
+
+::: {.column width="36%"}
+
+```{python}
+# Polars
+print(purchases_pl
+  .group_by('country')
+  .agg(
+    (pl.col('amount') - pl.col('discount')).sum().alias('total')
+  )
+  .sort('country')
+)
+```
+
+:::
+
+::::
+
+:::
+
+
+### “Oh, and Maria asked me to remove any outliers.”
+
+
+
+
+:::{.column-screen-inset}
+
+:::: {.columns}
+
+::: {.column width="26%"}
+
+```{r}
+# R
+purchases |>
+  dplyr::filter(amount <= median(amount) * 10) |>
+  dplyr::group_by(country) |> 
+  dplyr::summarize(total = sum(amount - discount))
+```
+
+:::
+
+::: {.column width="2%"}
+
+:::
+
+::: {.column width="34%"}
+
+```{python}
+#| warning: false
+# Pandas
+(purchases_pd
+  .query("amount <= amount.median() * 10")
+  .groupby("country")
+  .apply(lambda df: (df["amount"] - df["discount"]).sum())
+  .reset_index()
+  .rename(columns={0: "total"})
+)
+```
+
+:::
+
+::: {.column width="2%"}
+
+:::
+
+::: {.column width="36%"}
+
+```{python}
+# Polars
+print(purchases_pl
+  .filter(
+    pl.col('amount') <= (pl.col('amount').median() * 10)
+  )
+  .group_by('country')
+  .agg(
+    (pl.col('amount') - pl.col('discount')).sum().alias('total')
+  )
+  .sort('country')
+)
+```
+
+:::
+
+::::
+
+:::
+
+
+### “I probably should use the median within each country”
+
+
+
+:::{.column-screen-inset}
+
+:::: {.columns}
+
+::: {.column width="26%"}
+
+```{r}
+# R 
+purchases |>
+  dplyr::group_by(country) |>                     
+  dplyr::filter(amount <= median(amount) * 10) |> 
+  dplyr::summarize(total = sum(amount - discount))
+```
+
+:::
+
+::: {.column width="2%"}
+
+:::
+
+::: {.column width="34%"}
+
+```{python}
+#| warning: false
+# Pandas
+(purchases_pd
+  .groupby("country")                                               
+  .apply(lambda df: df[df["amount"] <= df["amount"].median() * 10]) 
+  .reset_index(drop=True)                                           
+  .groupby("country")
+  .apply(lambda df: (df["amount"] - df["discount"]).sum())
+  .reset_index()
+  .rename(columns={0: "total"})
+)
+```
+
+:::
+
+::: {.column width="2%"}
+
+:::
+
+::: {.column width="36%"}
+
+```{python}
+# Polars
+print(purchases_pl
+  .filter(
+    pl.col('amount') <= (pl.col('amount').median().over('country') * 10)
+  )
+  .group_by('country')
+  .agg(
+    (pl.col('amount') - pl.col('discount')).sum().alias('total')
+  )
+  .sort('country')
+)
+```
+
+:::
+
+::::
+
+:::

@@ -22,7 +22,7 @@ book:
     - data_manipulation.qmd
     - import_export.qmd
     - lazy_execution.qmd
-    - benchmarking.qmd
+    - examples.qmd
     - references.qmd
 
 bibliography: references.bib

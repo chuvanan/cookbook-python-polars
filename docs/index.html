@@ -204,8 +204,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./benchmarking.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">benchmarking.html</span></span></a>
+  <a href="./examples.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Polars in action</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
@@ -272,7 +272,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>This book was inspired by a series of <a href="https://www.emilyriederer.com/post/py-rgo-polars/">blog posts</a> recommending a Pythonic data science stack that mimics the comfort and familiarity of R’s tidyverse tools. Particularly, this book explores the <code>Polars</code> library, a rising star in the DataFrame space (alongside established players like Pandas, Dask, Modin, Ray, and Vaex).</p>
 <p>In a nutshell, Polars is defined as a <a href="https://pola.rs/posts/polars_birds_eye_view/">query engine with a DataFrame front-end</a>. It offers a rich set of intuitive functions and principled workflows for data manipulation and analysis. Designed from the ground up with performance in mind, Polars is also noted for its <a href="https://www.ritchievink.com/blog/2021/02/28/i-wrote-one-of-the-fastest-dataframe-libraries/">lightning-fast execution speed</a>. Polars, despite its quick rise in popularity, is still in its early stages of development.</p>
 <p>The majority of this book contains structured examples of data wrangling tasks that demonstrates idiomatic Polars and related dplyr/tidyr code for comparison. Examples might include discussion on API choices.</p>
-<div id="280e30c2" class="cell" data-execution_count="1">
+<div id="864c0835" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
@@ -313,112 +313,112 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 text {
    text-rendering: optimizeLegibility;
 }
-#pwGMADs .plot-title {
+#pyW6Tgf .plot-title {
    fill: #474747;
    font-family: Roboto Condensed;
    font-size: 18.0px;
    font-weight: bold;
    font-style: normal;   
 }
-#pwGMADs .plot-subtitle {
+#pyW6Tgf .plot-subtitle {
    fill: #474747;
    font-family: Roboto Condensed;
    font-size: 15.0px;
    font-weight: normal;
    font-style: normal;   
 }
-#pwGMADs .plot-caption {
+#pyW6Tgf .plot-caption {
    fill: #474747;
    font-family: Roboto Condensed;
    font-size: 13.0px;
    font-weight: normal;
    font-style: normal;   
 }
-#pwGMADs .legend-title {
+#pyW6Tgf .legend-title {
    fill: #474747;
    font-family: Roboto Condensed;
    font-size: 15.0px;
    font-weight: normal;
    font-style: normal;   
 }
-#pwGMADs .legend-item {
+#pyW6Tgf .legend-item {
    fill: #474747;
    font-family: Roboto Condensed;
    font-size: 15.0px;
    font-weight: normal;
    font-style: normal;   
 }
-#pwGMADs .axis-title-x {
+#pyW6Tgf .axis-title-x {
    fill: #474747;
    font-family: Roboto Condensed;
    font-size: 15.0px;
    font-weight: normal;
    font-style: normal;   
 }
-#pwGMADs .axis-text-x {
+#pyW6Tgf .axis-text-x {
    fill: #474747;
    font-family: Roboto Condensed;
    font-size: 15.0px;
    font-weight: normal;
    font-style: normal;   
 }
-#dsSSCV8 .axis-tooltip-text-x {
+#dekhiAu .axis-tooltip-text-x {
    fill: #ffffff;
    font-family: Roboto Condensed;
    font-size: 15.0px;
    font-weight: normal;
    font-style: normal;   
 }
-#pwGMADs .axis-title-y {
+#pyW6Tgf .axis-title-y {
    fill: #474747;
    font-family: Roboto Condensed;
    font-size: 15.0px;
    font-weight: normal;
    font-style: normal;   
 }
-#pwGMADs .axis-text-y {
+#pyW6Tgf .axis-text-y {
    fill: #474747;
    font-family: Roboto Condensed;
    font-size: 15.0px;
    font-weight: normal;
    font-style: normal;   
 }
-#dsSSCV8 .axis-tooltip-text-y {
+#dekhiAu .axis-tooltip-text-y {
    fill: #ffffff;
    font-family: Roboto Condensed;
    font-size: 15.0px;
    font-weight: normal;
    font-style: normal;   
 }
-#pwGMADs .facet-strip-text-x {
+#pyW6Tgf .facet-strip-text-x {
    fill: #474747;
    font-family: Roboto Condensed;
    font-size: 15.0px;
    font-weight: normal;
    font-style: normal;   
 }
-#pwGMADs .facet-strip-text-y {
+#pyW6Tgf .facet-strip-text-y {
    fill: #474747;
    font-family: Roboto Condensed;
    font-size: 15.0px;
    font-weight: normal;
    font-style: normal;   
 }
-#dsSSCV8 .tooltip-text {
+#dekhiAu .tooltip-text {
    fill: #474747;
    font-family: Roboto Condensed;
    font-size: 15.0px;
    font-weight: normal;
    font-style: normal;   
 }
-#dsSSCV8 .tooltip-title {
+#dekhiAu .tooltip-title {
    fill: #474747;
    font-family: Roboto Condensed;
    font-size: 15.0px;
    font-weight: bold;
    font-style: normal;   
 }
-#dsSSCV8 .tooltip-label {
+#dekhiAu .tooltip-label {
    fill: #474747;
    font-family: Roboto Condensed;
    font-size: 15.0px;
@@ -427,7 +427,7 @@ text {
 }
 
   </style>
-  <g id="pwGMADs">
+  <g id="pyW6Tgf">
     <path fill-rule="evenodd" fill="rgb(255,255,255)" fill-opacity="1.0" d="M0.0 0.0 L0.0 380.0 L700.0 380.0 L700.0 0.0 Z">
     </path>
     <g transform="translate(23.0 36.0 ) ">
@@ -515,9 +515,9 @@ text {
           </g>
         </g>
       </g>
-      <g transform="translate(57.89598183079157 0.0 ) " clip-path="url(#cPy3pye)" clip-bounds-jfx="[rect (0.0, 0.0), (395.50096582933656, 296.0)]">
+      <g transform="translate(57.89598183079157 0.0 ) " clip-path="url(#cuZxxso)" clip-bounds-jfx="[rect (0.0, 0.0), (395.50096582933656, 296.0)]">
         <defs>
-          <clippath id="cPy3pye">
+          <clippath id="cuZxxso">
             <rect x="0.0" y="0.0" width="395.50096582933656" height="296.0">
             </rect>
           </clippath>
@@ -665,7 +665,7 @@ text {
     <path fill="rgb(0,0,0)" fill-opacity="0.0" stroke="rgb(71,71,71)" stroke-opacity="1.0" stroke-width="0.0" d="M0.0 0.0 L0.0 380.0 L700.0 380.0 L700.0 0.0 Z">
     </path>
   </g>
-  <g id="dsSSCV8">
+  <g id="dekhiAu">
   </g>
 </svg>
 </div>
