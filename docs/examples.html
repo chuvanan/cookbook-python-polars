@@ -256,7 +256,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <section id="why-pandas-feels-clunky-after-using-r-but-polars-doesnt" class="level2 page-columns page-full" data-number="5.1">
 <h2 data-number="5.1" class="anchored" data-anchor-id="why-pandas-feels-clunky-after-using-r-but-polars-doesnt"><span class="header-section-number">5.1</span> Why Pandas feels clunky after using R, but Polars doesn’t</h2>
-<p>The first example of <em>Polars in action</em> is not actually a real-world problem; it’s more of a toy example. However, it’s delibrately chosen to highlight Polars’ fluent API, which, in my view, resonates with many <code>dplyr</code> users.</p>
+<p>The initial demonstration of <em>Polars in action</em> isn’t a real-world scenario but rather a simplified example, deliberately chosen to highlight Polars’ fluent API, which, in my view, resonates with many tidyverse users.</p>
+<p>Rasmus Baath, in his insightful <a href="https://www.sumsar.net/blog/pandas-feels-clunky-when-coming-from-r/">blog post</a>, compared the usability of R’s <code>dplyr</code> and Python’s <code>Pandas</code> using a simple data analysis exercise. He argued that Pandas feels <em>clunky and complicated</em> compared to the core package of the tidyverse. I found his example to be complelling because I have had the same personal experience using Pandas for various data tasks at work.</p>
+<p>By borrowing Ramus’s case, I aim to showcase Polar’s fluent interface which is arguably as <em>silky smooth</em> as tidyverse’s. While this example carries biased opinion, it serves as an useful illustration of what a good API design should look like. Pandas remains an excellent package, but it’s important to acknowledge its quirks, especially for newcomers.</p>
 <section id="reading-data" class="level3 page-columns page-full" data-number="5.1.1">
 <h3 data-number="5.1.1" class="anchored" data-anchor-id="reading-data"><span class="header-section-number">5.1.1</span> Reading data</h3>
 <div class="column-screen-inset">
