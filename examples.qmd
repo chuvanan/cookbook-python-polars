@@ -4,8 +4,15 @@
 ## Why Pandas feels clunky after using R, but Polars doesn't
 
 
-The first example of *Polars in action* is not actually a real-world problem; it's more of a toy example. However, it's delibrately chosen to highlight Polars' fluent API, which,
-in my view, resonates with many `dplyr` users.
+The initial demonstration of *Polars in action* isn't a real-world scenario but rather a simplified example, deliberately chosen to highlight Polars' fluent API, which,
+in my view, resonates with many tidyverse users.
+
+Rasmus Baath, in his insightful [blog post](https://www.sumsar.net/blog/pandas-feels-clunky-when-coming-from-r/), compared the usability of R's `dplyr` and Python's `Pandas` using a simple data
+analysis exercise. He argued that Pandas feels *clunky and complicated* compared to the core package of the tidyverse. I found his example to be complelling because I have had the same personal
+experience using Pandas for various data tasks at work. 
+
+By borrowing Ramus's case, I aim to showcase Polar's fluent interface which is arguably as *silky smooth* as tidyverse's. While this example carries biased opinion, it 
+serves as an useful illustration of what a good API design should look like. Pandas remains an excellent package, but it's important to acknowledge its quirks, especially for newcomers.
 
 ### Reading data
 
