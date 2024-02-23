@@ -8,7 +8,7 @@ The initial demonstration of *Polars in action* isn't a real-world scenario but 
 in my view, resonates with many tidyverse users.
 
 Rasmus Baath, in his insightful [blog post](https://www.sumsar.net/blog/pandas-feels-clunky-when-coming-from-r/), compared the usability of R's `dplyr` and Python's `Pandas` using a simple data
-analysis exercise. He argued that Pandas feels *clunky and complicated* compared to the core package of the tidyverse. I found his example to be complelling because I have had the same personal
+analysis exercise. He argued that Pandas feels *clunky and complicated* compared to the core package of the tidyverse. I found his example to be compelling because I have had the same personal
 experience using Pandas for various data tasks at work. 
 
 By borrowing Ramus's case, I aim to showcase Polar's fluent interface which is arguably as *silky smooth* as tidyverse's. While this example carries biased opinion, it 
