@@ -123,14 +123,14 @@ purchases_pl['amount'].sum()
 
 ### “Ah, they wanted it by country…”
 
-Some subtle yet significant differences:
+Some subtle yet significant differences emerge:
 
 * In R and Polars, the output consistenly remains as a DataFrame. However, in Pandas, this isn't guaranteed, 
 so the use of `reset_index()`.
 
 * R's and Poars' solutions are typically present themselves straightforwardly, while [in Pandas](https://gist.github.com/chuvanan/547ab180fb55b692673984b4a014e7af), this isn't always the case (why resetting index? why passing sum method as a string?)
 
-* Polar's version may appear more verbose, but this is a design choice.
+* Polar's version may appear more verbose, but this is a design choice. And it's hard to beat dplyr's clarity.
 
 :::{.column-screen-inset}
 
@@ -187,6 +187,10 @@ print(purchases_pl
 
 
 ### “And I guess I should deduct the discount.”
+
+
+In this task, Polars closely resembles the intuitive syntax of dplyr. However, achieving similar operation
+in Pandas requires a large change in code structure.
 
 
 
@@ -250,8 +254,8 @@ print(purchases_pl
 
 ### “Oh, and Maria asked me to remove any outliers.”
 
-
-
+Now Pandas deviates from its usual syntax with the introduction of `query()` [method](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.query.html). Meanwhile, Polars 
+maintains its fluency, demonstrating its consistency very well.
 
 :::{.column-screen-inset}
 
@@ -318,7 +322,9 @@ print(purchases_pl
 
 ### “I probably should use the median within each country”
 
-
+In this last task, Polars shines in readability thanks to its [window
+function API](https://docs.pola.rs/user-guide/expressions/window/), which makes the flow of data processing explicit. On the other hand, dplyr's solution might be a bit trickier to grasp as it involves
+working with grouped data frame.
 
 :::{.column-screen-inset}
 
