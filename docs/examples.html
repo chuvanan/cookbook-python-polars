@@ -257,10 +257,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="why-pandas-feels-clunky-after-using-r-but-polars-doesnt" class="level2 page-columns page-full" data-number="5.1">
 <h2 data-number="5.1" class="anchored" data-anchor-id="why-pandas-feels-clunky-after-using-r-but-polars-doesnt"><span class="header-section-number">5.1</span> Why Pandas feels clunky after using R, but Polars doesn’t</h2>
 <p>The initial demonstration of <em>Polars in action</em> isn’t a real-world scenario but rather a simplified example, deliberately chosen to highlight Polars’ fluent API, which, in my view, resonates with many tidyverse users.</p>
-<p>Rasmus Baath, in his insightful <a href="https://www.sumsar.net/blog/pandas-feels-clunky-when-coming-from-r/">blog post</a>, compared the usability of R’s <code>dplyr</code> and Python’s <code>Pandas</code> using a simple data analysis exercise. He argued that Pandas feels <em>clunky and complicated</em> compared to the core package of the tidyverse. I found his example to be complelling because I have had the same personal experience using Pandas for various data tasks at work.</p>
+<p>Rasmus Baath, in his insightful <a href="https://www.sumsar.net/blog/pandas-feels-clunky-when-coming-from-r/">blog post</a>, compared the usability of R’s <code>dplyr</code> and Python’s <code>Pandas</code> using a simple data analysis exercise. He argued that Pandas feels <em>clunky and complicated</em> compared to the core package of the tidyverse. I found his example to be compelling because I have had the same personal experience using Pandas for various data tasks at work. I recommend reading his post first to gain context for the subsequent code snippets.</p>
 <p>By borrowing Ramus’s case, I aim to showcase Polar’s fluent interface which is arguably as <em>silky smooth</em> as tidyverse’s. While this example carries biased opinion, it serves as an useful illustration of what a good API design should look like. Pandas remains an excellent package, but it’s important to acknowledge its quirks, especially for newcomers.</p>
 <section id="reading-data" class="level3 page-columns page-full" data-number="5.1.1">
 <h3 data-number="5.1.1" class="anchored" data-anchor-id="reading-data"><span class="header-section-number">5.1.1</span> Reading data</h3>
+<p>To begin, let’s take a look at the dataset, which consists of a table of <code>purchases</code> detailing different <code>amount</code> and <code>discount</code> applied in various <code>country</code>.</p>
 <div class="column-screen-inset">
 <div class="columns">
 <div class="column" style="width:26%;">
@@ -330,6 +331,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="how-much-do-we-sell..-lets-take-the-total-sum" class="level3 page-columns page-full" data-number="5.1.2">
 <h3 data-number="5.1.2" class="anchored" data-anchor-id="how-much-do-we-sell..-lets-take-the-total-sum"><span class="header-section-number">5.1.2</span> “How much do we sell..? Let’s take the total sum!”</h3>
+<p>There’s nothing noteworthy here. In R, we use the <code>sum()</code> function, whereas in Pandas and Polars, we use the <code>Series.sum()</code> method for similar operation.</p>
 <div class="column-screen-inset">
 <div class="columns">
 <div class="column" style="width:26%;">
@@ -366,6 +368,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="ah-they-wanted-it-by-country" class="level3 page-columns page-full" data-number="5.1.3">
 <h3 data-number="5.1.3" class="anchored" data-anchor-id="ah-they-wanted-it-by-country"><span class="header-section-number">5.1.3</span> “Ah, they wanted it by country…”</h3>
+<p>Some subtle yet significant differences emerge:</p>
+<ul>
+<li><p>In R and Polars, the output consistenly remains as a DataFrame. However, in Pandas, this isn’t guaranteed, so the use of <code>reset_index()</code>.</p></li>
+<li><p>R’s and Poars’ solutions are typically present themselves straightforwardly, while <a href="https://gist.github.com/chuvanan/547ab180fb55b692673984b4a014e7af">in Pandas</a>, this isn’t always the case (why resetting index? why passing sum method as a string?)</p></li>
+<li><p>Polar’s version may appear more verbose, but this is a design choice. And it’s hard to beat dplyr’s clarity.</p></li>
+</ul>
 <div class="column-screen-inset">
 <div class="columns">
 <div class="column" style="width:26%;">
@@ -448,6 +456,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="and-i-guess-i-should-deduct-the-discount." class="level3 page-columns page-full" data-number="5.1.4">
 <h3 data-number="5.1.4" class="anchored" data-anchor-id="and-i-guess-i-should-deduct-the-discount."><span class="header-section-number">5.1.4</span> “And I guess I should deduct the discount.”</h3>
+<p>In this task, Polars closely resembles the intuitive syntax of dplyr. However, achieving similar operation in Pandas requires a large change in code structure.</p>
 <div class="column-screen-inset">
 <div class="columns">
 <div class="column" style="width:26%;">
@@ -533,6 +542,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="oh-and-maria-asked-me-to-remove-any-outliers." class="level3 page-columns page-full" data-number="5.1.5">
 <h3 data-number="5.1.5" class="anchored" data-anchor-id="oh-and-maria-asked-me-to-remove-any-outliers."><span class="header-section-number">5.1.5</span> “Oh, and Maria asked me to remove any outliers.”</h3>
+<p>Now Pandas deviates from its usual syntax with the introduction of <code>query()</code> <a href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.query.html">method</a>. Meanwhile, Polars maintains its fluency, demonstrating its consistency very well.</p>
 <div class="column-screen-inset">
 <div class="columns">
 <div class="column" style="width:26%;">
@@ -623,6 +633,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="i-probably-should-use-the-median-within-each-country" class="level3 page-columns page-full" data-number="5.1.6">
 <h3 data-number="5.1.6" class="anchored" data-anchor-id="i-probably-should-use-the-median-within-each-country"><span class="header-section-number">5.1.6</span> “I probably should use the median within each country”</h3>
+<p>In this last task, Polars shines in readability thanks to its <a href="https://docs.pola.rs/user-guide/expressions/window/">window function API</a>, which makes the flow of data processing explicit. On the other hand, dplyr’s solution might be a bit trickier to grasp as it involves working with grouped data frame.</p>
 <div class="column-screen-inset">
 <div class="columns">
 <div class="column" style="width:26%;">
