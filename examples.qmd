@@ -9,12 +9,14 @@ in my view, resonates with many tidyverse users.
 
 Rasmus Baath, in his insightful [blog post](https://www.sumsar.net/blog/pandas-feels-clunky-when-coming-from-r/), compared the usability of R's `dplyr` and Python's `Pandas` using a simple data
 analysis exercise. He argued that Pandas feels *clunky and complicated* compared to the core package of the tidyverse. I found his example to be compelling because I have had the same personal
-experience using Pandas for various data tasks at work. 
+experience using Pandas for various data tasks at work. I recommend reading his post first to gain context for the subsequent code snippets.
 
 By borrowing Ramus's case, I aim to showcase Polar's fluent interface which is arguably as *silky smooth* as tidyverse's. While this example carries biased opinion, it 
 serves as an useful illustration of what a good API design should look like. Pandas remains an excellent package, but it's important to acknowledge its quirks, especially for newcomers.
 
 ### Reading data
+
+To begin, let's take a look at the dataset, which consists of a table of `purchases` detailing different `amount` and `discount` applied in various `country`.
 
 :::{.column-screen-inset}
 
@@ -73,6 +75,7 @@ print(purchases_pl.head())
 
 ### “How much do we sell..? Let’s take the total sum!”
 
+There's nothing noteworthy here. In R, we use the `sum()` function, whereas in Pandas and Polars, we use the `Series.sum()` method for similar operation.
 
 :::{.column-screen-inset}
 
@@ -120,7 +123,14 @@ purchases_pl['amount'].sum()
 
 ### “Ah, they wanted it by country…”
 
+Some subtle yet significant differences:
 
+* In R and Polars, the output consistenly remains as a DataFrame. However, in Pandas, this isn't guaranteed, 
+so the use of `reset_index()`.
+
+* R's and Poars' solutions are typically present themselves straightforwardly, while [in Pandas](https://gist.github.com/chuvanan/547ab180fb55b692673984b4a014e7af), this isn't always the case (why resetting index? why passing sum method as a string?)
+
+* Polar's version may appear more verbose, but this is a design choice.
 
 :::{.column-screen-inset}
 
