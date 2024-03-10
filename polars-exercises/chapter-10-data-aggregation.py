@@ -255,5 +255,5 @@ tips.pivot(
 tips.with_columns(
     double_size=pl.col("size") * 2,
     tip_pct_scaled=pl.col("tip_pct") * 100,
-    total_bill_by_smoker=pl.col("total_bill").sum().over("smoker")
+    total_bill_by_smoker=pl.col("total_bill").sum().over("smoker"),
 )
