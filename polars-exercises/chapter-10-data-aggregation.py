@@ -92,3 +92,67 @@ grouped.agg(pl.col("data1").bottom_k(2))
 
 
 # Custom aggregation functions
+
+
+def peak_to_peak(x: pl.Expr) -> pl.Expr:
+    return x.list.max() - x.list.min()
+
+
+grouped.agg(
+    cs.float().map_batches(peak_to_peak, return_dtype=pl.Float64, agg_list=True)
+)
+
+# Column wise and multiple function application
+
+tips = pl.read_csv("tips.csv")
+
+tips = tips.with_columns((pl.col("tip") / pl.col("total_bill")).alias("tip_pct"))
+
+tips_grouped = tips.group_by(["day", "smoker"])
+
+tips_grouped.agg(
+    pl.col("tip_pct").mean().alias("avg_tip_pct"),
+    pl.col("tip_pct").std().alias("std_tip_pct"),
+    pl.col("tip_pct")
+    .map_batches(peak_to_peak, agg_list=True, return_dtype=pl.Float64)
+    .alias("peak_tip_pct"),
+).sort(["day", "smoker"])
+
+
+# Apply
+# It's advised not to use UDFs where Polars-native expression can
+
+tips.group_by("smoker").agg(pl.col("tip_pct").top_k(5).alias("top5")).explode(
+    "top5"
+)  # DataFrame.explode()
+
+
+tips.with_columns(
+    pl.col("tip_pct").rank("ordinal", descending=True).over("smoker").alias("rn")
+).filter(pl.col("rn") <= 5).sort(["smoker", "rn"])
+
+# Quantile and bucket analysis
+
+dta = pl.DataFrame(
+    {
+        "data1": np.random.standard_normal(1000),
+        "data2": np.random.standard_normal(1000),
+    }
+)
+
+dta = dta.with_columns(
+    pl.col("data1")
+    .qcut(quantiles=4, labels=["g1", "g2", "g3", "g4"])
+    .alias("quartiles")
+)
+
+dta["quartiles"].value_counts()
+
+dta.group_by("quartiles").agg(
+    pl.col("data2").min().alias("min_2"),
+    pl.col("data2").max().alias("max_2"),
+    pl.col("data2").mean().alias("avg_2"),
+    pl.col("data2").std().alias("std_2"),
+)
+
+# Example: random sampling and permutation
