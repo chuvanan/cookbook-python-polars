@@ -156,3 +156,97 @@ dta.group_by("quartiles").agg(
 )
 
 # Example: random sampling and permutation
+
+suits = ["H", "S", "C", "D"]  # Hearts, Spades, Clubs, Diamonds
+card_val = (list(range(1, 11)) + [10] * 3) * 4
+base_names = ["A"] + list(range(2, 11)) + ["J", "K", "Q"]
+cards = []
+for suit in suits:
+    cards.extend(str(num) + suit for num in base_names)
+
+deck = pl.Series(name="card_val", values=cards)
+deck.sample(5)
+
+for i in range(0, 6):
+    print("Times: ", i)
+    print(deck.sample(5))
+
+
+# Example: weighted average and correlation
+
+w = pl.DataFrame(
+    {
+        "category": ["a", "a", "a", "a", "b", "b", "b", "b"],
+        "data": np.random.standard_normal(8),
+        "weights": np.random.uniform(size=8),
+    }
+)
+
+w.group_by("category").agg(
+    ((pl.col("data") * pl.col("weights")).sum() / pl.col("weights").sum()).alias(
+        "w_avg"
+    )
+)
+
+# ┌──────────┬───────────┐
+# │ category ┆ w_avg     │
+# │ ---      ┆ ---       │
+# │ str      ┆ f64       │
+# ╞══════════╪═══════════╡
+# │ a        ┆ -0.152434 │
+# │ b        ┆ -0.567091 │
+# └──────────┴───────────┘
+
+# Panda's implementation
+
+w_grouped = w.to_pandas().groupby("category")
+
+
+def get_w_avg(g):
+    return np.average(g["data"], weights=g["weights"])
+
+
+w_grouped.apply(get_w_avg)
+# category
+# a   -0.152434
+# b   -0.567091
+# dtype: float64
+
+
+close_px = pl.read_csv("stock_px.csv", try_parse_dates=True)
+close_px = close_px.rename({"": "day"})
+
+close_px = close_px.with_columns(pl.col("day").dt.year().alias("report_year"))
+
+
+rets = (
+    close_px.select(pl.col("report_year"), cs.float())
+    .with_columns(cs.float().pct_change())
+    .drop_nulls()
+)
+
+rets.group_by("report_year").agg(
+    pl.corr(pl.col("AAPL"), pl.col("SPX")),
+    pl.corr(pl.col("MSFT"), pl.col("SPX")),
+    pl.corr(pl.col("XOM"), pl.col("SPX")),
+).sort("report_year")
+
+
+# Pivot tables and cross-tabulation
+
+tips.pivot(
+    index=["time", "day"],
+    columns=["smoker"],
+    values=["size", "tip_pct"],
+    aggregate_function="mean",  # this arg takes pre-defined aggregate function string (min, max, first, last, sum, mean, median, len)
+).sort(["time", "day"])
+
+
+tips.pivot(
+    index=["time", "smoker"],
+    columns=["day"],
+    values=["tip_pct"],
+    aggregate_function="len",
+).sort(["time", "smoker"]).with_columns(
+    pl.sum_horizontal(pl.col(["Sun", "Sat", "Thur", "Fri"])).alias("All")
+)
