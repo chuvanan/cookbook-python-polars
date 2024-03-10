@@ -250,3 +250,10 @@ tips.pivot(
 ).sort(["time", "smoker"]).with_columns(
     pl.sum_horizontal(pl.col(["Sun", "Sat", "Thur", "Fri"])).alias("All")
 )
+
+# I didn't known column assignment is valid in Polars
+tips.with_columns(
+    double_size=pl.col("size") * 2,
+    tip_pct_scaled=pl.col("tip_pct") * 100,
+    total_bill_by_smoker=pl.col("total_bill").sum().over("smoker")
+)
