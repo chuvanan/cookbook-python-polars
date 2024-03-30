@@ -272,33 +272,38 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>This book was inspired by a series of <a href="https://www.emilyriederer.com/post/py-rgo-polars/">blog posts</a> recommending a Pythonic data science stack that mimics the comfort and familiarity of R’s tidyverse tools. Particularly, this book explores the <code>Polars</code> library, a rising star in the DataFrame space (alongside established players like Pandas, Dask, Modin, Ray, and Vaex).</p>
 <p>In a nutshell, Polars is defined as a <a href="https://pola.rs/posts/polars_birds_eye_view/">query engine with a DataFrame front-end</a>. It offers a rich set of intuitive functions and principled workflows for data manipulation and analysis. Designed from the ground up with performance in mind, Polars is also noted for its <a href="https://www.ritchievink.com/blog/2021/02/28/i-wrote-one-of-the-fastest-dataframe-libraries/">lightning-fast execution speed</a>. Polars, despite its quick rise in popularity, is still in its early stages of development.</p>
 <p>The majority of this book contains structured examples of data wrangling tasks that demonstrates idiomatic Polars and related dplyr/tidyr code for comparison. Examples might include discussion on API choices.</p>
-<div id="3384931e" class="cell" data-execution_count="1">
+<div id="c388461e" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> lets_plot <span class="im">import</span> <span class="op">*</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>LetsPlot.setup_html(isolated_frame<span class="op">=</span><span class="va">False</span>, offline<span class="op">=</span><span class="va">True</span>, no_js<span class="op">=</span><span class="va">True</span>, show_status<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>LetsPlot.setup_html(no_js<span class="op">=</span><span class="va">True</span>)</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>stars <span class="op">=</span> (</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    pl.read_csv(<span class="st">'./data/star-history-2024215.csv'</span>, has_header<span class="op">=</span><span class="va">False</span>)</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    .rename({<span class="st">'column_1'</span>: <span class="st">'project'</span>, <span class="st">'column_2'</span>: <span class="st">'date'</span>, <span class="st">'column_3'</span>: <span class="st">'stars'</span>})</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">'date'</span>).<span class="bu">str</span>.<span class="bu">slice</span>(<span class="dv">0</span>, <span class="dv">15</span>).<span class="bu">str</span>.to_date(<span class="st">'%a %b </span><span class="sc">%d</span><span class="st"> %Y'</span>).alias(<span class="st">'short_date'</span>)</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    .sort(<span class="st">'short_date'</span>)</span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    ggplot(stars.to_pandas(), aes(x<span class="op">=</span><span class="st">'short_date'</span>, y<span class="op">=</span><span class="st">'stars'</span>, color<span class="op">=</span><span class="st">'project'</span>)) <span class="op">+</span></span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    geom_line(size<span class="op">=</span><span class="fl">1.5</span>) <span class="op">+</span></span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    labs(y<span class="op">=</span><span class="st">'Github stars'</span>, title<span class="op">=</span><span class="st">'Polars is surging in popularity'</span>) <span class="op">+</span></span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    scale_x_datetime(name<span class="op">=</span><span class="st">'Date'</span>) <span class="op">+</span></span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    theme(legend_title<span class="op">=</span>element_blank(), </span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>          text<span class="op">=</span>element_text(family<span class="op">=</span><span class="st">'Roboto Condensed'</span>, size<span class="op">=</span><span class="dv">15</span>),</span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>         plot_title<span class="op">=</span>element_text(face<span class="op">=</span><span class="st">'bold'</span>, size<span class="op">=</span><span class="dv">18</span>)) <span class="op">+</span></span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>    scale_y_continuous(breaks<span class="op">=</span>[<span class="dv">0</span>, <span class="dv">10_000</span>, <span class="dv">20_000</span>, <span class="dv">30_000</span>, <span class="dv">40_000</span>], <span class="bu">format</span><span class="op">=</span><span class="st">'0,'</span>, expand<span class="op">=</span>[<span class="fl">0.01</span>,<span class="fl">0.01</span>]) <span class="op">+</span></span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    ggsize(<span class="dv">700</span>,<span class="dv">380</span>)</span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> okabeito(n):</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    pal <span class="op">=</span> [<span class="st">"#E69F00"</span>, <span class="st">"#56B4E9"</span>, <span class="st">"#009E73"</span>, <span class="st">"#F0E442"</span>, <span class="st">"#0072B2"</span>, <span class="st">"#D55E00"</span>, <span class="st">"#CC79A7"</span>, <span class="st">"#999999"</span>, <span class="st">"#000000"</span>]</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> pal[<span class="dv">0</span>:n]</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>stars <span class="op">=</span> (</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    pl.read_csv(<span class="st">'./data/star-history-2024330.csv'</span>, has_header<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    .rename({<span class="st">'Repository'</span>: <span class="st">'project'</span>, <span class="st">'Date'</span>: <span class="st">'date'</span>, <span class="st">'Stars'</span>: <span class="st">'stars'</span>})</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>        short_date<span class="op">=</span>pl.col(<span class="st">'date'</span>).<span class="bu">str</span>.<span class="bu">slice</span>(<span class="dv">0</span>, <span class="dv">15</span>).<span class="bu">str</span>.to_date(<span class="st">'%a %b </span><span class="sc">%d</span><span class="st"> %Y'</span>)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    .sort(<span class="st">'short_date'</span>)</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    ggplot(stars.to_pandas(), aes(x<span class="op">=</span><span class="st">'short_date'</span>, y<span class="op">=</span><span class="st">'stars'</span>, color<span class="op">=</span><span class="st">'project'</span>)) <span class="op">+</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    geom_line(size<span class="op">=</span><span class="fl">1.5</span>) <span class="op">+</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>    labs(y<span class="op">=</span><span class="st">'Github stars'</span>, title<span class="op">=</span><span class="st">'Polars is surging in popularity'</span>, caption<span class="op">=</span><span class="st">"Data as of Mar 2024"</span>) <span class="op">+</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>    scale_x_datetime(name<span class="op">=</span><span class="st">'Date'</span>) <span class="op">+</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    theme(legend_title<span class="op">=</span>element_blank(), </span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>          text<span class="op">=</span>element_text(family<span class="op">=</span><span class="st">'Roboto Condensed'</span>, size<span class="op">=</span><span class="dv">15</span>),</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>         plot_title<span class="op">=</span>element_text(face<span class="op">=</span><span class="st">'bold'</span>, size<span class="op">=</span><span class="dv">18</span>)) <span class="op">+</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>    scale_y_continuous(breaks<span class="op">=</span>[<span class="dv">0</span>, <span class="dv">10_000</span>, <span class="dv">20_000</span>, <span class="dv">30_000</span>, <span class="dv">40_000</span>], <span class="bu">format</span><span class="op">=</span><span class="st">'0,'</span>, expand<span class="op">=</span>[<span class="fl">0.01</span>,<span class="fl">0.01</span>]) <span class="op">+</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>    scale_color_manual(values<span class="op">=</span>okabeito(<span class="dv">5</span>)) <span class="op">+</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>    ggsize(<span class="dv">700</span>,<span class="dv">380</span>)</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display" data-execution_count="1">
 <svg xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" class="plt-container" width="700.0" height="380.0">
@@ -313,112 +318,112 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 text {
    text-rendering: optimizeLegibility;
 }
-#pxQ2d3o .plot-title {
+#p2y1hBi .plot-title {
    fill: #474747;
    font-family: Roboto Condensed;
    font-size: 18.0px;
    font-weight: bold;
    font-style: normal;   
 }
-#pxQ2d3o .plot-subtitle {
+#p2y1hBi .plot-subtitle {
    fill: #474747;
    font-family: Roboto Condensed;
    font-size: 15.0px;
    font-weight: normal;
    font-style: normal;   
 }
-#pxQ2d3o .plot-caption {
+#p2y1hBi .plot-caption {
    fill: #474747;
    font-family: Roboto Condensed;
    font-size: 13.0px;
    font-weight: normal;
    font-style: normal;   
 }
-#pxQ2d3o .legend-title {
+#p2y1hBi .legend-title {
    fill: #474747;
    font-family: Roboto Condensed;
    font-size: 15.0px;
    font-weight: normal;
    font-style: normal;   
 }
-#pxQ2d3o .legend-item {
+#p2y1hBi .legend-item {
    fill: #474747;
    font-family: Roboto Condensed;
    font-size: 15.0px;
    font-weight: normal;
    font-style: normal;   
 }
-#pxQ2d3o .axis-title-x {
+#p2y1hBi .axis-title-x {
    fill: #474747;
    font-family: Roboto Condensed;
    font-size: 15.0px;
    font-weight: normal;
    font-style: normal;   
 }
-#pxQ2d3o .axis-text-x {
+#p2y1hBi .axis-text-x {
    fill: #474747;
    font-family: Roboto Condensed;
    font-size: 15.0px;
    font-weight: normal;
    font-style: normal;   
 }
-#dNeTjEx .axis-tooltip-text-x {
+#d9lpjvf .axis-tooltip-text-x {
    fill: #ffffff;
    font-family: Roboto Condensed;
    font-size: 15.0px;
    font-weight: normal;
    font-style: normal;   
 }
-#pxQ2d3o .axis-title-y {
+#p2y1hBi .axis-title-y {
    fill: #474747;
    font-family: Roboto Condensed;
    font-size: 15.0px;
    font-weight: normal;
    font-style: normal;   
 }
-#pxQ2d3o .axis-text-y {
+#p2y1hBi .axis-text-y {
    fill: #474747;
    font-family: Roboto Condensed;
    font-size: 15.0px;
    font-weight: normal;
    font-style: normal;   
 }
-#dNeTjEx .axis-tooltip-text-y {
+#d9lpjvf .axis-tooltip-text-y {
    fill: #ffffff;
    font-family: Roboto Condensed;
    font-size: 15.0px;
    font-weight: normal;
    font-style: normal;   
 }
-#pxQ2d3o .facet-strip-text-x {
+#p2y1hBi .facet-strip-text-x {
    fill: #474747;
    font-family: Roboto Condensed;
    font-size: 15.0px;
    font-weight: normal;
    font-style: normal;   
 }
-#pxQ2d3o .facet-strip-text-y {
+#p2y1hBi .facet-strip-text-y {
    fill: #474747;
    font-family: Roboto Condensed;
    font-size: 15.0px;
    font-weight: normal;
    font-style: normal;   
 }
-#dNeTjEx .tooltip-text {
+#d9lpjvf .tooltip-text {
    fill: #474747;
    font-family: Roboto Condensed;
    font-size: 15.0px;
    font-weight: normal;
    font-style: normal;   
 }
-#dNeTjEx .tooltip-title {
+#d9lpjvf .tooltip-title {
    fill: #474747;
    font-family: Roboto Condensed;
    font-size: 15.0px;
    font-weight: bold;
    font-style: normal;   
 }
-#dNeTjEx .tooltip-label {
+#d9lpjvf .tooltip-label {
    fill: #474747;
    font-family: Roboto Condensed;
    font-size: 15.0px;
@@ -427,18 +432,18 @@ text {
 }
 
   </style>
-  <g id="pxQ2d3o">
+  <g id="p2y1hBi">
     <path fill-rule="evenodd" fill="rgb(255,255,255)" fill-opacity="1.0" d="M0.0 0.0 L0.0 380.0 L700.0 380.0 L700.0 0.0 Z">
     </path>
     <g transform="translate(23.0 36.0 ) ">
       <g transform="translate(57.89598183079157 0.0 ) ">
-        <line x1="134.17439465465736" y1="296.0" x2="134.17439465465736" y2="0.0" stroke="rgb(233,233,233)" stroke-opacity="1.0" stroke-width="1.0" fill="none">
+        <line x1="133.14506680421528" y1="275.0" x2="133.14506680421528" y2="0.0" stroke="rgb(233,233,233)" stroke-opacity="1.0" stroke-width="1.0" fill="none">
         </line>
-        <line x1="267.53446032126294" y1="296.0" x2="267.53446032126294" y2="0.0" stroke="rgb(233,233,233)" stroke-opacity="1.0" stroke-width="1.0" fill="none">
+        <line x1="265.3237668800555" y1="275.0" x2="265.3237668800555" y2="0.0" stroke="rgb(233,233,233)" stroke-opacity="1.0" stroke-width="1.0" fill="none">
         </line>
       </g>
-      <g transform="translate(57.89598183079157 296.0 ) ">
-        <g transform="translate(0.8143289880520115 0.0 ) ">
+      <g transform="translate(57.89598183079157 275.0 ) ">
+        <g transform="translate(0.9663667283748509 0.0 ) ">
           <line stroke-width="1.0" stroke="rgb(71,71,71)" stroke-opacity="1.0" x2="0.0" y2="4.0">
           </line>
           <g transform="translate(0.0 7.0 ) ">
@@ -447,7 +452,7 @@ text {
             </text>
           </g>
         </g>
-        <g transform="translate(134.17439465465736 0.0 ) ">
+        <g transform="translate(133.14506680421528 0.0 ) ">
           <line stroke-width="1.0" stroke="rgb(71,71,71)" stroke-opacity="1.0" x2="0.0" y2="4.0">
           </line>
           <g transform="translate(0.0 7.0 ) ">
@@ -456,7 +461,7 @@ text {
             </text>
           </g>
         </g>
-        <g transform="translate(267.53446032126294 0.0 ) ">
+        <g transform="translate(265.3237668800555 0.0 ) ">
           <line stroke-width="1.0" stroke="rgb(71,71,71)" stroke-opacity="1.0" x2="0.0" y2="4.0">
           </line>
           <g transform="translate(0.0 7.0 ) ">
@@ -469,45 +474,45 @@ text {
         </line>
       </g>
       <g transform="translate(57.89598183079157 0.0 ) ">
-        <line x1="0.0" y1="222.67744544788405" x2="395.50096582933656" y2="222.67744544788405" stroke="rgb(233,233,233)" stroke-opacity="1.0" stroke-width="1.0" fill="none">
+        <line x1="0.0" y1="207.6838216806567" x2="395.5009658293368" y2="207.6838216806567" stroke="rgb(233,233,233)" stroke-opacity="1.0" stroke-width="1.0" fill="none">
         </line>
-        <line x1="0.0" y1="152.25692071981197" x2="395.50096582933656" y2="152.25692071981197" stroke="rgb(233,233,233)" stroke-opacity="1.0" stroke-width="1.0" fill="none">
+        <line x1="0.0" y1="143.063785145663" x2="395.5009658293368" y2="143.063785145663" stroke="rgb(233,233,233)" stroke-opacity="1.0" stroke-width="1.0" fill="none">
         </line>
-        <line x1="0.0" y1="81.83639599173986" x2="395.50096582933656" y2="81.83639599173986" stroke="rgb(233,233,233)" stroke-opacity="1.0" stroke-width="1.0" fill="none">
+        <line x1="0.0" y1="78.44374861066925" x2="395.5009658293368" y2="78.44374861066925" stroke="rgb(233,233,233)" stroke-opacity="1.0" stroke-width="1.0" fill="none">
         </line>
-        <line x1="0.0" y1="11.415871263667782" x2="395.50096582933656" y2="11.415871263667782" stroke="rgb(233,233,233)" stroke-opacity="1.0" stroke-width="1.0" fill="none">
+        <line x1="0.0" y1="13.82371207567553" x2="395.5009658293368" y2="13.82371207567553" stroke="rgb(233,233,233)" stroke-opacity="1.0" stroke-width="1.0" fill="none">
         </line>
       </g>
       <g transform="translate(57.89598183079157 0.0 ) ">
-        <g transform="translate(0.0 293.09797017595616 ) ">
+        <g transform="translate(0.0 272.30385821565045 ) ">
           <g transform="translate(-3.0 0.0 ) ">
             <text class="axis-text-y" text-anchor="end" dy="0.35em">
               <tspan>0</tspan>
             </text>
           </g>
         </g>
-        <g transform="translate(0.0 222.67744544788405 ) ">
+        <g transform="translate(0.0 207.6838216806567 ) ">
           <g transform="translate(-3.0 0.0 ) ">
             <text class="axis-text-y" text-anchor="end" dy="0.35em">
               <tspan>10,000</tspan>
             </text>
           </g>
         </g>
-        <g transform="translate(0.0 152.25692071981197 ) ">
+        <g transform="translate(0.0 143.063785145663 ) ">
           <g transform="translate(-3.0 0.0 ) ">
             <text class="axis-text-y" text-anchor="end" dy="0.35em">
               <tspan>20,000</tspan>
             </text>
           </g>
         </g>
-        <g transform="translate(0.0 81.83639599173986 ) ">
+        <g transform="translate(0.0 78.44374861066925 ) ">
           <g transform="translate(-3.0 0.0 ) ">
             <text class="axis-text-y" text-anchor="end" dy="0.35em">
               <tspan>30,000</tspan>
             </text>
           </g>
         </g>
-        <g transform="translate(0.0 11.415871263667782 ) ">
+        <g transform="translate(0.0 13.82371207567553 ) ">
           <g transform="translate(-3.0 0.0 ) ">
             <text class="axis-text-y" text-anchor="end" dy="0.35em">
               <tspan>40,000</tspan>
@@ -515,31 +520,31 @@ text {
           </g>
         </g>
       </g>
-      <g transform="translate(57.89598183079157 0.0 ) " clip-path="url(#cjsldY5)" clip-bounds-jfx="[rect (0.0, 0.0), (395.50096582933656, 296.0)]">
+      <g transform="translate(57.89598183079157 0.0 ) " clip-path="url(#cxFwaDt)" clip-bounds-jfx="[rect (0.0, 0.0), (395.50096582933656, 275.0)]">
         <defs>
-          <clippath id="cjsldY5">
-            <rect x="0.0" y="0.0" width="395.50096582933656" height="296.0">
+          <clippath id="cxFwaDt">
+            <rect x="0.0" y="0.0" width="395.50096582933656" height="275.0">
             </rect>
           </clippath>
         </defs>
         <g>
-          <path d="M17.97731662860633 293.09797017595616 L17.97731662860633 293.09797017595616 L117.8147809036609 274.7182132219293 L166.45541821689153 255.9159331195341 L192.23641667270294 237.11365301713886 L210.05671022289562 218.31137291474357 L224.59047422489698 199.50909281234834 L238.46693231726022 180.70681270995308 L252.48945838954273 161.90453260755783 L265.4164746124284 143.31351407934682 L278.48955881523375 124.51123397695156 L293.6075947369136 105.7089538745563 L308.4334946987542 86.90667377216104 L325.01221041963004 68.10439366976581 L340.49541629110877 49.302113567370554 L354.5179423633915 30.499833464975325 L369.63597828507136 11.697553362580038 L377.52364920073046 2.9020298240438365 " fill="none" stroke-width="3.3000000000000003" stroke="rgb(228,26,28)" stroke-opacity="1.0">
+          <path d="M17.97731662860633 272.30385821565045 L17.97731662860633 272.30385821565045 L165.21251704167275 238.18447892517375 L190.69274838159367 220.93092917033044 L208.4275684903455 203.6773794154871 L222.76019861905115 186.42382966064378 L236.58611960179223 169.17027990580044 L250.5568146262376 151.9167301509571 L263.3693173170502 134.85704050571877 L276.3265940495669 117.60349075087544 L291.3830943867929 100.34994099603213 L306.15004664061075 83.0963912411888 L322.6542873948779 65.84284148634546 L338.000335815512 48.58929173150213 L351.8262567982533 31.335741976658824 L367.1723052188877 14.08219222181549 L377.52364920073046 2.6961417843496065 " fill="none" stroke-width="3.3000000000000003" stroke="rgb(230,159,0)" stroke-opacity="1.0">
           </path>
         </g>
         <g>
-          <path d="M134.6125985944161 293.09797017595616 L134.6125985944161 293.09797017595616 L174.63522509238987 288.027692395535 L199.24767970884432 282.53489146674536 L218.23651709839396 276.8308289637715 L231.3096013011991 271.3380280349819 L242.7029037349289 265.8452271061923 L251.8321524799046 260.35242617740266 L261.83780910439805 254.859625248613 L275.12999527708257 249.15556274563917 L287.9109435200487 243.66276181684955 L299.5963819136175 238.16996088805993 L313.98407793569936 232.67715995927028 L324.7200744597908 227.18435903048066 L340.2763143212294 221.48029652750682 L357.95053989150256 215.9874955987172 L376.5011733412932 210.49469466992758 L377.52364920073046 210.13554999381444 " fill="none" stroke-width="3.3000000000000003" stroke="rgb(55,126,184)" stroke-opacity="1.0">
+          <path d="M133.57938892932748 272.30385821565045 L133.57938892932748 272.30385821565045 L198.72770769617114 262.4169926257964 L217.04162397173923 257.1827696664619 L229.7817396416997 252.1424068167324 L241.87037212399196 246.90818385739792 L250.70158866794168 241.8678210076684 L261.1253196706368 236.6335980483339 L273.7206612988932 231.5932351986044 L286.7503250522618 226.3590122392699 L298.76657051370194 221.31864938954038 L313.09920064240737 216.0844264302059 L324.17441483277094 211.0440635804764 L340.24433346192563 205.80984062114192 L357.76199250812124 200.76947777141237 L376.6550049505058 195.53525481207788 L377.52364920073046 195.22507863670992 " fill="none" stroke-width="3.3000000000000003" stroke="rgb(86,180,233)" stroke-opacity="1.0">
           </path>
         </g>
         <g>
-          <path d="M163.82619457833857 293.09797017595616 L163.82619457833857 293.09797017595616 L239.5624421666571 289.7177849890087 L248.47258894175343 285.91507665369284 L259.9389253654431 282.1123683183769 L265.85467855218735 278.0983984088768 L269.9445819899365 274.29569007356093 L275.7873011867209 270.492981738245 L278.48955881523375 266.6902734029291 L280.7536125039876 262.88756506761325 L286.5963317007722 259.08485673229734 L294.7031045863107 255.28214839698146 L303.4671833814873 251.47944006166554 L315.29868975497584 247.46547015216544 L334.72573108428423 243.66276181684955 L347.7988152870894 239.86005348153367 L375.55173147181563 236.05734514621776 L377.52364920073046 235.83199946708794 " fill="none" stroke-width="3.3000000000000003" stroke="rgb(77,175,74)" stroke-opacity="1.0">
+          <path d="M162.53419727014693 272.30385821565045 L162.53419727014693 272.30385821565045 L246.43075443767088 265.7126144890811 L257.7955167114426 262.2231325161914 L263.65886540045835 258.5397904336968 L267.71253856817316 255.05030846080712 L273.503500236337 251.56082648791747 L276.1818200078628 248.0713445150278 L278.4258176542762 244.58186254213814 L284.2891663432922 241.09238056924846 L292.2517386370175 237.6028985963588 L301.22772922267154 234.11341662346916 L312.9544266007033 230.43007454097452 L332.13698712649625 226.94059256808484 L345.0942638590129 223.4511105951952 L372.67371880364317 219.9616286223055 L377.52364920073046 219.57390840309557 " fill="none" stroke-width="3.3000000000000003" stroke="rgb(0,158,115)" stroke-opacity="1.0">
           </path>
         </g>
         <g>
-          <path d="M226.7814939236912 293.09797017595616 L226.7814939236912 293.09797017595616 L236.20287862850614 289.08400026645603 L244.6748214638435 284.85876878277173 L248.5456229317133 280.42227572490316 L257.96700763652825 275.98578266703464 L264.32096476303127 271.5492896091661 L266.8041204216647 267.32405812548177 L273.52324749796685 262.88756506761325 L284.5513799818975 258.4510720097447 L299.2312119638186 254.01457895187616 L311.64699025698565 249.7893474681918 L326.5459242087859 245.3528544103233 L335.09090103408334 240.91636135245474 L347.87184927704925 236.4798682945862 L360.14155959029654 232.25463681090187 L375.9899354115746 227.81814375303333 L377.52364920073046 227.44491497197453 " fill="none" stroke-width="3.3000000000000003" stroke="rgb(152,78,163)" stroke-opacity="1.0">
+          <path d="M224.93180924461262 272.30385821565045 L224.93180924461262 272.30385821565045 L242.95617743677258 264.5494538314512 L246.6479155002271 260.4783915297466 L256.49255033610575 256.407329228042 L262.1387379625653 252.33626692633737 L265.3961539009076 248.2652046246328 L272.63485598611237 244.19414232292817 L283.4929091139197 240.1230800212236 L297.3188300966608 236.05201771951897 L312.44771745473895 231.98095541781436 L325.18783312469964 227.90989311610974 L334.7429198771699 223.83883081440516 L346.6867783177579 219.76776851270054 L359.6440550502746 215.69670621099596 L376.6550049505058 211.62564390929134 L377.52364920073046 211.38008777045837 " fill="none" stroke-width="3.3000000000000003" stroke="rgb(240,228,66)" stroke-opacity="1.0">
           </path>
         </g>
         <g>
-          <path d="M280.242374574269 293.09797017595616 L280.242374574269 293.09797017595616 L303.6862853513667 282.1123683183769 L319.2425252128053 270.70424331242924 L326.76502617866527 259.29611830648156 L334.433595124445 247.88799330053388 L341.29879018066663 236.4798682945862 L346.26510149793353 225.07174328863852 L347.87184927704925 213.66361828269083 L349.69769902604435 202.46675485092737 L352.1808546846778 191.0586298449797 L355.24828226298973 179.650504839032 L359.99549161037703 168.24237983308433 L364.3044970180056 156.83425482713665 L369.416876315192 145.42612982118897 L374.3831876324589 134.01800481524128 L377.4506152107706 122.6098798092936 L377.52364920073046 122.34228181532694 " fill="none" stroke-width="3.3000000000000003" stroke="rgb(255,127,0)" stroke-opacity="1.0">
+          <path d="M277.91910850831187 272.30385821565045 L277.91910850831187 272.30385821565045 L317.1528738101222 250.78538604949753 L325.83931631236806 239.7353598020136 L332.2817611682003 228.87919366413468 L339.375689211701 217.82916741665073 L343.71891046282394 206.7791411691668 L345.6009730049773 195.92297503128785 L347.9173576722428 184.8729487838039 L350.5232904229165 174.016782645925 L354.93889869489135 162.96675639844105 L360.00599015453486 151.9167301509571 L364.27682438480565 141.06056401307816 L369.7058509487092 130.01053776559425 L372.81849284534724 119.1543716277153 L377.3788751590264 108.10434538023136 L377.52364920073046 107.7489351792889 " fill="none" stroke-width="3.3000000000000003" stroke="rgb(0,114,178)" stroke-opacity="1.0">
           </path>
         </g>
       </g>
@@ -549,17 +554,17 @@ text {
         <tspan>Polars is surging in popularity</tspan>
       </text>
     </g>
-    <g transform="translate(14.5 184.0 ) rotate(-90.0 ) ">
+    <g transform="translate(14.5 173.5 ) rotate(-90.0 ) ">
       <text class="axis-title-y" y="0.0" text-anchor="middle">
         <tspan>Github stars</tspan>
       </text>
     </g>
-    <g transform="translate(278.64646474545987 371.5 ) ">
+    <g transform="translate(278.64646474545987 350.5 ) ">
       <text class="axis-title-x" y="0.0" text-anchor="middle">
         <tspan>Date</tspan>
       </text>
     </g>
-    <g transform="translate(486.39694766012815 112.75 ) ">
+    <g transform="translate(486.39694766012815 102.25 ) ">
       <rect x="5.0" y="5.0" height="132.5" width="203.60305233987182" stroke="rgb(71,71,71)" stroke-opacity="1.0" stroke-width="0.0" fill="rgb(255,255,255)" fill-opacity="1.0">
       </rect>
       <g transform="translate(10.0 10.0 ) ">
@@ -570,7 +575,7 @@ text {
               </rect>
               <g transform="translate(1.0 1.0 ) ">
                 <g>
-                  <line x1="0.0" y1="10.5" x2="21.0" y2="10.5" stroke="rgb(228,26,28)" stroke-opacity="1.0" fill="rgb(255,255,255)" fill-opacity="1.0" stroke-width="1.6500000000000001">
+                  <line x1="0.0" y1="10.5" x2="21.0" y2="10.5" stroke="rgb(230,159,0)" stroke-opacity="1.0" fill="rgb(255,255,255)" fill-opacity="1.0" stroke-width="1.6500000000000001">
                   </line>
                 </g>
               </g>
@@ -589,7 +594,7 @@ text {
               </rect>
               <g transform="translate(1.0 1.0 ) ">
                 <g>
-                  <line x1="0.0" y1="10.5" x2="21.0" y2="10.5" stroke="rgb(55,126,184)" stroke-opacity="1.0" fill="rgb(255,255,255)" fill-opacity="1.0" stroke-width="1.6500000000000001">
+                  <line x1="0.0" y1="10.5" x2="21.0" y2="10.5" stroke="rgb(86,180,233)" stroke-opacity="1.0" fill="rgb(255,255,255)" fill-opacity="1.0" stroke-width="1.6500000000000001">
                   </line>
                 </g>
               </g>
@@ -608,7 +613,7 @@ text {
               </rect>
               <g transform="translate(1.0 1.0 ) ">
                 <g>
-                  <line x1="0.0" y1="10.5" x2="21.0" y2="10.5" stroke="rgb(77,175,74)" stroke-opacity="1.0" fill="rgb(255,255,255)" fill-opacity="1.0" stroke-width="1.6500000000000001">
+                  <line x1="0.0" y1="10.5" x2="21.0" y2="10.5" stroke="rgb(0,158,115)" stroke-opacity="1.0" fill="rgb(255,255,255)" fill-opacity="1.0" stroke-width="1.6500000000000001">
                   </line>
                 </g>
               </g>
@@ -627,7 +632,7 @@ text {
               </rect>
               <g transform="translate(1.0 1.0 ) ">
                 <g>
-                  <line x1="0.0" y1="10.5" x2="21.0" y2="10.5" stroke="rgb(152,78,163)" stroke-opacity="1.0" fill="rgb(255,255,255)" fill-opacity="1.0" stroke-width="1.6500000000000001">
+                  <line x1="0.0" y1="10.5" x2="21.0" y2="10.5" stroke="rgb(240,228,66)" stroke-opacity="1.0" fill="rgb(255,255,255)" fill-opacity="1.0" stroke-width="1.6500000000000001">
                   </line>
                 </g>
               </g>
@@ -646,7 +651,7 @@ text {
               </rect>
               <g transform="translate(1.0 1.0 ) ">
                 <g>
-                  <line x1="0.0" y1="10.5" x2="21.0" y2="10.5" stroke="rgb(255,127,0)" stroke-opacity="1.0" fill="rgb(255,255,255)" fill-opacity="1.0" stroke-width="1.6500000000000001">
+                  <line x1="0.0" y1="10.5" x2="21.0" y2="10.5" stroke="rgb(0,114,178)" stroke-opacity="1.0" fill="rgb(255,255,255)" fill-opacity="1.0" stroke-width="1.6500000000000001">
                   </line>
                 </g>
               </g>
@@ -662,10 +667,15 @@ text {
         </g>
       </g>
     </g>
+    <g transform="translate(476.39694766012815 372.1 ) ">
+      <text class="plot-caption" y="0.0" text-anchor="end">
+        <tspan>Data as of Mar 2024</tspan>
+      </text>
+    </g>
     <path fill="rgb(0,0,0)" fill-opacity="0.0" stroke="rgb(71,71,71)" stroke-opacity="1.0" stroke-width="0.0" d="M0.0 0.0 L0.0 380.0 L700.0 380.0 L700.0 0.0 Z">
     </path>
   </g>
-  <g id="dNeTjEx">
+  <g id="d9lpjvf">
   </g>
 </svg>
 </div>

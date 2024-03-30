@@ -14,13 +14,17 @@ The majority of this book contains structured examples of data wrangling tasks t
 #| code-fold: true
 import polars as pl
 from lets_plot import *
-LetsPlot.setup_html(isolated_frame=False, offline=True, no_js=True, show_status=False)
+LetsPlot.setup_html(no_js=True)
+
+def okabeito(n):
+    pal = ["#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999", "#000000"]
+    return pal[0:n]
 
 stars = (
-    pl.read_csv('./data/star-history-2024215.csv', has_header=False)
-    .rename({'column_1': 'project', 'column_2': 'date', 'column_3': 'stars'})
+    pl.read_csv('./data/star-history-2024330.csv', has_header=True)
+    .rename({'Repository': 'project', 'Date': 'date', 'Stars': 'stars'})
     .with_columns(
-        pl.col('date').str.slice(0, 15).str.to_date('%a %b %d %Y').alias('short_date')
+        short_date=pl.col('date').str.slice(0, 15).str.to_date('%a %b %d %Y')
     )
     .sort('short_date')
 )
@@ -28,12 +32,13 @@ stars = (
 (
     ggplot(stars.to_pandas(), aes(x='short_date', y='stars', color='project')) +
     geom_line(size=1.5) +
-    labs(y='Github stars', title='Polars is surging in popularity') +
+    labs(y='Github stars', title='Polars is surging in popularity', caption="Data as of Mar 2024") +
     scale_x_datetime(name='Date') +
     theme(legend_title=element_blank(), 
           text=element_text(family='Roboto Condensed', size=15),
          plot_title=element_text(face='bold', size=18)) +
     scale_y_continuous(breaks=[0, 10_000, 20_000, 30_000, 40_000], format='0,', expand=[0.01,0.01]) +
+    scale_color_manual(values=okabeito(5)) +
     ggsize(700,380)
 )
 ```
