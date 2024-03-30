@@ -63,7 +63,7 @@ import polars as pl
 purchases_pl = pl.read_csv("./data/purchases.csv")
 pl.Config.set_tbl_formatting('NOTHING')
 pl.Config.set_tbl_hide_column_data_types(True)
-print(purchases_pl.head())
+purchases_pl.head()
 ```
 
 :::
@@ -172,9 +172,9 @@ purchases |>
 
 ```{python}
 # Polars
-print(purchases_pl
+(purchases_pl
   .group_by('country')
-  .agg(pl.col('amount').sum().alias('total'))
+  .agg(total=pl.col('amount').sum())
   .sort('country')
 )
 ```
@@ -236,10 +236,10 @@ purchases |>
 
 ```{python}
 # Polars
-print(purchases_pl
+(purchases_pl
   .group_by('country')
   .agg(
-    (pl.col('amount') - pl.col('discount')).sum().alias('total')
+    total=(pl.col('amount') - pl.col('discount')).sum()
   )
   .sort('country')
 )
@@ -301,13 +301,13 @@ purchases |>
 
 ```{python}
 # Polars
-print(purchases_pl
+(purchases_pl
   .filter(
     pl.col('amount') <= (pl.col('amount').median() * 10)
   )
   .group_by('country')
   .agg(
-    (pl.col('amount') - pl.col('discount')).sum().alias('total')
+    total=(pl.col('amount') - pl.col('discount')).sum()
   )
   .sort('country')
 )
@@ -372,13 +372,13 @@ purchases |>
 
 ```{python}
 # Polars
-print(purchases_pl
+(purchases_pl
   .filter(
     pl.col('amount') <= (pl.col('amount').median().over('country') * 10)
   )
   .group_by('country')
   .agg(
-    (pl.col('amount') - pl.col('discount')).sum().alias('total')
+    total=(pl.col('amount') - pl.col('discount')).sum()
   )
   .sort('country')
 )
