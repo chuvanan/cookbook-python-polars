@@ -1,7 +1,7 @@
 
 # Reading and writing data with Polars
 
-An overview of Polars I/O capabilities (at version `0.20.9`):
+An overview of Polars I/O capabilities:
 
 
 | Format                                                           	| Implementation         	| Read 	| Write 	| Scan            	|
@@ -14,7 +14,7 @@ An overview of Polars I/O capabilities (at version `0.20.9`):
 | Cloud storage (AWS S3, Azure blob storage, Google cloud storage) 	| native                 	| x    	| x     	| x               	|
 
 
-A note regarding `implementation`: A Polars function or method that is entirely written in Rust is referred to as 'native'. Though this definition may not be stricly accurate, it is acceptable
+A note regarding `implementation`: A Polars function or method that is entirely written in Rust is referred to as 'native'. Though this definition may not be strictly accurate, it is acceptable
 to use it for distinguishing purpose, particularly in contrast to invoking functions/methods from external packages.
 
 A note about `scan`: Similar to the concept of [lazy reading](https://www.tidyverse.org/blog/2021/11/readr-2-1-0-lazy/) in the `readr` package, Polars allows you to `scan` an input file, which defers the actual parsing of the file and provides a `LazyFrame`, a lazy computation holder. This feature offers notable performance benefits:
@@ -35,7 +35,7 @@ pl.Config.set_tbl_cols(10)
 
 ### Delimited file (CSV, TSV)
 
-For a complete list of parameter options to use with Polars CSV readers, see this [page](https://docs.pola.rs/py-polars/html/reference/api/polars.read_csv.html). These parameters
+For a complete list of parameter options to use with Polars CSV readers, see this [page](https://docs.pola.rs/api/python/stable/reference/api/polars.read_csv.html). These parameters
 provides the same functionality as readr's arguments but with slightly different names. Here's an example:
 
 ```{python}
@@ -67,7 +67,7 @@ flights_202212 = pl.read_csv(
     infer_schema_length=1000,       # maximum number of lines to read to infer schema, default=100
     n_rows=10,                      # maximum number of lines to read
     try_parse_dates=True, #<<
-    dtypes={'Year':pl.Int32, 'Quarter':pl.Int32, 'Month': pl.Int32, 'Reporting_Airline': pl.Categorical} #<<
+    schema_overrides={'Year':pl.Int32, 'Quarter':pl.Int32, 'Month': pl.Int32, 'Reporting_Airline': pl.Categorical} #<<
 )
 
 flights_202212.head(3)
@@ -94,8 +94,8 @@ for p in Path.cwd().rglob('data/On_Time*.csv'):
 To read multiple files into a single DataFrame, we can use globbing patterns:
 
 ```{python}
-#| eval: false
-%%time
+#| eval: true
+#| cache: true
 no_flights_each_month = (
     pl.scan_csv('./data/On_Time*.csv')
     .group_by(['Year', 'Month'])
@@ -114,7 +114,8 @@ If your files don't have to be in a single table you can also build a query plan
 All query plan execution is embarrassingly parallel and doesn't require any communication.
 
 ```{python}
-#| eval: false
+#| eval: true
+#| cache: true
 queries = []
 for p in Path.cwd().rglob('data/On_Time*.csv'):
     q = (
@@ -126,8 +127,10 @@ for p in Path.cwd().rglob('data/On_Time*.csv'):
     )
     queries.append(q)
 
-dfs = pl.collect_all(queries)
-dfs[:3]
+dfs = pl.concat(
+    pl.collect_all(queries) # this returns a dict of result DataFrame
+)
+dfs
 ```
 
 ### Reading spreadsheets

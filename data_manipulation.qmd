@@ -288,7 +288,7 @@ This is where selectors go beyond what bare `pl.col()` can express. Selectors su
 
 | operator | meaning                                        | dplyr equivalent          |
 |----------|------------------------------------------------|---------------------------|
-| `\|`     | union — columns matching either selector       | `c(starts_with(), ...)`   |
+| `|`      | union — columns matching either selector       | `c(starts_with(), ...)`   |
 | `&`      | intersection — columns matching both selectors | `where(\(x) ... & ...)`   |
 | `-`      | difference — left selector minus right         | not available             |
 | `~`      | complement — all columns not matching          | `!selector`               |
@@ -332,13 +332,120 @@ A full comparison between dplyr and Polars selection features:
 | range of consecutive columns            | `col1:col10`                      | not available      |
 | any of a list, ignoring missing names   | `any_of()`                        | not available      |
 
-### Modify/Add column
 
+**Note**: All available selector functions can be found [here](https://docs.pola.rs/api/python/stable/reference/selectors.html#functions)
 
-### Rename column
+### Modifying, renaming, and removing columns
 
+#### Adding and modifying columns
 
-### Remove column
+`with_columns()` is the Polars equivalent of dplyr's `mutate()`. It adds new columns or overwrites existing ones and returns a new DataFrame:
+
+```r
+# dplyr
+full_flights |>
+    mutate(
+        DepDelay_hrs = DepDelay / 60,
+        IsDelayed    = DepDelay > 0
+    )
+```
+
+```{python}
+(
+    full_flights
+    .with_columns(
+        DepDelay_hrs = pl.col('DepDelay') / 60,
+        IsDelayed    = pl.col('DepDelay') > 0
+    )
+    .select(['FlightDate', 'DepDelay', 'DepDelay_hrs', 'IsDelayed'])
+    .head(3)
+)
+```
+
+Overwriting an existing column uses the same syntax — assigning to a name that already exists replaces it:
+
+```{python}
+# overwrite DepDelay from Float64 to Int32
+full_flights.with_columns(
+    pl.col('DepDelay').cast(pl.Int32)
+)['DepDelay'].dtype
+```
+
+#### Parallel execution
+
+A key difference from dplyr is that all expressions inside a single `with_columns()` call are **evaluated in parallel** against the original DataFrame. This means you cannot reference a column created earlier in the same call:
+
+```r
+# dplyr: works — mutate() evaluates expressions sequentially
+full_flights |>
+    mutate(
+        DepDelay_hrs = DepDelay / 60,
+        IsLongDelay  = DepDelay_hrs > 2   # references the column just created above
+    )
+```
+
+```python
+# Polars: fails — DepDelay_hrs does not exist in the original DataFrame yet
+full_flights.with_columns(
+    DepDelay_hrs = pl.col('DepDelay') / 60,
+    IsLongDelay  = pl.col('DepDelay_hrs') > 2   # ColumnNotFoundError
+)
+```
+
+The fix is to split into two chained `with_columns()` calls:
+
+```{python}
+(
+    full_flights
+    .with_columns(DepDelay_hrs = pl.col('DepDelay') / 60)
+    .with_columns(IsLongDelay  = pl.col('DepDelay_hrs') > 2)
+    .select(['FlightDate', 'DepDelay', 'DepDelay_hrs', 'IsLongDelay'])
+    .head(3)
+)
+```
+
+The parallel evaluation is intentional — it allows Polars to optimise multi-column mutations, which is a meaningful performance advantage for wide DataFrames.
+
+#### Renaming columns
+
+`.rename()` takes a dictionary mapping old names to new names:
+
+```r
+# dplyr — note the order: new_name = old_name
+full_flights |> rename(departure_delay = DepDelay, arrival_delay = ArrDelay)
+```
+
+```{python}
+# Polars dict order is the reverse: old_name -> new_name
+(
+    full_flights
+    .rename({'DepDelay': 'departure_delay', 'ArrDelay': 'arrival_delay'})
+    .select(['FlightDate', 'departure_delay', 'arrival_delay'])
+    .head(3)
+)
+```
+
+Note the reversed convention: dplyr uses `new_name = old_name`, while Polars maps `old_name → new_name`.
+
+#### Removing columns
+
+`.drop()` removes one or more columns by name:
+
+```r
+# dplyr
+full_flights |> select(-Year, -Quarter)
+```
+
+```{python}
+full_flights.drop(['Year', 'Quarter']).head(3)
+```
+
+To remove columns by type or name pattern, use `.select()` with a selector complement instead:
+
+```{python}
+# remove all string columns
+full_flights.select(~cs.string()).head(3)
+```
 
 
 ### Aggregation by group

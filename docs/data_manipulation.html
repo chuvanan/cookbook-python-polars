@@ -406,11 +406,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul class="collapse">
   <li><a href="#filtering-rows" id="toc-filtering-rows" class="nav-link" data-scroll-target="#filtering-rows"><span class="header-section-number">2.3.1</span> Filtering rows</a></li>
   <li><a href="#selecting-columns" id="toc-selecting-columns" class="nav-link" data-scroll-target="#selecting-columns"><span class="header-section-number">2.3.2</span> Selecting columns</a></li>
-  <li><a href="#modifyadd-column" id="toc-modifyadd-column" class="nav-link" data-scroll-target="#modifyadd-column"><span class="header-section-number">2.3.3</span> Modify/Add column</a></li>
-  <li><a href="#rename-column" id="toc-rename-column" class="nav-link" data-scroll-target="#rename-column"><span class="header-section-number">2.3.4</span> Rename column</a></li>
-  <li><a href="#remove-column" id="toc-remove-column" class="nav-link" data-scroll-target="#remove-column"><span class="header-section-number">2.3.5</span> Remove column</a></li>
-  <li><a href="#aggregation-by-group" id="toc-aggregation-by-group" class="nav-link" data-scroll-target="#aggregation-by-group"><span class="header-section-number">2.3.6</span> Aggregation by group</a></li>
-  <li><a href="#sort-a-dataframe" id="toc-sort-a-dataframe" class="nav-link" data-scroll-target="#sort-a-dataframe"><span class="header-section-number">2.3.7</span> Sort a DataFrame</a></li>
+  <li><a href="#modifying-renaming-and-removing-columns" id="toc-modifying-renaming-and-removing-columns" class="nav-link" data-scroll-target="#modifying-renaming-and-removing-columns"><span class="header-section-number">2.3.3</span> Modifying, renaming, and removing columns</a></li>
+  <li><a href="#aggregation-by-group" id="toc-aggregation-by-group" class="nav-link" data-scroll-target="#aggregation-by-group"><span class="header-section-number">2.3.4</span> Aggregation by group</a></li>
+  <li><a href="#sort-a-dataframe" id="toc-sort-a-dataframe" class="nav-link" data-scroll-target="#sort-a-dataframe"><span class="header-section-number">2.3.5</span> Sort a DataFrame</a></li>
   </ul></li>
   <li><a href="#two-tables-operation" id="toc-two-tables-operation" class="nav-link" data-scroll-target="#two-tables-operation"><span class="header-section-number">2.4</span> Two tables operation</a>
   <ul class="collapse">
@@ -449,14 +447,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 <p>To showcase the robust syntax and efficiency of the polars package, we will leverage a moderately-sized dataset, comprising approximately 530,000 rows.</p>
-<div id="56c14987" class="cell" data-execution_count="2">
+<div id="b47d0f84" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>full_flights <span class="op">=</span> pl.read_csv(<span class="st">'./data/On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2022_1.csv'</span>)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>full_flights.shape</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="2">
 <pre data-code-line-numbers=""><code>(537902, 110)</code></pre>
 </div>
 </div>
-<div id="593ad1c8" class="cell" data-execution_count="3">
+<div id="265d54b4" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>full_flights.estimated_size(<span class="st">'mb'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="3">
 <pre data-code-line-numbers=""><code>240.02948379516602</code></pre>
@@ -483,14 +481,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>Polars has a much richer type system — granular numeric types (<code>Int8</code> through <code>Int64</code>, <code>UInt8</code> through <code>UInt64</code>, <code>Float32</code>, <code>Float64</code>), dedicated temporal types, nested types, and more:</p>
 <p><img src="Polars-data-types.png" class="img-fluid"></p>
 <p>Polars <strong>never coerces silently</strong>. Every type change must be declared explicitly with <code>.cast()</code>. You can inspect the current type of a column before acting on it:</p>
-<div id="e1935ddb" class="cell" data-execution_count="4">
+<div id="abce7600" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>full_flights[<span class="st">'Year'</span>].dtype</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="4">
 <pre data-code-line-numbers=""><code>Int64</code></pre>
 </div>
 </div>
 <p>To convert the <code>Year</code> column from integer to string:</p>
-<div id="ee8ae944" class="cell" data-execution_count="5">
+<div id="37e53d4a" class="cell" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>full_flights <span class="op">=</span> full_flights.with_columns(</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    pl.col(<span class="st">'Year'</span>).cast(pl.String)</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>)</span>
@@ -524,7 +522,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(OriginStateName <span class="sc">==</span> <span class="st">'Ohio'</span>) <span class="sc">|&gt;</span></span>
 <span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(FlightDate, Origin, Dest)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Python/Polars follows a <strong>method chaining</strong> style: the data object comes first, and methods are applied sequentially via the dot operator:</p>
-<div id="ea87f962" class="cell" data-execution_count="6">
+<div id="83c389cf" class="cell" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    full_flights</span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(pl.col(<span class="st">'OriginStateName'</span>) <span class="op">==</span> <span class="st">'Ohio'</span>)</span>
@@ -545,7 +543,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </ul>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13" data-code-line-numbers=""><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># dplyr</span></span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>flights_from_ohio <span class="ot">&lt;-</span> full_flights <span class="sc">|&gt;</span> <span class="fu">filter</span>(OriginStateName <span class="sc">==</span> <span class="st">"Ohio"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div id="0a21ba9d" class="cell" data-execution_count="7">
+<div id="e7902176" class="cell" data-execution_count="7">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>flights_from_ohio <span class="op">=</span> full_flights.<span class="bu">filter</span>(pl.col(<span class="st">'OriginStateName'</span>) <span class="op">==</span> <span class="st">'Ohio'</span>)</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>flights_from_ohio.shape</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="6">
@@ -558,7 +556,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16" data-code-line-numbers=""><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># dplyr — comma-separated predicates are implicitly AND-ed</span></span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>flights_from_ohio_to_virginia <span class="ot">&lt;-</span> full_flights <span class="sc">|&gt;</span></span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(OriginStateName <span class="sc">==</span> <span class="st">"Ohio"</span>, DestStateName <span class="sc">==</span> <span class="st">"Virginia"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div id="ec43cd13" class="cell" data-execution_count="8">
+<div id="fb6e6949" class="cell" data-execution_count="8">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># note that each predicate must be enclosed within parentheses when using &amp;</span></span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>flights_from_ohio_to_virginia <span class="op">=</span> full_flights.<span class="bu">filter</span>(</span>
 <span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    (pl.col(<span class="st">'OriginStateName'</span>) <span class="op">==</span> <span class="st">'Ohio'</span>) <span class="op">&amp;</span> (pl.col(<span class="st">'DestStateName'</span>) <span class="op">==</span> <span class="st">'Virginia'</span>)</span>
@@ -581,7 +579,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19" data-code-line-numbers=""><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># dplyr</span></span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>flights_from_ohio_except_virginia <span class="ot">&lt;-</span> full_flights <span class="sc">|&gt;</span></span>
 <span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(OriginStateName <span class="sc">==</span> <span class="st">"Ohio"</span>, DestStateName <span class="sc">!=</span> <span class="st">"Virginia"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div id="72ebb8e9" class="cell" data-execution_count="9">
+<div id="013b809a" class="cell" data-execution_count="9">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>flights_from_ohio_except_virginia <span class="op">=</span> full_flights.<span class="bu">filter</span>(</span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    pl.col(<span class="st">'OriginStateName'</span>) <span class="op">==</span> <span class="st">'Ohio'</span>,</span>
 <span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    <span class="op">~</span>(pl.col(<span class="st">'DestStateName'</span>) <span class="op">==</span> <span class="st">'Virginia'</span>)</span>
@@ -597,7 +595,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22" data-code-line-numbers=""><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co"># dplyr</span></span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>major_hubs <span class="ot">&lt;-</span> full_flights <span class="sc">|&gt;</span></span>
 <span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(OriginStateName <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"California"</span>, <span class="st">"Texas"</span>, <span class="st">"New York"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div id="6bf6e540" class="cell" data-execution_count="10">
+<div id="8812b288" class="cell" data-execution_count="10">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>major_hubs <span class="op">=</span> full_flights.<span class="bu">filter</span>(</span>
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>    pl.col(<span class="st">'OriginStateName'</span>).is_in([<span class="st">'California'</span>, <span class="st">'Texas'</span>, <span class="st">'New York'</span>])</span>
 <span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>)</span>
@@ -609,7 +607,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ul>
 <li>Why prefer <code>.filter()</code> over boolean indexing? The key reason is that <code>.filter()</code> integrates with Polars’ lazy execution engine, which pushes the predicate down to the scan and avoids loading unnecessary rows into memory:</li>
 </ul>
-<div id="55d41ee1" class="cell" data-execution_count="11">
+<div id="139ab4ca" class="cell" data-execution_count="11">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> time</span>
 <span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>start <span class="op">=</span> time.perf_counter()</span>
@@ -627,8 +625,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb25-16"><a href="#cb25-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"eager: </span><span class="sc">{</span>time<span class="sc">.</span>perf_counter() <span class="op">-</span> start<span class="sc">:.3f}</span><span class="ss">s"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre data-code-line-numbers=""><code>lazy:  0.564s
-eager: 0.532s</code></pre>
+<pre data-code-line-numbers=""><code>lazy:  0.637s
+eager: 0.555s</code></pre>
 </div>
 </div>
 </section>
@@ -645,7 +643,7 @@ eager: 0.532s</code></pre>
 <h4 data-number="2.3.2.1" class="anchored" data-anchor-id="selecting-by-name"><span class="header-section-number">2.3.2.1</span> Selecting by name</h4>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27" data-code-line-numbers=""><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co"># dplyr</span></span>
 <span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>full_flights <span class="sc">|&gt;</span> <span class="fu">select</span>(FlightDate, Tail_Number)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div id="0c281e42" class="cell" data-execution_count="12">
+<div id="cd9f433d" class="cell" data-execution_count="12">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>full_flights.select([<span class="st">'FlightDate'</span>, <span class="st">'Tail_Number'</span>]).head(<span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="11">
 <div><style>
@@ -692,7 +690,7 @@ eager: 0.532s</code></pre>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29" data-code-line-numbers=""><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co"># dplyr</span></span>
 <span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>full_flights <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="fu">where</span>(is.double))</span>
 <span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>full_flights <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="fu">where</span>(is.integer))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div id="ddf5a260" class="cell" data-execution_count="13">
+<div id="b9adae90" class="cell" data-execution_count="13">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>full_flights.select(pl.col(pl.Float64)).head(<span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="12">
 <div><style>
@@ -832,7 +830,7 @@ eager: 0.532s</code></pre>
 </div>
 </div>
 </div>
-<div id="3f0fc7e0" class="cell" data-execution_count="14">
+<div id="e571bed7" class="cell" data-execution_count="14">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>full_flights.select(pl.col(pl.Int64)).head(<span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="13">
 <div><style>
@@ -976,14 +974,14 @@ eager: 0.532s</code></pre>
 <section id="selecting-with-selectors" class="level4" data-number="2.3.2.3">
 <h4 data-number="2.3.2.3" class="anchored" data-anchor-id="selecting-with-selectors"><span class="header-section-number">2.3.2.3</span> Selecting with Selectors</h4>
 <p><code>polars.selectors</code> provides a declarative selection API that closely mirrors dplyr’s <a href="https://dplyr.tidyverse.org/reference/select.html">selection helpers</a>. Import it as <code>cs</code> by convention:</p>
-<div id="09b1298d" class="cell" data-execution_count="15">
+<div id="0cbc6c1c" class="cell" data-execution_count="15">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars.selectors <span class="im">as</span> cs</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p><strong>Select by data type:</strong></p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb33" data-code-line-numbers=""><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="co"># dplyr</span></span>
 <span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>full_flights <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="fu">where</span>(is.numeric))</span>
 <span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>full_flights <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="fu">where</span>(is.character))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div id="ebe2c224" class="cell" data-execution_count="16">
+<div id="4a4c15a3" class="cell" data-execution_count="16">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>full_flights.select(cs.numeric()).head(<span class="dv">3</span>)  <span class="co"># all Int*, UInt*, Float* columns</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="15">
 <div><style>
@@ -1233,7 +1231,7 @@ eager: 0.532s</code></pre>
 </div>
 </div>
 </div>
-<div id="e0c0114c" class="cell" data-execution_count="17">
+<div id="a6da2cc5" class="cell" data-execution_count="17">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>full_flights.select(cs.string()).head(<span class="dv">3</span>)   <span class="co"># all String columns</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="16">
 <div><style>
@@ -1597,7 +1595,7 @@ eager: 0.532s</code></pre>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb36" data-code-line-numbers=""><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="co"># dplyr</span></span>
 <span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>full_flights <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="fu">starts_with</span>(<span class="st">"Flight"</span>))</span>
 <span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>full_flights <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="fu">ends_with</span>(<span class="st">"Delay"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div id="9adaa04a" class="cell" data-execution_count="18">
+<div id="ff99f858" class="cell" data-execution_count="18">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>full_flights.select(cs.starts_with(<span class="st">'Flight'</span>)).head(<span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="17">
 <div><style>
@@ -1642,7 +1640,7 @@ eager: 0.532s</code></pre>
 </div>
 </div>
 </div>
-<div id="0cb11037" class="cell" data-execution_count="19">
+<div id="0a73a6cf" class="cell" data-execution_count="19">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>full_flights.select(cs.ends_with(<span class="st">'Delay'</span>)).head(<span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="18">
 <div><style>
@@ -1729,7 +1727,7 @@ eager: 0.532s</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>\|</code></td>
+<td><code>|</code></td>
 <td>union — columns matching either selector</td>
 <td><code>c(starts_with(), ...)</code></td>
 </tr>
@@ -1750,7 +1748,7 @@ eager: 0.532s</code></pre>
 </tr>
 </tbody>
 </table>
-<div id="0a809110" class="cell" data-execution_count="20">
+<div id="76165a40" class="cell" data-execution_count="20">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="co"># union: columns starting with "Flight" OR ending with "Delay"</span></span>
 <span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>full_flights.select(cs.starts_with(<span class="st">'Flight'</span>) <span class="op">|</span> cs.ends_with(<span class="st">'Delay'</span>)).head(<span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="19">
@@ -1836,7 +1834,7 @@ eager: 0.532s</code></pre>
 </div>
 </div>
 </div>
-<div id="e2bf87cd" class="cell" data-execution_count="21">
+<div id="a3f68fcd" class="cell" data-execution_count="21">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="co"># difference: numeric columns excluding Int64 (i.e. Float columns only)</span></span>
 <span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>full_flights.select(cs.numeric() <span class="op">-</span> cs.integer()).head(<span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="20">
@@ -1977,7 +1975,7 @@ eager: 0.532s</code></pre>
 </div>
 </div>
 </div>
-<div id="1528f84e" class="cell" data-execution_count="22">
+<div id="26daa7e0" class="cell" data-execution_count="22">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="co"># complement: everything except string columns</span></span>
 <span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>full_flights.select(<span class="op">~</span>cs.string()).head(<span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="21">
@@ -2340,22 +2338,889 @@ eager: 0.532s</code></pre>
 </tr>
 </tbody>
 </table>
+<p><strong>Note</strong>: All available selector functions can be found <a href="https://docs.pola.rs/api/python/stable/reference/selectors.html#functions">here</a></p>
 </section>
 </section>
-<section id="modifyadd-column" class="level3" data-number="2.3.3">
-<h3 data-number="2.3.3" class="anchored" data-anchor-id="modifyadd-column"><span class="header-section-number">2.3.3</span> Modify/Add column</h3>
+<section id="modifying-renaming-and-removing-columns" class="level3" data-number="2.3.3">
+<h3 data-number="2.3.3" class="anchored" data-anchor-id="modifying-renaming-and-removing-columns"><span class="header-section-number">2.3.3</span> Modifying, renaming, and removing columns</h3>
+<section id="adding-and-modifying-columns" class="level4" data-number="2.3.3.1">
+<h4 data-number="2.3.3.1" class="anchored" data-anchor-id="adding-and-modifying-columns"><span class="header-section-number">2.3.3.1</span> Adding and modifying columns</h4>
+<p><code>with_columns()</code> is the Polars equivalent of dplyr’s <code>mutate()</code>. It adds new columns or overwrites existing ones and returns a new DataFrame:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb42" data-code-line-numbers=""><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="co"># dplyr</span></span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>full_flights <span class="sc">|&gt;</span></span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(</span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>        <span class="at">DepDelay_hrs =</span> DepDelay <span class="sc">/</span> <span class="dv">60</span>,</span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>        <span class="at">IsDelayed    =</span> DepDelay <span class="sc">&gt;</span> <span class="dv">0</span></span>
+<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="5b04e6d5" class="cell" data-execution_count="23">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb43" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>    full_flights</span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>        DepDelay_hrs <span class="op">=</span> pl.col(<span class="st">'DepDelay'</span>) <span class="op">/</span> <span class="dv">60</span>,</span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>        IsDelayed    <span class="op">=</span> pl.col(<span class="st">'DepDelay'</span>) <span class="op">&gt;</span> <span class="dv">0</span></span>
+<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a>    .select([<span class="st">'FlightDate'</span>, <span class="st">'DepDelay'</span>, <span class="st">'DepDelay_hrs'</span>, <span class="st">'IsDelayed'</span>])</span>
+<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">3</span>)</span>
+<span id="cb43-9"><a href="#cb43-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="22">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (3, 4)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">FlightDate</th>
+<th data-quarto-table-cell-role="th">DepDelay</th>
+<th data-quarto-table-cell-role="th">DepDelay_hrs</th>
+<th data-quarto-table-cell-role="th">IsDelayed</th>
+</tr>
+<tr class="even">
+<td>str</td>
+<td>f64</td>
+<td>f64</td>
+<td>bool</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"2022-01-14"</td>
+<td>-3.0</td>
+<td>-0.05</td>
+<td>false</td>
+</tr>
+<tr class="even">
+<td>"2022-01-15"</td>
+<td>-10.0</td>
+<td>-0.166667</td>
+<td>false</td>
+</tr>
+<tr class="odd">
+<td>"2022-01-16"</td>
+<td>-6.0</td>
+<td>-0.1</td>
+<td>false</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>Overwriting an existing column uses the same syntax — assigning to a name that already exists replaces it:</p>
+<div id="8e07eac9" class="cell" data-execution_count="24">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb44" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="co"># overwrite DepDelay from Float64 to Int32</span></span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>full_flights.with_columns(</span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>    pl.col(<span class="st">'DepDelay'</span>).cast(pl.Int32)</span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>)[<span class="st">'DepDelay'</span>].dtype</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="23">
+<pre data-code-line-numbers=""><code>Int32</code></pre>
+</div>
+</div>
 </section>
-<section id="rename-column" class="level3" data-number="2.3.4">
-<h3 data-number="2.3.4" class="anchored" data-anchor-id="rename-column"><span class="header-section-number">2.3.4</span> Rename column</h3>
+<section id="parallel-execution" class="level4" data-number="2.3.3.2">
+<h4 data-number="2.3.3.2" class="anchored" data-anchor-id="parallel-execution"><span class="header-section-number">2.3.3.2</span> Parallel execution</h4>
+<p>A key difference from dplyr is that all expressions inside a single <code>with_columns()</code> call are <strong>evaluated in parallel</strong> against the original DataFrame. This means you cannot reference a column created earlier in the same call:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb46" data-code-line-numbers=""><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="co"># dplyr: works — mutate() evaluates expressions sequentially</span></span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>full_flights <span class="sc">|&gt;</span></span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(</span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a>        <span class="at">DepDelay_hrs =</span> DepDelay <span class="sc">/</span> <span class="dv">60</span>,</span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a>        <span class="at">IsLongDelay  =</span> DepDelay_hrs <span class="sc">&gt;</span> <span class="dv">2</span>   <span class="co"># references the column just created above</span></span>
+<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb47" data-code-line-numbers=""><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Polars: fails — DepDelay_hrs does not exist in the original DataFrame yet</span></span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>full_flights.with_columns(</span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>    DepDelay_hrs <span class="op">=</span> pl.col(<span class="st">'DepDelay'</span>) <span class="op">/</span> <span class="dv">60</span>,</span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>    IsLongDelay  <span class="op">=</span> pl.col(<span class="st">'DepDelay_hrs'</span>) <span class="op">&gt;</span> <span class="dv">2</span>   <span class="co"># ColumnNotFoundError</span></span>
+<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The fix is to split into two chained <code>with_columns()</code> calls:</p>
+<div id="1d5e11fa" class="cell" data-execution_count="25">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb48" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>    full_flights</span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>    .with_columns(DepDelay_hrs <span class="op">=</span> pl.col(<span class="st">'DepDelay'</span>) <span class="op">/</span> <span class="dv">60</span>)</span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a>    .with_columns(IsLongDelay  <span class="op">=</span> pl.col(<span class="st">'DepDelay_hrs'</span>) <span class="op">&gt;</span> <span class="dv">2</span>)</span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a>    .select([<span class="st">'FlightDate'</span>, <span class="st">'DepDelay'</span>, <span class="st">'DepDelay_hrs'</span>, <span class="st">'IsLongDelay'</span>])</span>
+<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">3</span>)</span>
+<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="24">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (3, 4)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">FlightDate</th>
+<th data-quarto-table-cell-role="th">DepDelay</th>
+<th data-quarto-table-cell-role="th">DepDelay_hrs</th>
+<th data-quarto-table-cell-role="th">IsLongDelay</th>
+</tr>
+<tr class="even">
+<td>str</td>
+<td>f64</td>
+<td>f64</td>
+<td>bool</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"2022-01-14"</td>
+<td>-3.0</td>
+<td>-0.05</td>
+<td>false</td>
+</tr>
+<tr class="even">
+<td>"2022-01-15"</td>
+<td>-10.0</td>
+<td>-0.166667</td>
+<td>false</td>
+</tr>
+<tr class="odd">
+<td>"2022-01-16"</td>
+<td>-6.0</td>
+<td>-0.1</td>
+<td>false</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>The parallel evaluation is intentional — it allows Polars to optimise multi-column mutations, which is a meaningful performance advantage for wide DataFrames.</p>
 </section>
-<section id="remove-column" class="level3" data-number="2.3.5">
-<h3 data-number="2.3.5" class="anchored" data-anchor-id="remove-column"><span class="header-section-number">2.3.5</span> Remove column</h3>
+<section id="renaming-columns" class="level4" data-number="2.3.3.3">
+<h4 data-number="2.3.3.3" class="anchored" data-anchor-id="renaming-columns"><span class="header-section-number">2.3.3.3</span> Renaming columns</h4>
+<p><code>.rename()</code> takes a dictionary mapping old names to new names:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb49" data-code-line-numbers=""><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="co"># dplyr — note the order: new_name = old_name</span></span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>full_flights <span class="sc">|&gt;</span> <span class="fu">rename</span>(<span class="at">departure_delay =</span> DepDelay, <span class="at">arrival_delay =</span> ArrDelay)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="9097d819" class="cell" data-execution_count="26">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb50" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Polars dict order is the reverse: old_name -&gt; new_name</span></span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a>    full_flights</span>
+<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a>    .rename({<span class="st">'DepDelay'</span>: <span class="st">'departure_delay'</span>, <span class="st">'ArrDelay'</span>: <span class="st">'arrival_delay'</span>})</span>
+<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a>    .select([<span class="st">'FlightDate'</span>, <span class="st">'departure_delay'</span>, <span class="st">'arrival_delay'</span>])</span>
+<span id="cb50-6"><a href="#cb50-6" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">3</span>)</span>
+<span id="cb50-7"><a href="#cb50-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="25">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (3, 3)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">FlightDate</th>
+<th data-quarto-table-cell-role="th">departure_delay</th>
+<th data-quarto-table-cell-role="th">arrival_delay</th>
+</tr>
+<tr class="even">
+<td>str</td>
+<td>f64</td>
+<td>f64</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"2022-01-14"</td>
+<td>-3.0</td>
+<td>4.0</td>
+</tr>
+<tr class="even">
+<td>"2022-01-15"</td>
+<td>-10.0</td>
+<td>-24.0</td>
+</tr>
+<tr class="odd">
+<td>"2022-01-16"</td>
+<td>-6.0</td>
+<td>-13.0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>Note the reversed convention: dplyr uses <code>new_name = old_name</code>, while Polars maps <code>old_name → new_name</code>.</p>
 </section>
-<section id="aggregation-by-group" class="level3" data-number="2.3.6">
-<h3 data-number="2.3.6" class="anchored" data-anchor-id="aggregation-by-group"><span class="header-section-number">2.3.6</span> Aggregation by group</h3>
+<section id="removing-columns" class="level4" data-number="2.3.3.4">
+<h4 data-number="2.3.3.4" class="anchored" data-anchor-id="removing-columns"><span class="header-section-number">2.3.3.4</span> Removing columns</h4>
+<p><code>.drop()</code> removes one or more columns by name:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb51" data-code-line-numbers=""><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="co"># dplyr</span></span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>full_flights <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="sc">-</span>Year, <span class="sc">-</span>Quarter)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="14da7ca6" class="cell" data-execution_count="27">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb52" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>full_flights.drop([<span class="st">'Year'</span>, <span class="st">'Quarter'</span>]).head(<span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="26">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (3, 108)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">Month</th>
+<th data-quarto-table-cell-role="th">DayofMonth</th>
+<th data-quarto-table-cell-role="th">DayOfWeek</th>
+<th data-quarto-table-cell-role="th">FlightDate</th>
+<th data-quarto-table-cell-role="th">Reporting_Airline</th>
+<th data-quarto-table-cell-role="th">DOT_ID_Reporting_Airline</th>
+<th data-quarto-table-cell-role="th">IATA_CODE_Reporting_Airline</th>
+<th data-quarto-table-cell-role="th">Tail_Number</th>
+<th data-quarto-table-cell-role="th">Flight_Number_Reporting_Airline</th>
+<th data-quarto-table-cell-role="th">OriginAirportID</th>
+<th data-quarto-table-cell-role="th">OriginAirportSeqID</th>
+<th data-quarto-table-cell-role="th">OriginCityMarketID</th>
+<th data-quarto-table-cell-role="th">Origin</th>
+<th data-quarto-table-cell-role="th">OriginCityName</th>
+<th data-quarto-table-cell-role="th">OriginState</th>
+<th data-quarto-table-cell-role="th">OriginStateFips</th>
+<th data-quarto-table-cell-role="th">OriginStateName</th>
+<th data-quarto-table-cell-role="th">OriginWac</th>
+<th data-quarto-table-cell-role="th">DestAirportID</th>
+<th data-quarto-table-cell-role="th">DestAirportSeqID</th>
+<th data-quarto-table-cell-role="th">DestCityMarketID</th>
+<th data-quarto-table-cell-role="th">Dest</th>
+<th data-quarto-table-cell-role="th">DestCityName</th>
+<th data-quarto-table-cell-role="th">DestState</th>
+<th data-quarto-table-cell-role="th">DestStateFips</th>
+<th data-quarto-table-cell-role="th">DestStateName</th>
+<th data-quarto-table-cell-role="th">DestWac</th>
+<th data-quarto-table-cell-role="th">CRSDepTime</th>
+<th data-quarto-table-cell-role="th">DepTime</th>
+<th data-quarto-table-cell-role="th">DepDelay</th>
+<th data-quarto-table-cell-role="th">DepDelayMinutes</th>
+<th data-quarto-table-cell-role="th">DepDel15</th>
+<th data-quarto-table-cell-role="th">DepartureDelayGroups</th>
+<th data-quarto-table-cell-role="th">DepTimeBlk</th>
+<th data-quarto-table-cell-role="th">TaxiOut</th>
+<th data-quarto-table-cell-role="th">WheelsOff</th>
+<th data-quarto-table-cell-role="th">WheelsOn</th>
+<th data-quarto-table-cell-role="th">…</th>
+<th data-quarto-table-cell-role="th">Div1TotalGTime</th>
+<th data-quarto-table-cell-role="th">Div1LongestGTime</th>
+<th data-quarto-table-cell-role="th">Div1WheelsOff</th>
+<th data-quarto-table-cell-role="th">Div1TailNum</th>
+<th data-quarto-table-cell-role="th">Div2Airport</th>
+<th data-quarto-table-cell-role="th">Div2AirportID</th>
+<th data-quarto-table-cell-role="th">Div2AirportSeqID</th>
+<th data-quarto-table-cell-role="th">Div2WheelsOn</th>
+<th data-quarto-table-cell-role="th">Div2TotalGTime</th>
+<th data-quarto-table-cell-role="th">Div2LongestGTime</th>
+<th data-quarto-table-cell-role="th">Div2WheelsOff</th>
+<th data-quarto-table-cell-role="th">Div2TailNum</th>
+<th data-quarto-table-cell-role="th">Div3Airport</th>
+<th data-quarto-table-cell-role="th">Div3AirportID</th>
+<th data-quarto-table-cell-role="th">Div3AirportSeqID</th>
+<th data-quarto-table-cell-role="th">Div3WheelsOn</th>
+<th data-quarto-table-cell-role="th">Div3TotalGTime</th>
+<th data-quarto-table-cell-role="th">Div3LongestGTime</th>
+<th data-quarto-table-cell-role="th">Div3WheelsOff</th>
+<th data-quarto-table-cell-role="th">Div3TailNum</th>
+<th data-quarto-table-cell-role="th">Div4Airport</th>
+<th data-quarto-table-cell-role="th">Div4AirportID</th>
+<th data-quarto-table-cell-role="th">Div4AirportSeqID</th>
+<th data-quarto-table-cell-role="th">Div4WheelsOn</th>
+<th data-quarto-table-cell-role="th">Div4TotalGTime</th>
+<th data-quarto-table-cell-role="th">Div4LongestGTime</th>
+<th data-quarto-table-cell-role="th">Div4WheelsOff</th>
+<th data-quarto-table-cell-role="th">Div4TailNum</th>
+<th data-quarto-table-cell-role="th">Div5Airport</th>
+<th data-quarto-table-cell-role="th">Div5AirportID</th>
+<th data-quarto-table-cell-role="th">Div5AirportSeqID</th>
+<th data-quarto-table-cell-role="th">Div5WheelsOn</th>
+<th data-quarto-table-cell-role="th">Div5TotalGTime</th>
+<th data-quarto-table-cell-role="th">Div5LongestGTime</th>
+<th data-quarto-table-cell-role="th">Div5WheelsOff</th>
+<th data-quarto-table-cell-role="th">Div5TailNum</th>
+<th data-quarto-table-cell-role="th"></th>
+</tr>
+<tr class="even">
+<td>i64</td>
+<td>i64</td>
+<td>i64</td>
+<td>str</td>
+<td>str</td>
+<td>i64</td>
+<td>str</td>
+<td>str</td>
+<td>i64</td>
+<td>i64</td>
+<td>i64</td>
+<td>i64</td>
+<td>str</td>
+<td>str</td>
+<td>str</td>
+<td>i64</td>
+<td>str</td>
+<td>i64</td>
+<td>i64</td>
+<td>i64</td>
+<td>i64</td>
+<td>str</td>
+<td>str</td>
+<td>str</td>
+<td>i64</td>
+<td>str</td>
+<td>i64</td>
+<td>i64</td>
+<td>str</td>
+<td>f64</td>
+<td>f64</td>
+<td>f64</td>
+<td>i64</td>
+<td>str</td>
+<td>f64</td>
+<td>str</td>
+<td>str</td>
+<td>…</td>
+<td>str</td>
+<td>str</td>
+<td>str</td>
+<td>str</td>
+<td>str</td>
+<td>str</td>
+<td>str</td>
+<td>str</td>
+<td>str</td>
+<td>str</td>
+<td>str</td>
+<td>str</td>
+<td>str</td>
+<td>str</td>
+<td>str</td>
+<td>str</td>
+<td>str</td>
+<td>str</td>
+<td>str</td>
+<td>str</td>
+<td>str</td>
+<td>str</td>
+<td>str</td>
+<td>str</td>
+<td>str</td>
+<td>str</td>
+<td>str</td>
+<td>str</td>
+<td>str</td>
+<td>str</td>
+<td>str</td>
+<td>str</td>
+<td>str</td>
+<td>str</td>
+<td>str</td>
+<td>str</td>
+<td>str</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>14</td>
+<td>5</td>
+<td>"2022-01-14"</td>
+<td>"YX"</td>
+<td>20452</td>
+<td>"YX"</td>
+<td>"N119HQ"</td>
+<td>4879</td>
+<td>11066</td>
+<td>1106606</td>
+<td>31066</td>
+<td>"CMH"</td>
+<td>"Columbus, OH"</td>
+<td>"OH"</td>
+<td>39</td>
+<td>"Ohio"</td>
+<td>44</td>
+<td>11278</td>
+<td>1127805</td>
+<td>30852</td>
+<td>"DCA"</td>
+<td>"Washington, DC"</td>
+<td>"VA"</td>
+<td>51</td>
+<td>"Virginia"</td>
+<td>38</td>
+<td>1224</td>
+<td>"1221"</td>
+<td>-3.0</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>-1</td>
+<td>"1200-1259"</td>
+<td>28.0</td>
+<td>"1249"</td>
+<td>"1352"</td>
+<td>…</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>""</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>""</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>""</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>""</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>""</td>
+<td>null</td>
+</tr>
+<tr class="even">
+<td>1</td>
+<td>15</td>
+<td>6</td>
+<td>"2022-01-15"</td>
+<td>"YX"</td>
+<td>20452</td>
+<td>"YX"</td>
+<td>"N122HQ"</td>
+<td>4879</td>
+<td>11066</td>
+<td>1106606</td>
+<td>31066</td>
+<td>"CMH"</td>
+<td>"Columbus, OH"</td>
+<td>"OH"</td>
+<td>39</td>
+<td>"Ohio"</td>
+<td>44</td>
+<td>11278</td>
+<td>1127805</td>
+<td>30852</td>
+<td>"DCA"</td>
+<td>"Washington, DC"</td>
+<td>"VA"</td>
+<td>51</td>
+<td>"Virginia"</td>
+<td>38</td>
+<td>1224</td>
+<td>"1214"</td>
+<td>-10.0</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>-1</td>
+<td>"1200-1259"</td>
+<td>19.0</td>
+<td>"1233"</td>
+<td>"1323"</td>
+<td>…</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>""</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>""</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>""</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>""</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>""</td>
+<td>null</td>
+</tr>
+<tr class="odd">
+<td>1</td>
+<td>16</td>
+<td>7</td>
+<td>"2022-01-16"</td>
+<td>"YX"</td>
+<td>20452</td>
+<td>"YX"</td>
+<td>"N412YX"</td>
+<td>4879</td>
+<td>11066</td>
+<td>1106606</td>
+<td>31066</td>
+<td>"CMH"</td>
+<td>"Columbus, OH"</td>
+<td>"OH"</td>
+<td>39</td>
+<td>"Ohio"</td>
+<td>44</td>
+<td>11278</td>
+<td>1127805</td>
+<td>30852</td>
+<td>"DCA"</td>
+<td>"Washington, DC"</td>
+<td>"VA"</td>
+<td>51</td>
+<td>"Virginia"</td>
+<td>38</td>
+<td>1224</td>
+<td>"1218"</td>
+<td>-6.0</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>-1</td>
+<td>"1200-1259"</td>
+<td>16.0</td>
+<td>"1234"</td>
+<td>"1327"</td>
+<td>…</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>""</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>""</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>""</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>""</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>""</td>
+<td>null</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>To remove columns by type or name pattern, use <code>.select()</code> with a selector complement instead:</p>
+<div id="3317d1df" class="cell" data-execution_count="28">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb53" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="co"># remove all string columns</span></span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a>full_flights.select(<span class="op">~</span>cs.string()).head(<span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="27">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (3, 44)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">Quarter</th>
+<th data-quarto-table-cell-role="th">Month</th>
+<th data-quarto-table-cell-role="th">DayofMonth</th>
+<th data-quarto-table-cell-role="th">DayOfWeek</th>
+<th data-quarto-table-cell-role="th">DOT_ID_Reporting_Airline</th>
+<th data-quarto-table-cell-role="th">Flight_Number_Reporting_Airline</th>
+<th data-quarto-table-cell-role="th">OriginAirportID</th>
+<th data-quarto-table-cell-role="th">OriginAirportSeqID</th>
+<th data-quarto-table-cell-role="th">OriginCityMarketID</th>
+<th data-quarto-table-cell-role="th">OriginStateFips</th>
+<th data-quarto-table-cell-role="th">OriginWac</th>
+<th data-quarto-table-cell-role="th">DestAirportID</th>
+<th data-quarto-table-cell-role="th">DestAirportSeqID</th>
+<th data-quarto-table-cell-role="th">DestCityMarketID</th>
+<th data-quarto-table-cell-role="th">DestStateFips</th>
+<th data-quarto-table-cell-role="th">DestWac</th>
+<th data-quarto-table-cell-role="th">CRSDepTime</th>
+<th data-quarto-table-cell-role="th">DepDelay</th>
+<th data-quarto-table-cell-role="th">DepDelayMinutes</th>
+<th data-quarto-table-cell-role="th">DepDel15</th>
+<th data-quarto-table-cell-role="th">DepartureDelayGroups</th>
+<th data-quarto-table-cell-role="th">TaxiOut</th>
+<th data-quarto-table-cell-role="th">TaxiIn</th>
+<th data-quarto-table-cell-role="th">CRSArrTime</th>
+<th data-quarto-table-cell-role="th">ArrDelay</th>
+<th data-quarto-table-cell-role="th">ArrDelayMinutes</th>
+<th data-quarto-table-cell-role="th">ArrDel15</th>
+<th data-quarto-table-cell-role="th">ArrivalDelayGroups</th>
+<th data-quarto-table-cell-role="th">Cancelled</th>
+<th data-quarto-table-cell-role="th">Diverted</th>
+<th data-quarto-table-cell-role="th">CRSElapsedTime</th>
+<th data-quarto-table-cell-role="th">ActualElapsedTime</th>
+<th data-quarto-table-cell-role="th">AirTime</th>
+<th data-quarto-table-cell-role="th">Flights</th>
+<th data-quarto-table-cell-role="th">Distance</th>
+<th data-quarto-table-cell-role="th">DistanceGroup</th>
+<th data-quarto-table-cell-role="th">CarrierDelay</th>
+<th data-quarto-table-cell-role="th">WeatherDelay</th>
+<th data-quarto-table-cell-role="th">NASDelay</th>
+<th data-quarto-table-cell-role="th">SecurityDelay</th>
+<th data-quarto-table-cell-role="th">LateAircraftDelay</th>
+<th data-quarto-table-cell-role="th">TotalAddGTime</th>
+<th data-quarto-table-cell-role="th">LongestAddGTime</th>
+<th data-quarto-table-cell-role="th">DivAirportLandings</th>
+</tr>
+<tr class="even">
+<td>i64</td>
+<td>i64</td>
+<td>i64</td>
+<td>i64</td>
+<td>i64</td>
+<td>i64</td>
+<td>i64</td>
+<td>i64</td>
+<td>i64</td>
+<td>i64</td>
+<td>i64</td>
+<td>i64</td>
+<td>i64</td>
+<td>i64</td>
+<td>i64</td>
+<td>i64</td>
+<td>i64</td>
+<td>f64</td>
+<td>f64</td>
+<td>f64</td>
+<td>i64</td>
+<td>f64</td>
+<td>f64</td>
+<td>i64</td>
+<td>f64</td>
+<td>f64</td>
+<td>f64</td>
+<td>i64</td>
+<td>f64</td>
+<td>f64</td>
+<td>f64</td>
+<td>f64</td>
+<td>f64</td>
+<td>f64</td>
+<td>f64</td>
+<td>i64</td>
+<td>f64</td>
+<td>f64</td>
+<td>f64</td>
+<td>f64</td>
+<td>f64</td>
+<td>f64</td>
+<td>f64</td>
+<td>i64</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>1</td>
+<td>14</td>
+<td>5</td>
+<td>20452</td>
+<td>4879</td>
+<td>11066</td>
+<td>1106606</td>
+<td>31066</td>
+<td>39</td>
+<td>44</td>
+<td>11278</td>
+<td>1127805</td>
+<td>30852</td>
+<td>51</td>
+<td>38</td>
+<td>1224</td>
+<td>-3.0</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>-1</td>
+<td>28.0</td>
+<td>4.0</td>
+<td>1352</td>
+<td>4.0</td>
+<td>4.0</td>
+<td>0.0</td>
+<td>0</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>88.0</td>
+<td>95.0</td>
+<td>63.0</td>
+<td>1.0</td>
+<td>323.0</td>
+<td>2</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td>1</td>
+<td>1</td>
+<td>15</td>
+<td>6</td>
+<td>20452</td>
+<td>4879</td>
+<td>11066</td>
+<td>1106606</td>
+<td>31066</td>
+<td>39</td>
+<td>44</td>
+<td>11278</td>
+<td>1127805</td>
+<td>30852</td>
+<td>51</td>
+<td>38</td>
+<td>1224</td>
+<td>-10.0</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>-1</td>
+<td>19.0</td>
+<td>5.0</td>
+<td>1352</td>
+<td>-24.0</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>-2</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>88.0</td>
+<td>74.0</td>
+<td>50.0</td>
+<td>1.0</td>
+<td>323.0</td>
+<td>2</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td>1</td>
+<td>1</td>
+<td>16</td>
+<td>7</td>
+<td>20452</td>
+<td>4879</td>
+<td>11066</td>
+<td>1106606</td>
+<td>31066</td>
+<td>39</td>
+<td>44</td>
+<td>11278</td>
+<td>1127805</td>
+<td>30852</td>
+<td>51</td>
+<td>38</td>
+<td>1224</td>
+<td>-6.0</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>-1</td>
+<td>16.0</td>
+<td>12.0</td>
+<td>1352</td>
+<td>-13.0</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>-1</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>88.0</td>
+<td>81.0</td>
+<td>53.0</td>
+<td>1.0</td>
+<td>323.0</td>
+<td>2</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
 </section>
-<section id="sort-a-dataframe" class="level3" data-number="2.3.7">
-<h3 data-number="2.3.7" class="anchored" data-anchor-id="sort-a-dataframe"><span class="header-section-number">2.3.7</span> Sort a DataFrame</h3>
+</section>
+<section id="aggregation-by-group" class="level3" data-number="2.3.4">
+<h3 data-number="2.3.4" class="anchored" data-anchor-id="aggregation-by-group"><span class="header-section-number">2.3.4</span> Aggregation by group</h3>
+</section>
+<section id="sort-a-dataframe" class="level3" data-number="2.3.5">
+<h3 data-number="2.3.5" class="anchored" data-anchor-id="sort-a-dataframe"><span class="header-section-number">2.3.5</span> Sort a DataFrame</h3>
 </section>
 </section>
 <section id="two-tables-operation" class="level2" data-number="2.4">
