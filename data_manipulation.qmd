@@ -18,163 +18,319 @@ full_flights.estimated_size('mb')
 
 ## Data type conversion
 
-In R, you work with four main types of vectors: logical, integer, double, and character. When you mix different types, they get automatically adjusted in a specific order: character → double → integer → logical. If you want to intentionally adjust them, you can use functions like `as.integer()`, `as.double()`, `as.logical()`, and `as.character()`.
+The way R and Polars handle types reflects a fundamental design difference: R prioritises convenience through implicit coercion, while Polars prioritises correctness through explicit conversion.
 
-On the other hand, in polars, there's a wider variety of data types, and you need to purposefully adjust them when needed.
+### R: implicit type coercion
+
+R's type system is built around four atomic vector types — logical, integer, double, and character — arranged in a coercion hierarchy:
+
+![](R-data-types.png)
+
+When you combine values of mixed types, R silently promotes them up the hierarchy to find a common type:
+
+```r
+# R coerces everything to the "highest" type in the hierarchy
+x <- c(TRUE, 1L, 2.5)
+typeof(x)  # "double" — logical and integer were silently promoted
+
+y <- c(TRUE, 1L, 2.5, "text")
+typeof(y)  # "character" — everything coerced to string
+```
+
+This makes interactive exploration forgiving — R rarely stops you with a type error. The cost is that type mismatches surface as subtly wrong results rather than loud errors, which makes bugs hard to trace in larger codebases.
+
+### Polars: explicit type conversion
+
+Polars has a much richer type system — granular numeric types (`Int8` through `Int64`, `UInt8` through `UInt64`, `Float32`, `Float64`), dedicated temporal types, nested types, and more:
+
+![](Polars-data-types.png)
+
+Polars **never coerces silently**. Every type change must be declared explicitly with `.cast()`. You can inspect the current type of a column before acting on it:
 
 ```{python}
 full_flights['Year'].dtype
 ```
 
+To convert the `Year` column from integer to string:
+
 ```{python}
 full_flights = full_flights.with_columns(
-    pl.col('Year').cast(pl.Utf8)
+    pl.col('Year').cast(pl.String)
 )
 full_flights['Year'].dtype
 ```
 
+If `.cast()` cannot perform the conversion safely (e.g. casting `"abc"` to `Int64`), Polars raises an error immediately rather than producing a `null` or a wrong value — unless you explicitly opt in to lenient casting with `strict=False`.
+
+The tradeoff is intentional: explicit casting is more verbose, but type contracts are visible in the code and mistakes fail loudly at the point of conversion. For production pipelines processing millions of rows, catching a type mismatch early is far cheaper than diagnosing a silently incorrect result downstream.
+
 ## Introduction to methods
+
+In Python, a **method** is a function that belongs to an object and is invoked using dot notation: `object.method()`. The object provides both the data and the set of operations available on it.
+
+The distinction from a standalone function comes down to ownership:
+
+```python
+# standalone functions — data is passed as an argument
+len(full_flights)
+pl.read_csv('./data/flights.csv')
+
+# methods — the object is the implicit first argument
+full_flights.shape
+full_flights.head()
+full_flights.filter(pl.col('OriginStateName') == 'Ohio')
+```
+
+A method always has implicit access to the object it belongs to. A `DataFrame` method like `.filter()` knows it is operating on a DataFrame; a `Series` method like `.mean()` knows it is operating on a Series. This means methods are **type-specific** — `.filter()` exists on a `DataFrame` but not on a `Series`.
+
+### Comparison with R
+
+R's tidyverse follows a **function-first** style: data is passed as the first argument to a verb, and the pipe operator chains those verbs into a pipeline:
+
+```r
+# R / dplyr: functions act on data passed as an argument
+full_flights |>
+    filter(OriginStateName == 'Ohio') |>
+    select(FlightDate, Origin, Dest)
+```
+
+Python/Polars follows a **method chaining** style: the data object comes first, and methods are applied sequentially via the dot operator:
+
+```{python}
+#| eval: false
+(
+    full_flights
+    .filter(pl.col('OriginStateName') == 'Ohio')
+    .select(['FlightDate', 'Origin', 'Dest'])
+)
+```
+
+The two patterns are structurally equivalent — both read as a left-to-right pipeline of transformations. The key difference is where the data lives: in R, data flows through functions as an argument; in Python, data is the object and methods are behaviors it carries with it.
+
+One practical consequence of this is that in R, `filter()` works on any compatible object — data frames, tibbles, grouped tibbles. In Python, each type exposes its own set of methods, so you need to be aware of what type you are working with at each step of the chain.
 
 ## Single table operation
 
 
 ### Filtering rows
 
-* Retrieving all flights from Oihio (filtering based on one condition)
+Filtering rows in Polars maps directly to dplyr's `filter()`. The function name is the same; the main syntax difference is that Polars requires column references to be wrapped in `pl.col()`.
 
-```{python}
-# recommended way
-flights_from_ohio = full_flights.filter(pl.col('OriginStateName') == 'Ohio')
+* Retrieving all flights from Ohio (filtering based on one condition):
 
-# alternative way (not recommended)
-# flights_from_ohio = full_flights[full_flights['OriginStateName'] == 'Ohio']
-
-flights_from_ohio['OriginStateName'].value_counts()
+```r
+# dplyr
+flights_from_ohio <- full_flights |> filter(OriginStateName == "Ohio")
 ```
 
-* Obtaining all flights from Ohio to Virginia (filtering based on multiple conditions)
+```{python}
+flights_from_ohio = full_flights.filter(pl.col('OriginStateName') == 'Ohio')
+flights_from_ohio.shape
+```
+
+* Filtering based on multiple conditions:
+
+```r
+# dplyr — comma-separated predicates are implicitly AND-ed
+flights_from_ohio_to_virginia <- full_flights |>
+    filter(OriginStateName == "Ohio", DestStateName == "Virginia")
+```
 
 ```{python}
-# note that each predicate must be enclosed within parentheses
+# note that each predicate must be enclosed within parentheses when using &
 flights_from_ohio_to_virginia = full_flights.filter(
     (pl.col('OriginStateName') == 'Ohio') & (pl.col('DestStateName') == 'Virginia')
 )
 
-# you can replace `&` with `,` to avoid parentheses
+# comma-separated predicates are also AND-ed, avoiding the need for parentheses
 # flights_from_ohio_to_virginia = full_flights.filter(
-#     pl.col('OriginStateName') == 'Ohio', 
+#     pl.col('OriginStateName') == 'Ohio',
 #     pl.col('DestStateName') == 'Virginia'
 # )
 
-flights_from_ohio_to_virginia['DestStateName'].value_counts()
+flights_from_ohio_to_virginia.shape
 ```
 
-* Fetching all flights from Ohito to any state except Virginia (filtering based on negative condition)
+* Filtering with a negative condition:
+
+```r
+# dplyr
+flights_from_ohio_except_virginia <- full_flights |>
+    filter(OriginStateName == "Ohio", DestStateName != "Virginia")
+```
 
 ```{python}
-flights_from_ohio_except_to_virginia = full_flights.filter(
-    pl.col('OriginStateName') == 'Ohio', 
+flights_from_ohio_except_virginia = full_flights.filter(
+    pl.col('OriginStateName') == 'Ohio',
     ~(pl.col('DestStateName') == 'Virginia')
 )
-flights_from_ohio_except_to_virginia['DestStateName'].value_counts(sort=True).head()
+flights_from_ohio_except_virginia.shape
 ```
 
-* Why using the `.filter()` method? The reason is to leverage lazy execution and query optimization
+* Filtering with a set of values using `.is_in()`, the equivalent of R's `%in%` operator:
+
+```r
+# dplyr
+major_hubs <- full_flights |>
+    filter(OriginStateName %in% c("California", "Texas", "New York"))
+```
 
 ```{python}
-%%time
-# this code is optimized by polars query engine before reading any data into memory
-lazy_stmt = (
+major_hubs = full_flights.filter(
+    pl.col('OriginStateName').is_in(['California', 'Texas', 'New York'])
+)
+major_hubs.shape
+```
+
+* Why prefer `.filter()` over boolean indexing? The key reason is that `.filter()` integrates with Polars' lazy execution engine, which pushes the predicate down to the scan and avoids loading unnecessary rows into memory:
+
+```{python}
+import time
+
+start = time.perf_counter()
+lazy_result = (
     pl.scan_csv('./data/On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2022_1.csv')
     .filter(pl.col('OriginStateName') == 'Ohio')
     .collect()
 )
-```
+print(f"lazy:  {time.perf_counter() - start:.3f}s")
 
-```{python}
-%%time
-eager_stmt = (
+start = time.perf_counter()
+eager_result = (
     pl.read_csv('./data/On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2022_1.csv')
     .filter(pl.col('OriginStateName') == 'Ohio')
 )
+print(f"eager: {time.perf_counter() - start:.3f}s")
 ```
 
 ### Selecting columns
 
-Selecting variables within a DataFrame in polars is highly expressive, offering flexibility based on either variable names or types. Here's a breakdown from simple to complex:
+Polars offers three levels of column selection, progressing from explicit to declarative:
 
-* Utilizing the `select` function to create a DataFrame from Series:
+1. **By name** — a string list; simple but brittle if column names change
+2. **By type** — `pl.col(dtype)` selects all columns of a given type
+3. **Selectors** (`polars.selectors`) — a high-level API for flexible, composable selection based on types, name patterns, or properties
 
-```{python}
-foo = pl.Series('foo', [1, 2, 3])
-bar = pl.Series('bar', [4, 5, 6])
+Selectors are the recommended approach for anything beyond a simple name list. They produce code that reads closer to intent, composes naturally with set operations, and adapts automatically when the schema changes.
 
-pl.select(mmin = pl.min_horizontal(foo, bar))
+#### Selecting by name
+
+```r
+# dplyr
+full_flights |> select(FlightDate, Tail_Number)
 ```
-
-* Selecting columns by names:
-
 
 ```{python}
 full_flights.select(['FlightDate', 'Tail_Number']).head(3)
-# or 
-# full_flights.select(pl.col(['FlightDate', 'Tail_Number'])).head(3)
 ```
 
-* Selecting columns by types:
+#### Selecting by type
+
+`pl.col(dtype)` selects all columns that match a given type. Useful for applying the same transformation to every column of a type:
+
+```r
+# dplyr
+full_flights |> select(where(is.double))
+full_flights |> select(where(is.integer))
+```
 
 ```{python}
-# select all integer columns
+full_flights.select(pl.col(pl.Float64)).head(3)
+```
+
+```{python}
 full_flights.select(pl.col(pl.Int64)).head(3)
 ```
 
-```{python}
-# select all numeric columns
-full_flights.select(
-    pl.col(pl.Int64),
-    pl.col(pl.Float64)
-).head(3)
-```
+#### Selecting with Selectors
 
-* Complex column selection with Selectors, analogous to dplyr's [selection helpers](https://dplyr.tidyverse.org/reference/select.html)
+`polars.selectors` provides a declarative selection API that closely mirrors dplyr's [selection helpers](https://dplyr.tidyverse.org/reference/select.html). Import it as `cs` by convention:
 
 ```{python}
 import polars.selectors as cs
-
-# match all variables. Same as dplyr's `everything()`
-full_flights.select(cs.all()).head(3)
 ```
 
+**Select by data type:**
+
+```r
+# dplyr
+full_flights |> select(where(is.numeric))
+full_flights |> select(where(is.character))
+```
 
 ```{python}
-# match variables by prefix or suffix
-full_flights.select(
-    cs.starts_with('Flight') | cs.ends_with('Delay')
-).head(3)
+full_flights.select(cs.numeric()).head(3)  # all Int*, UInt*, Float* columns
 ```
 
-A detailed comparison between dplyr and polars column selection helpers:
+```{python}
+full_flights.select(cs.string()).head(3)   # all String columns
+```
 
-| dplyr action                                                               	| dplyr function                   	| polars function    	|
-|----------------------------------------------------------------------------	|----------------------------------	|--------------------	|
-| matches all columns                                                        	| `everything()`                   	| `cs.all()`         	|
-| matches all integer columns                                                	| `where(is.integer())`            	| `cs.integer()`     	|
-| matches all factor/categorical columns                                     	| `where(is.factor())`             	| `cs.categorical()` 	|
-| matches all float columns                                                  	| `where(is.double())`             	| `cs.float()`       	|
-| matches all string columns                                                 	| `where(is.character())`          	| `cs.string()`      	|
-| matches all date columns                                                   	| `where(\(x) class(x) == "Date")` 	| `cs.date()`        	|
-| match all datetime columns                                                 	| not available                    	| `cs.datetime()`    	|
-| match all time columns                                                     	| not available                    	| `cs.time()`        	|
-| match all date/datetime columns                                            	| not available                    	| `cs.temporal()`    	|
-| select the last column                                                     	| `last_col()`                     	| `cs.last()`        	|
-| starts with a prefix                                                       	| `starts_with()`                  	| `cs.starts_with()` 	|
-| ends with a suffix                                                         	| `end_with()`                     	| `cs.ends_with()`   	|
-| contains a literal string                                                  	| `contains()`                     	| `cs.contains()`    	|
-| matches a regular expression                                               	| `matches()`                      	| `cs.matches()`     	|
-| takes the complement of a set of columns                                   	| `!`                              	| `~`                	|
-| takes the difference between a set of columns                              	| not available                    	| `-`                	|
-| selects a range of consecutive columns                                     	| `col1:col10`                     	| not available      	|
-| matches all column names in a list, no error thrown for non-existing names 	| `any_of()`                       	| not available      	|
+**Select by name pattern:**
+
+```r
+# dplyr
+full_flights |> select(starts_with("Flight"))
+full_flights |> select(ends_with("Delay"))
+```
+
+```{python}
+full_flights.select(cs.starts_with('Flight')).head(3)
+```
+
+```{python}
+full_flights.select(cs.ends_with('Delay')).head(3)
+```
+
+**Combining selectors with set operations:**
+
+This is where selectors go beyond what bare `pl.col()` can express. Selectors support set operations using Python operators, making complex multi-criteria selections readable in a single expression:
+
+| operator | meaning                                        | dplyr equivalent          |
+|----------|------------------------------------------------|---------------------------|
+| `\|`     | union — columns matching either selector       | `c(starts_with(), ...)`   |
+| `&`      | intersection — columns matching both selectors | `where(\(x) ... & ...)`   |
+| `-`      | difference — left selector minus right         | not available             |
+| `~`      | complement — all columns not matching          | `!selector`               |
+
+```{python}
+# union: columns starting with "Flight" OR ending with "Delay"
+full_flights.select(cs.starts_with('Flight') | cs.ends_with('Delay')).head(3)
+```
+
+```{python}
+# difference: numeric columns excluding Int64 (i.e. Float columns only)
+full_flights.select(cs.numeric() - cs.integer()).head(3)
+```
+
+```{python}
+# complement: everything except string columns
+full_flights.select(~cs.string()).head(3)
+```
+
+A full comparison between dplyr and Polars selection features:
+
+| dplyr action                            | dplyr function                    | polars selector    |
+|-----------------------------------------|-----------------------------------|--------------------|
+| matches all columns                     | `everything()`                    | `cs.all()`         |
+| matches all numeric columns             | `where(is.numeric)`               | `cs.numeric()`     |
+| matches all integer columns             | `where(is.integer)`               | `cs.integer()`     |
+| matches all float columns               | `where(is.double)`                | `cs.float()`       |
+| matches all string columns              | `where(is.character)`             | `cs.string()`      |
+| matches all factor/categorical columns  | `where(is.factor)`                | `cs.categorical()` |
+| matches all date columns                | `where(\(x) class(x) == "Date")`  | `cs.date()`        |
+| matches all datetime columns            | not available                     | `cs.datetime()`    |
+| matches all time columns                | not available                     | `cs.time()`        |
+| matches all temporal columns            | not available                     | `cs.temporal()`    |
+| select the last column                  | `last_col()`                      | `cs.last()`        |
+| starts with a prefix                    | `starts_with()`                   | `cs.starts_with()` |
+| ends with a suffix                      | `ends_with()`                     | `cs.ends_with()`   |
+| contains a literal string               | `contains()`                      | `cs.contains()`    |
+| matches a regular expression            | `matches()`                       | `cs.matches()`     |
+| complement of a selection               | `!selector`                       | `~selector`        |
+| difference between selections           | not available                     | `cs_a - cs_b`      |
+| range of consecutive columns            | `col1:col10`                      | not available      |
+| any of a list, ignoring missing names   | `any_of()`                        | not available      |
 
 ### Modify/Add column
 
