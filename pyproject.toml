@@ -1,0 +1,17 @@
+[project]
+name = "cookbook-polars-for-python"
+version = "0.1.0"
+description = "A tidyverse user's guide to polars library"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "polars",
+    "pandas",
+    "numpy",
+    "pyarrow",
+    "jupyterlab",
+    "ipykernel",
+    "loguru",
+    "requests",
+    "lets-plot",
+]
