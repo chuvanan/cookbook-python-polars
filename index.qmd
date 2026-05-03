@@ -1,12 +1,12 @@
 # Preface {.unnumbered}
 
 This book was inspired by a series of [blog posts](https://www.emilyriederer.com/post/py-rgo-polars/) recommending a Pythonic data science stack that mimics the comfort and familiarity of R's
-tidyverse tools. Particularly, this book explores the `Polars` library, a rising star in the DataFrame space (alongside established players like Pandas, Dask, Modin, Ray, and Vaex).
+tidyverse tools. In particular, this book explores the `Polars` library, a rising star in the DataFrame space (alongside established players like Pandas, Dask, Modin, Ray, and Vaex).
 
 In a nutshell, Polars is defined as a [query engine with a DataFrame front-end](https://pola.rs/posts/polars_birds_eye_view/). It offers a rich set of intuitive functions and principled workflows 
-for data manipulation and analysis. Designed from the ground up with performance in mind, Polars is also noted for its [lightning-fast execution speed](https://www.ritchievink.com/blog/2021/02/28/i-wrote-one-of-the-fastest-dataframe-libraries/). Polars, despite its quick rise in popularity, is still in its early stages of development.
+for data manipulation and analysis. Designed from the ground up with performance in mind, Polars is also noted for its [lightning-fast execution speed](https://www.ritchievink.com/blog/2021/02/28/i-wrote-one-of-the-fastest-dataframe-libraries/). ~~Despite its quick rise in popularity, `Polars` is still in its early stages of development.~~ `Polars` has finally reached the [milestone of version 1.0](https://pola.rs/posts/announcing-polars-1/)
 
-The majority of this book contains structured examples of data wrangling tasks that demonstrates idiomatic Polars and related dplyr/tidyr code for comparison. Examples might include discussion on API choices.
+The majority of this book contains structured examples of data wrangling tasks that demonstrate idiomatic Polars and related dplyr/tidyr code for comparison. Examples might include discussion on API choices.
 
 
 ```{python}
@@ -21,7 +21,7 @@ def okabeito(n):
     return pal[0:n]
 
 stars = (
-    pl.read_csv('./data/star-history-2024330.csv', has_header=True)
+    pl.read_csv('./data/star-history-202653.csv', has_header=True)
     .rename({'Repository': 'project', 'Date': 'date', 'Stars': 'stars'})
     .with_columns(
         short_date=pl.col('date').str.slice(0, 15).str.to_date('%a %b %d %Y')
@@ -32,7 +32,7 @@ stars = (
 (
     ggplot(stars.to_pandas(), aes(x='short_date', y='stars', color='project')) +
     geom_line(size=1.5) +
-    labs(y='Github stars', title='Polars is surging in popularity', caption="Data as of Mar 2024") +
+    labs(y='Github stars', title='Polars is surging in popularity', caption="Data as of May 2026") +
     scale_x_datetime(name='Date') +
     theme(legend_title=element_blank(), 
           text=element_text(family='Roboto Condensed', size=15),
@@ -51,14 +51,12 @@ stars = (
 ```bash
 git clone https://github.com/chuvanan/cookbook-python-polars.git python-polars-cookbook
 cd python-polars-cookbook
-python3 -m venv env
-source env/bin/activate
 ```
 
-* You can install the exact packages that the book uses with the `requirements.txt` file:
+* Install [uv](https://docs.astral.sh/uv/getting-started/installation/) then sync dependencies:
 
 ```bash
-python3 -m pip install -r requirements.txt
+uv sync
 ```
 
 * Download the data (source: [Reporting carrier on-time performance](https://transtats.bts.gov/TableInfo.asp?gnoyr_VQ=FGJ&QO_fu146_anzr=b0-gvzr&V0s1_b0yB=D))

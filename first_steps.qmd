@@ -3,16 +3,16 @@
 
 ## Installation
 
-Let's kick off our journey into the world of data manipulation with the Polars library. First things first, we need to [set up a virtual environment](https://realpython.com/python-virtual-environments-a-primer/#how-can-you-work-with-a-python-virtual-environment) for a clean installation. Install the latest stable version with:
+Let's kick off our journey into the world of data manipulation with the Polars library. First things first, we need to set up a project with [uv](https://docs.astral.sh/uv/), a fast Python package manager. Install the latest stable version with:
 
 ```bash
-pip install polars
+uv add polars
 ```
 
 Depending on your use case, you might want to install the [optional dependencies](https://docs.pola.rs/user-guide/installation/#feature-flags) as well:
 
 ```bash
-pip install 'polars[numpy,pandas,pyarrow]'
+uv add 'polars[numpy,pandas,pyarrow]'
 ```
 
 To gain insights into the installed Polars package, including version details and enabled features, utilize the `show_versions()` function:
@@ -25,7 +25,7 @@ pl.show_versions()
 
 ## Initial exploration
 
-For better presentation, this book use Polars' [configuration options](https://docs.pola.rs/py-polars/html/reference/config.html) to adjust the layout of printed tables. Specifically:
+For better presentation, this book use Polars' [configuration options](https://docs.pola.rs/api/python/stable/reference/config.html) to adjust the layout of printed tables. Specifically:
 
 - Limit the number of columns and rows displayed in DataFrames to 10 each
 - Apply stylish formatting to the tables for pleasant reading experience
@@ -106,10 +106,7 @@ flights.shape
 Transitioning from a Pandas DataFrame to a Polars DataFrame is effortless with the `from_pandas()` method:
 
 :::{.column-margin}
-To clarify, [cheap conversion](https://pythonspeed.com/articles/polars-pandas-interopability/) from Polars to Pandas is achievable given the following prerequisites:
-
-- Pandas version 2.0 or later
-- Supported by the `pyarrow` library
+For efficient zero-copy conversion, both Pandas and Polars rely on the `pyarrow` library as an interchange format.
 :::
 
 ```{python}
@@ -137,7 +134,7 @@ s
 s.dtype
 ```
 
-Constructing a Series with a specfic dtype:
+Constructing a Series with a specific dtype:
 
 ```{python}
 s2 = pl.Series('a', [1, 2, 3], dtype=pl.Float32)
@@ -145,7 +142,7 @@ s2
 ```
 
 
-* `Series` provides a wide range of [methods](https://docs.pola.rs/py-Polars/html/reference/series/index.html) for various operations, including standard statistical functions 
+* `Series` provides a wide range of [methods](https://docs.pola.rs/api/python/stable/reference/series/index.html) for various operations, including standard statistical functions 
 like `.max()`, `.mean()`, as well as specialized ones such as `.entropy()` and `.unique_counts()`.
 
 ```{python}
@@ -211,7 +208,7 @@ flights.dtypes[:10]
 ```
 
 ```{python}
-# Get a dict of columns and their dtype
+# Get a Schema object mapping column names to their dtype
 flights[:,:10].schema
 ```
 

@@ -2,12 +2,11 @@
 .Rhistory
 .RData
 .Ruserdata
-
 /.quarto/
-
 /env/
-
+/.venv/
 /data/
-
 Untitled.ipynb
-/.ipynb_checkpoints/
+.ipynb_checkpoints/
+
+**/*.quarto_ipynb
