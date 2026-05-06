@@ -450,6 +450,298 @@ full_flights.select(~cs.string()).head(3)
 
 ### Aggregation by group
 
+Most analytical questions about groups of data follow a common pattern: divide the data into subsets based on one or more keys, apply a function to each subset independently, and reassemble the results. [Wickham (2011)](https://www.jstatsoft.org/article/view/v040i01) formalised this as the **split-apply-combine** strategy — the conceptual backbone behind `group_by()` in dplyr, Polars' `group_by()` context, and pandas' `groupby()`.
+
+The strategy has three steps:
+
+1. **Split** — partition rows into groups based on one or more grouping expressions
+2. **Apply** — compute a summary or transformation independently within each group
+3. **Combine** — assemble the per-group results into a single output
+
+#### Implementation: `grouped_df` vs `GroupBy`
+
+dplyr and Polars implement the split-apply-combine strategy differently, and understanding the difference prevents a whole class of subtle bugs.
+
+**dplyr** wraps the data frame in a `grouped_df` object. The groups are **sticky** — they persist across the pipe and silently alter the behaviour of any subsequent verb until you call `ungroup()`:
+
+```r
+by_carrier <- full_flights |> group_by(Reporting_Airline)
+class(by_carrier)
+# "grouped_df" "tbl_df" "tbl" "data.frame"
+
+by_carrier |> summarise(n = n(), mean_delay = mean(DepDelay, na.rm = TRUE))
+
+by_carrier |> ungroup()  # explicitly remove grouping when done
+```
+
+**Polars** returns a `GroupBy` object from `group_by()` — not a DataFrame. The primary operation on a `GroupBy` is `.agg()`, which accepts one or more aggregating expressions. The object also exposes:
+
+- **Convenience aggregation shortcuts** — `.len()`, `.sum()`, `.mean()`, `.min()`, `.max()`, `.first()`, `.last()`, and others — each equivalent to calling `.agg()` with the corresponding expression
+- **`.map_groups(fn)`** — applies a custom Python function to each group's sub-DataFrame and concatenates the results; useful when the transformation cannot be expressed as a Polars expression
+- **`.having(*predicates)`** — filters groups by a predicate before aggregation, equivalent to SQL's `HAVING` clause
+
+There is no sticky state: each `group_by()` call is self-contained:
+
+```{python}
+type(full_flights.group_by('Reporting_Airline'))
+```
+
+This design eliminates the class of bugs where a forgotten `ungroup()` causes downstream verbs to silently operate group-by-group. In Polars, grouping context is always explicit and local to a single expression.
+
+#### Basic aggregation
+
+The fundamental pattern in Polars is `group_by()` followed by `.agg()`. Multiple aggregations are passed as comma-separated keyword arguments:
+
+```r
+# dplyr
+full_flights |>
+    group_by(Reporting_Airline) |>
+    summarise(
+        n_flights  = n(),
+        mean_delay = mean(DepDelay, na.rm = TRUE),
+        max_delay  = max(DepDelay, na.rm = TRUE)
+    )
+```
+
+```{python}
+(
+    full_flights
+    .group_by('Reporting_Airline')
+    .agg(
+        n_flights  = pl.len(),
+        mean_delay = pl.col('DepDelay').mean(),
+        max_delay  = pl.col('DepDelay').max()
+    )
+    .sort('Reporting_Airline')
+)
+```
+
+`pl.len()` counts rows in each group, equivalent to dplyr's `n()`. The `.sort()` call is necessary because `group_by()` in Polars does not guarantee output order — dplyr's `summarise()` preserves group key order by default.
+
+To group by multiple columns, pass a list:
+
+```r
+# dplyr
+full_flights |>
+    group_by(Reporting_Airline, OriginStateName) |>
+    summarise(n_flights = n(), mean_delay = mean(DepDelay, na.rm = TRUE))
+```
+
+```{python}
+(
+    full_flights
+    .group_by(['Reporting_Airline', 'OriginStateName'])
+    .agg(
+        n_flights  = pl.len(),
+        mean_delay = pl.col('DepDelay').mean()
+    )
+    .sort(['Reporting_Airline', 'OriginStateName'])
+    .head(10)
+)
+```
+
+Polars also lets you apply the same aggregation to multiple columns in a single expression using a multi-column selector and `.name.suffix()` to auto-generate output names — a feature with no direct dplyr equivalent:
+
+```{python}
+# compute mean of all three delay-component columns in one expression
+(
+    full_flights
+    .group_by('Reporting_Airline')
+    .agg(
+        pl.col('DepDelay', 'ArrDelay', 'CarrierDelay').mean().name.suffix('_mean')
+    )
+    .sort('Reporting_Airline')
+    .head(5)
+)
+```
+
+#### How dplyr verbs change behaviour on grouped data
+
+One of dplyr's defining features is that the same verb produces different output depending on whether grouping is active. The three most important cases are `summarise()`, `mutate()`, and `filter()`.
+
+**`summarise()` reduces each group to one row** — the familiar aggregation pattern shown above. Polars' `group_by().agg()` is the direct equivalent.
+
+**Grouped `mutate()` computes within-group window statistics**, keeping all rows intact:
+
+```r
+# dplyr: add each carrier's average delay back to every flight row
+full_flights |>
+    group_by(Reporting_Airline) |>
+    mutate(carrier_avg_delay = mean(DepDelay, na.rm = TRUE))
+# → same number of rows; new column has the group mean repeated per row
+```
+
+Polars handles this with the `.over()` window function applied inside `.with_columns()`. Rather than grouping the DataFrame, `.over()` computes a group-level aggregate and broadcasts the result back to each row:
+
+```{python}
+(
+    full_flights
+    .with_columns(
+        carrier_avg_delay = pl.col('DepDelay').mean().over('Reporting_Airline')
+    )
+    .select(['FlightDate', 'Reporting_Airline', 'DepDelay', 'carrier_avg_delay'])
+    .head(5)
+)
+```
+
+`.over()` makes the window function intent visible in the expression itself: you can see at a glance that this is a within-group broadcast, not a reduction.
+
+**Grouped `filter()` allows filtering by group-level conditions**:
+
+```r
+# dplyr: keep only carriers that operated more than 10,000 flights
+full_flights |>
+    group_by(Reporting_Airline) |>
+    filter(n() > 10000)
+```
+
+Polars achieves the same with `.over()` inside `.filter()`:
+
+```{python}
+full_flights.filter(
+    pl.len().over('Reporting_Airline') > 10_000
+)
+```
+
+#### Per-operation grouping
+
+dplyr 1.1.0 introduced the `.by` argument as an inline alternative to the `group_by()` + `ungroup()` pattern. It scopes the grouping to a single verb and always returns an ungrouped result:
+
+```r
+# equivalent to group_by(Reporting_Airline) |> summarise(...) |> ungroup()
+full_flights |>
+    summarise(
+        mean_delay = mean(DepDelay, na.rm = TRUE),
+        .by = Reporting_Airline
+    )
+```
+
+Because Polars `group_by()` never produces sticky groups, every `group_by()` call in Polars is already per-operation by definition — there is no accumulated state to unwind. The closest parallel to `.by`'s ordering guarantee is `maintain_order=True`:
+
+```{python}
+(
+    full_flights
+    .group_by('Reporting_Airline', maintain_order=True)
+    .agg(mean_delay = pl.col('DepDelay').mean())
+)
+```
+
+#### Row-wise aggregations
+
+The aggregations above reduce groups of rows to summary values. **Row-wise aggregations** work in the opposite direction: they aggregate across columns for each individual row — computing, for example, the total delay breakdown per flight.
+
+dplyr handles this with `rowwise()`, which treats each row as its own single-row group:
+
+```r
+# dplyr: rowwise sum of five delay-breakdown columns
+full_flights |>
+    rowwise() |>
+    mutate(total_breakdown = sum(
+        c_across(c(CarrierDelay, WeatherDelay, NASDelay, SecurityDelay, LateAircraftDelay)),
+        na.rm = TRUE
+    ))
+```
+
+`rowwise()` is conceptually clear but slow — it iterates row by row. Polars avoids the problem entirely with **horizontal aggregation functions** that operate across a set of columns in a single vectorised pass:
+
+| dplyr `rowwise()` + `c_across()` | Polars horizontal function  |
+|-----------------------------------|-----------------------------|
+| `sum(...)`                        | `pl.sum_horizontal(...)`    |
+| `mean(...)`                       | `pl.mean_horizontal(...)`   |
+| `min(...)`                        | `pl.min_horizontal(...)`    |
+| `max(...)`                        | `pl.max_horizontal(...)`    |
+| `any(...)`                        | `pl.any_horizontal(...)`    |
+| `all(...)`                        | `pl.all_horizontal(...)`    |
+
+```{python}
+(
+    full_flights
+    .with_columns(
+        total_breakdown = pl.sum_horizontal(
+            'CarrierDelay', 'WeatherDelay', 'NASDelay', 'SecurityDelay', 'LateAircraftDelay'
+        )
+    )
+    .select(['FlightDate', 'Reporting_Airline', 'DepDelay', 'total_breakdown'])
+    .head(5)
+)
+```
+
+Nulls are automatically excluded from horizontal aggregations, so there is no `na.rm = TRUE` equivalent needed.
+
+#### Dynamic grouping and rolling aggregation
+
+Standard `group_by()` groups by the distinct values of a categorical column. Time-series analysis often requires a different kind of grouping: partitioning a continuous time axis into fixed-width intervals (e.g., all rows in the same calendar week) or computing a statistic over a sliding window anchored to each row's position.
+
+Polars provides two dedicated contexts for this: `group_by_dynamic()` and `rolling()`. Neither is available natively in dplyr — R users typically reach for `{tsibble}` and `{slider}` for equivalent operations. pandas offers `resample()` and `.rolling()` with broadly similar semantics, but Polars integrates both into its lazy execution engine and supports additional grouping keys alongside the time dimension.
+
+**`group_by_dynamic()`** partitions a sorted time column into equal-width buckets and aggregates each bucket. The data must be sorted by the index column before calling it:
+
+```{python}
+flights_ts = (
+    full_flights
+    .with_columns(pl.col('FlightDate').str.to_date('%Y-%m-%d'))
+    .sort('FlightDate')
+)
+
+(
+    flights_ts
+    .group_by_dynamic('FlightDate', every='1w')
+    .agg(
+        n_flights  = pl.len(),
+        mean_delay = pl.col('DepDelay').mean()
+    )
+)
+```
+
+The result contains one row per bucket; the `FlightDate` column holds the left boundary of each interval. Common `every` values: `'1d'` (daily), `'1w'` (weekly), `'1mo'` (monthly), `'1y'` (yearly).
+
+Adding `group_by=` produces a separate time series per value of a categorical variable, combining dynamic grouping with ordinary grouping in one call:
+
+```{python}
+(
+    flights_ts
+    .group_by_dynamic('FlightDate', every='1w', group_by='Reporting_Airline')
+    .agg(
+        n_flights  = pl.len(),
+        mean_delay = pl.col('DepDelay').mean()
+    )
+    .sort(['Reporting_Airline', 'FlightDate'])
+    .head(10)
+)
+```
+
+**`rolling()`** computes aggregations over a sliding time window. For each row, it looks back `period` in time from the row's index value and aggregates all rows that fall within that window — producing one result per input row:
+
+```{python}
+# aggregate to daily level first, then apply a 7-day rolling window
+daily_flights = (
+    flights_ts
+    .group_by('FlightDate')
+    .agg(
+        n_flights  = pl.len(),
+        mean_delay = pl.col('DepDelay').mean()
+    )
+    .sort('FlightDate')
+)
+
+(
+    daily_flights
+    .rolling('FlightDate', period='7d')
+    .agg(
+        rolling_flights     = pl.col('n_flights').sum(),
+        rolling_mean_delay  = pl.col('mean_delay').mean()
+    )
+)
+```
+
+The key distinction between the two contexts:
+
+| | `group_by_dynamic()` | `rolling()` |
+|---|---|---|
+| Output rows | One per bucket | One per input row |
+| Window type | Fixed interval buckets | Sliding window per row |
+| Use case | Time-based summaries (weekly totals) | Moving averages, cumulative stats |
+
 
 ### Sort a DataFrame
 
