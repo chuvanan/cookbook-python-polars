@@ -1,0 +1,90 @@
+### Filtering rows
+
+Filtering rows in Polars maps directly to dplyr's `filter()`. The function name is the same; the main syntax difference is that Polars requires column references to be wrapped in `pl.col()`.
+
+* Retrieving all flights from Ohio (filtering based on one condition):
+
+```r
+# dplyr
+flights_from_ohio <- full_flights |> filter(OriginStateName == "Ohio")
+```
+
+```{python}
+flights_from_ohio = full_flights.filter(pl.col('OriginStateName') == 'Ohio')
+flights_from_ohio.shape
+```
+
+* Filtering based on multiple conditions:
+
+```r
+# dplyr — comma-separated predicates are implicitly AND-ed
+flights_from_ohio_to_virginia <- full_flights |>
+    filter(OriginStateName == "Ohio", DestStateName == "Virginia")
+```
+
+```{python}
+# note that each predicate must be enclosed within parentheses when using &
+flights_from_ohio_to_virginia = full_flights.filter(
+    (pl.col('OriginStateName') == 'Ohio') & (pl.col('DestStateName') == 'Virginia')
+)
+
+# comma-separated predicates are also AND-ed, avoiding the need for parentheses
+# flights_from_ohio_to_virginia = full_flights.filter(
+#     pl.col('OriginStateName') == 'Ohio',
+#     pl.col('DestStateName') == 'Virginia'
+# )
+
+flights_from_ohio_to_virginia.shape
+```
+
+* Filtering with a negative condition:
+
+```r
+# dplyr
+flights_from_ohio_except_virginia <- full_flights |>
+    filter(OriginStateName == "Ohio", DestStateName != "Virginia")
+```
+
+```{python}
+flights_from_ohio_except_virginia = full_flights.filter(
+    pl.col('OriginStateName') == 'Ohio',
+    ~(pl.col('DestStateName') == 'Virginia')
+)
+flights_from_ohio_except_virginia.shape
+```
+
+* Filtering with a set of values using `.is_in()`, the equivalent of R's `%in%` operator:
+
+```r
+# dplyr
+major_hubs <- full_flights |>
+    filter(OriginStateName %in% c("California", "Texas", "New York"))
+```
+
+```{python}
+major_hubs = full_flights.filter(
+    pl.col('OriginStateName').is_in(['California', 'Texas', 'New York'])
+)
+major_hubs.shape
+```
+
+* Why prefer `.filter()` over boolean indexing? The key reason is that `.filter()` integrates with Polars' lazy execution engine, which pushes the predicate down to the scan and avoids loading unnecessary rows into memory:
+
+```{python}
+import time
+
+start = time.perf_counter()
+lazy_result = (
+    pl.scan_csv('./data/On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2022_1.csv')
+    .filter(pl.col('OriginStateName') == 'Ohio')
+    .collect()
+)
+print(f"lazy:  {time.perf_counter() - start:.3f}s")
+
+start = time.perf_counter()
+eager_result = (
+    pl.read_csv('./data/On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2022_1.csv')
+    .filter(pl.col('OriginStateName') == 'Ohio')
+)
+print(f"eager: {time.perf_counter() - start:.3f}s")
+```

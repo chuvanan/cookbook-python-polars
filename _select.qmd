@@ -1,0 +1,131 @@
+### Selecting columns
+
+Polars offers three levels of column selection, progressing from explicit to declarative:
+
+1. **By name** — a string list; simple but brittle if column names change
+2. **By type** — `pl.col(dtype)` selects all columns of a given type
+3. **Selectors** (`polars.selectors`) — a high-level API for flexible, composable selection based on types, name patterns, or properties
+
+Selectors are the recommended approach for anything beyond a simple name list. They produce code that reads closer to intent, composes naturally with set operations, and adapts automatically when the schema changes.
+
+#### Selecting by name
+
+```r
+# dplyr
+full_flights |> select(FlightDate, Tail_Number)
+```
+
+```{python}
+full_flights.select(['FlightDate', 'Tail_Number']).head(3)
+```
+
+#### Selecting by type
+
+`pl.col(dtype)` selects all columns that match a given type. Useful for applying the same transformation to every column of a type:
+
+```r
+# dplyr
+full_flights |> select(where(is.double))
+full_flights |> select(where(is.integer))
+```
+
+```{python}
+full_flights.select(pl.col(pl.Float64)).head(3)
+```
+
+```{python}
+full_flights.select(pl.col(pl.Int64)).head(3)
+```
+
+#### Selecting with Selectors
+
+`polars.selectors` provides a declarative selection API that closely mirrors dplyr's [selection helpers](https://dplyr.tidyverse.org/reference/select.html). Import it as `cs` by convention:
+
+```{python}
+import polars.selectors as cs
+```
+
+**Select by data type:**
+
+```r
+# dplyr
+full_flights |> select(where(is.numeric))
+full_flights |> select(where(is.character))
+```
+
+```{python}
+full_flights.select(cs.numeric()).head(3)  # all Int*, UInt*, Float* columns
+```
+
+```{python}
+full_flights.select(cs.string()).head(3)   # all String columns
+```
+
+**Select by name pattern:**
+
+```r
+# dplyr
+full_flights |> select(starts_with("Flight"))
+full_flights |> select(ends_with("Delay"))
+```
+
+```{python}
+full_flights.select(cs.starts_with('Flight')).head(3)
+```
+
+```{python}
+full_flights.select(cs.ends_with('Delay')).head(3)
+```
+
+**Combining selectors with set operations:**
+
+This is where selectors go beyond what bare `pl.col()` can express. Selectors support set operations using Python operators, making complex multi-criteria selections readable in a single expression:
+
+| operator | meaning                                        | dplyr equivalent          |
+|----------|------------------------------------------------|---------------------------|
+| `|`      | union — columns matching either selector       | `c(starts_with(), ...)`   |
+| `&`      | intersection — columns matching both selectors | `where(\(x) ... & ...)`   |
+| `-`      | difference — left selector minus right         | not available             |
+| `~`      | complement — all columns not matching          | `!selector`               |
+
+```{python}
+# union: columns starting with "Flight" OR ending with "Delay"
+full_flights.select(cs.starts_with('Flight') | cs.ends_with('Delay')).head(3)
+```
+
+```{python}
+# difference: numeric columns excluding Int64 (i.e. Float columns only)
+full_flights.select(cs.numeric() - cs.integer()).head(3)
+```
+
+```{python}
+# complement: everything except string columns
+full_flights.select(~cs.string()).head(3)
+```
+
+A full comparison between dplyr and Polars selection features:
+
+| dplyr action                            | dplyr function                    | polars selector    |
+|-----------------------------------------|-----------------------------------|--------------------|
+| matches all columns                     | `everything()`                    | `cs.all()`         |
+| matches all numeric columns             | `where(is.numeric)`               | `cs.numeric()`     |
+| matches all integer columns             | `where(is.integer)`               | `cs.integer()`     |
+| matches all float columns               | `where(is.double)`                | `cs.float()`       |
+| matches all string columns              | `where(is.character)`             | `cs.string()`      |
+| matches all factor/categorical columns  | `where(is.factor)`                | `cs.categorical()` |
+| matches all date columns                | `where(\(x) class(x) == "Date")`  | `cs.date()`        |
+| matches all datetime columns            | not available                     | `cs.datetime()`    |
+| matches all time columns                | not available                     | `cs.time()`        |
+| matches all temporal columns            | not available                     | `cs.temporal()`    |
+| select the last column                  | `last_col()`                      | `cs.last()`        |
+| starts with a prefix                    | `starts_with()`                   | `cs.starts_with()` |
+| ends with a suffix                      | `ends_with()`                     | `cs.ends_with()`   |
+| contains a literal string               | `contains()`                      | `cs.contains()`    |
+| matches a regular expression            | `matches()`                       | `cs.matches()`     |
+| complement of a selection               | `!selector`                       | `~selector`        |
+| difference between selections           | not available                     | `cs_a - cs_b`      |
+| range of consecutive columns            | `col1:col10`                      | not available      |
+| any of a list, ignoring missing names   | `any_of()`                        | not available      |
+
+
+**Note**: All available selector functions can be found [here](https://docs.pola.rs/api/python/stable/reference/selectors.html#functions)

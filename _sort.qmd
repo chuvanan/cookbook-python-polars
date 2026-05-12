@@ -1,0 +1,81 @@
+
+### Sort a DataFrame
+
+Sorting in Polars maps directly to dplyr's `arrange()`. The key differences are syntax and a small set of additional options that Polars exposes for controlling null placement and sort stability.
+
+#### Sorting by a single column
+
+```r
+# dplyr — ascending by default
+full_flights |> arrange(DepDelay)
+```
+
+```{python}
+full_flights.sort('DepDelay').select(['FlightDate', 'Origin', 'Dest', 'DepDelay']).head(5)
+```
+
+#### Sorting in descending order
+
+dplyr wraps the column name in `desc()`. Polars uses the `descending=` argument, which accepts either a single boolean or a list of booleans when sorting by multiple columns:
+
+```r
+# dplyr
+full_flights |> arrange(desc(DepDelay))
+```
+
+```{python}
+full_flights.sort('DepDelay', descending=True).select(['FlightDate', 'Origin', 'Dest', 'DepDelay']).head(5)
+```
+
+#### Sorting by multiple columns
+
+Pass a list of column names and a matching list of `descending=` flags:
+
+```r
+# dplyr — sort by carrier ascending, then by departure delay descending
+full_flights |> arrange(Reporting_Airline, desc(DepDelay))
+```
+
+```{python}
+(
+    full_flights
+    .sort(['Reporting_Airline', 'DepDelay'], descending=[False, True])
+    .select(['Reporting_Airline', 'FlightDate', 'Origin', 'Dest', 'DepDelay'])
+    .head(10)
+)
+```
+
+#### Handling nulls
+
+dplyr follows R's default: `NA` values sort to the end regardless of direction. Polars gives you explicit control via `nulls_last=`:
+
+- `nulls_last=True` — nulls appear at the bottom (matches R's default)
+- `nulls_last=False` — nulls appear at the top
+
+```{python}
+# nulls sorted to the top (Polars default)
+full_flights.sort('DepDelay').select(['FlightDate', 'DepDelay']).head(5)
+```
+
+```{python}
+# nulls sorted to the bottom — matches R / dplyr behaviour
+full_flights.sort('DepDelay', nulls_last=True).select(['FlightDate', 'DepDelay']).head(5)
+```
+
+#### Sort stability
+
+By default, Polars uses an unstable sort, which does not guarantee the relative order of rows with equal sort keys. For most analytical tasks this is irrelevant and the unstable sort is faster. When reproducibility of tie-breaking matters — for example, when the output order is semantically significant — pass `maintain_order=True`:
+
+```{python}
+full_flights.sort('Reporting_Airline', maintain_order=True).select(['Reporting_Airline', 'FlightDate']).head(5)
+```
+
+A comparison of the main options:
+
+| task | dplyr | Polars |
+|---|---|---|
+| sort ascending | `arrange(col)` | `.sort('col')` |
+| sort descending | `arrange(desc(col))` | `.sort('col', descending=True)` |
+| sort by multiple columns | `arrange(col1, desc(col2))` | `.sort(['col1', 'col2'], descending=[False, True])` |
+| nulls last | default behaviour | `nulls_last=True` |
+| stable sort | default behaviour | `maintain_order=True` |

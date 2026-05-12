@@ -1,0 +1,299 @@
+
+### Join DataFrames
+
+Joins combine two DataFrames by matching rows on one or more key columns. The table below is a quick reference for readers coming from dplyr:
+
+| Category | Join type | dplyr | Polars |
+|---|---|---|---|
+| **Equi joins** | left | `left_join(x, y)` | `x.join(y, how='left')` |
+| | right | `right_join(x, y)` | `x.join(y, how='right')` |
+| | full | `full_join(x, y)` | `x.join(y, how='full')` |
+| | inner | `inner_join(x, y)` | `x.join(y, how='inner')` |
+| | semi | `semi_join(x, y)` | `x.join(y, how='semi')` |
+| | anti | `anti_join(x, y)` | `x.join(y, how='anti')` |
+| **Non-equi joins** | cross | `cross_join(x, y)` | `x.join(y, how='cross')` |
+| | inequality | `inner_join(x, y, join_by(a >= b))` | `x.join_where(y, pl.col('a') >= pl.col('b'))` |
+| | asof/rolling | `left_join(x, y, join_by(closest(a <= b)))` | `x.join_asof(y, ...)` |
+| | overlap | `inner_join(x, y, join_by(overlaps(...)))` | not available |
+
+To illustrate joins, we use a small airline name lookup table alongside `full_flights`:
+
+```{python}
+airlines = pl.DataFrame({
+    'carrier': ['AA', 'UA', 'DL', 'WN', 'B6', 'AS', 'NK', 'F9', 'G4', 'HA',
+                'YX', '9E', 'EV', 'MQ', 'OH', 'OO'],
+    'name': [
+        'American Airlines', 'United Airlines', 'Delta Air Lines',
+        'Southwest Airlines', 'JetBlue Airways', 'Alaska Airlines',
+        'Spirit Airlines', 'Frontier Airlines', 'Allegiant Air', 'Hawaiian Airlines',
+        'Republic Airways', 'Endeavor Air', 'ExpressJet Airlines', 'Envoy Air',
+        'PSA Airlines', 'SkyWest Airlines'
+    ]
+})
+```
+
+#### Mutating joins
+
+**Mutating joins** add columns from the right table to the left, matching on shared keys. The four types differ only in how they handle unmatched rows:
+
+- **inner** — only rows with a match in both tables
+- **left** — all left rows; unmatched right-table columns filled with `null`
+- **right** — all right rows; unmatched left-table columns filled with `null`
+- **full** — all rows from either table; unmatched cells filled with `null`
+
+dplyr provides a separate function for each join type; Polars uses a single `.join()` with a `how=` argument.
+
+**Left join** — the most common in practice. Keeps every left row and fills unmatched right-table columns with `null`. When the key columns have different names in the two tables, use `left_on=` / `right_on=` in Polars and `join_by(left_key == right_key)` in dplyr:
+
+```r
+# dplyr
+full_flights |>
+    left_join(airlines, join_by(Reporting_Airline == carrier)) |>
+    select(FlightDate, Reporting_Airline, name, Origin, DepDelay)
+```
+
+```{python}
+(
+    full_flights
+    .join(airlines, left_on='Reporting_Airline', right_on='carrier', how='left')
+    .select(['FlightDate', 'Reporting_Airline', 'name', 'Origin', 'DepDelay'])
+    .head(5)
+)
+```
+
+When key column names are identical in both tables, use `on=` (Polars) or a single-argument `join_by()` (dplyr):
+
+```r
+# dplyr: single argument when names match
+flights |> left_join(airlines, join_by(carrier))
+```
+
+```python
+# Polars: on= when key names are identical
+flights.join(airlines, on='carrier', how='left')
+```
+
+**Inner join** — discards rows with no match in either table:
+
+```r
+# dplyr
+full_flights |>
+    inner_join(airlines, join_by(Reporting_Airline == carrier))
+```
+
+```{python}
+(
+    full_flights
+    .join(airlines, left_on='Reporting_Airline', right_on='carrier', how='inner')
+    .select(['FlightDate', 'Reporting_Airline', 'name', 'Origin', 'DepDelay'])
+    .head(5)
+)
+```
+
+#### Handling duplicate column names
+
+When both tables have non-key columns with the same name, Polars appends a suffix to the right table's version. The default is `'_right'`; dplyr defaults to `.x` / `.y`:
+
+```r
+# dplyr: control suffixes with suffix = c("", "_right")
+x |> left_join(y, join_by(key), suffix = c("", "_right"))
+```
+
+```python
+# Polars: suffix= controls what is appended to right-table duplicates (default: '_right')
+x.join(y, on='key', how='left', suffix='_right')
+```
+
+#### Coalescing join keys
+
+After joining on `left_on='a'` and `right_on='b'`, Polars offers explicit control over whether both key columns appear in the output via `coalesce=`:
+
+- `coalesce=None` (default) — coalesce unless `how='full'`
+- `coalesce=True` — always merge the two key columns into one
+- `coalesce=False` — keep both key columns separately, appending `suffix` to the right one
+
+dplyr always coalesces the join key into the left column name. The Polars `coalesce=False` option is useful when you want to inspect both keys after a full outer join to diagnose mismatches:
+
+```{python}
+# coalesce=False: keeps both 'Reporting_Airline' (left) and 'carrier' (right)
+(
+    full_flights
+    .join(airlines, left_on='Reporting_Airline', right_on='carrier', how='left', coalesce=False)
+    .select(['Reporting_Airline', 'carrier', 'name', 'DepDelay'])
+    .head(3)
+)
+```
+
+#### Filtering joins
+
+**Filtering joins** keep or discard left-table rows based on whether a match exists in the right table. Unlike mutating joins, they never add columns or duplicate rows — they only filter.
+
+```{python}
+major_airports = pl.DataFrame({
+    'iata': ['ATL', 'LAX', 'ORD', 'DFW', 'DEN'],
+    'city': ['Atlanta', 'Los Angeles', 'Chicago', 'Dallas', 'Denver']
+})
+```
+
+**Semi join** — keeps left rows that have at least one match in the right table:
+
+```r
+# dplyr: flights departing from a major hub
+full_flights |> semi_join(major_airports, join_by(Origin == iata))
+```
+
+```{python}
+full_flights.join(major_airports, left_on='Origin', right_on='iata', how='semi').shape
+```
+
+**Anti join** — keeps left rows that have no match in the right table:
+
+```r
+# dplyr: flights that did NOT depart from any major hub
+full_flights |> anti_join(major_airports, join_by(Origin == iata))
+```
+
+```{python}
+full_flights.join(major_airports, left_on='Origin', right_on='iata', how='anti').shape
+```
+
+Neither semi nor anti joins add columns from the right table; the right table acts purely as a filter mask.
+
+#### Validating join relationships
+
+A common silent bug: a join expected to be many-to-one fans out unexpectedly because the right table has duplicate keys, inflating the output row count without any error.
+
+**dplyr** warns by default when it detects an unexpected many-to-many relationship and requires explicit acknowledgement via `relationship=`:
+
+```r
+# dplyr warns when many-to-many is detected
+df1 |> inner_join(df2, join_by(key))
+#> Warning: Detected an unexpected many-to-many relationship
+
+# acknowledge explicitly
+df1 |> inner_join(df2, join_by(key), relationship = "many-to-many")
+
+# assert one-to-one — errors if either table has duplicate keys
+df1 |> inner_join(df2, join_by(key), relationship = "one-to-one")
+```
+
+**Polars** exposes this as the `validate=` parameter with four options:
+
+| `validate=` | meaning | asserts |
+|---|---|---|
+| `'m:m'` (default) | many-to-many | no check |
+| `'1:1'` | one-to-one | keys unique in both tables |
+| `'1:m'` | one-to-many | keys unique in left table |
+| `'m:1'` | many-to-one | keys unique in right table |
+
+Unlike dplyr, Polars defaults to `'m:m'` (no check) and raises an `InvalidOperationError` immediately when validation fails rather than warning. Declaring the expected relationship explicitly is good practice — it documents intent and catches data-quality problems early:
+
+```{python}
+# assert that airlines has one row per carrier code (many-to-one join)
+(
+    full_flights
+    .join(airlines, left_on='Reporting_Airline', right_on='carrier', how='left', validate='m:1')
+    .select(['FlightDate', 'Reporting_Airline', 'name', 'DepDelay'])
+    .head(5)
+)
+```
+
+#### Non-equi joins
+
+**Non-equi joins** match rows using conditions other than equality — comparisons such as `<`, `<=`, `>`, or `>=`. Both dplyr and Polars support them, but with different syntax. In Polars they are separate methods rather than arguments to `.join()`.
+
+##### Cross join
+
+A **cross join** returns the Cartesian product — every left row paired with every right row. It requires no key:
+
+```r
+# dplyr
+df |> cross_join(df)
+```
+
+```{python}
+# Polars: how='cross', no on= argument
+carriers = full_flights.select('Reporting_Airline').unique()
+origins  = full_flights.select('Origin').unique().head(5)
+
+# all carrier–origin combinations
+carriers.join(origins, how='cross').shape
+```
+
+Cross joins grow quadratically with table size; use only with small tables.
+
+##### Inequality joins
+
+An **inequality join** matches rows where a value satisfies a relational condition (`<`, `<=`, `>`, `>=`) against a value in the right table. In dplyr this is expressed inside `join_by()`; in Polars it uses the dedicated `.join_where()` method, which accepts one or more Polars expression predicates AND-ed together:
+
+```r
+# dplyr: pair employees with projects whose skill range they fall within
+employees |>
+    inner_join(projects, join_by(skill_level >= min_skill, skill_level <= max_skill))
+```
+
+```{python}
+employees = pl.DataFrame({
+    'name': ['Alice', 'Bob', 'Carol'],
+    'skill_level': [3, 7, 5]
+})
+
+projects = pl.DataFrame({
+    'project': ['Alpha', 'Beta', 'Gamma'],
+    'min_skill': [1, 5, 2],
+    'max_skill': [4, 9, 6]
+})
+
+employees.join_where(
+    projects,
+    pl.col('skill_level') >= pl.col('min_skill'),
+    pl.col('skill_level') <= pl.col('max_skill')
+)
+```
+
+`.join_where()` always performs an inner join; rows that satisfy none of the predicates are excluded.
+
+##### Asof (rolling) join
+
+An **asof join** is a left join that matches each left row to the nearest right row whose key is ≤ (or ≥) the left key, without requiring an exact match. This is the standard pattern for joining event data to a slowly-changing reference table — for example, attaching the most recently published fuel price to each daily flight summary.
+
+In dplyr this uses `join_by(closest(...))`:
+
+```r
+# dplyr: attach the most recent fuel price on or before each date
+daily_summary |>
+    left_join(fuel_prices, join_by(closest(FlightDate >= price_date)))
+```
+
+Polars provides `join_asof()`, a dedicated method that requires both tables to be sorted by the join key:
+
+```{python}
+fuel_prices = pl.DataFrame({
+    'price_date':         pl.Series(['2022-01-01', '2022-02-01']).str.to_date(),
+    'fuel_usd_per_gallon': [2.85, 2.97]
+})
+
+daily_summary = (
+    flights_ts
+    .group_by('FlightDate')
+    .agg(n_flights=pl.len(), mean_delay=pl.col('DepDelay').mean())
+    .sort('FlightDate')
+)
+
+daily_summary.join_asof(
+    fuel_prices,
+    left_on='FlightDate',
+    right_on='price_date',
+    strategy='backward'
+)
+```
+
+The `strategy=` parameter controls the matching direction:
+
+| `strategy=` | matches the right row whose key is... |
+|---|---|
+| `'backward'` (default) | ≤ the left key (most recent prior record) |
+| `'forward'` | ≥ the left key (next upcoming record) |
+| `'nearest'` | closest to the left key (either direction) |
+
+An optional `tolerance=` argument limits the matching window: `tolerance='30d'` returns `null` instead of a match if the nearest right key is more than 30 days away from the left key.
