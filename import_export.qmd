@@ -135,13 +135,317 @@ dfs
 
 ### Reading spreadsheets
 
+Polars reads Excel (`.xlsx`, `.xls`) and ODS files with `read_excel()`. Unlike CSV, Excel requires an external parsing engine — Polars supports three:
 
+| engine | package | notes |
+|---|---|---|
+| `'calamine'` (default) | `fastexcel` | fastest; Rust-based; recommended for most files |
+| `'xlsx2csv'` | `xlsx2csv` | converts to CSV in memory then reads |
+| `'openpyxl'` | `openpyxl` | slowest but handles unusual or malformed files |
+
+```r
+# R: readxl
+library(readxl)
+read_excel("flights_summary.xlsx")                      # first sheet
+read_excel("flights_summary.xlsx", sheet = "January")  # by name
+read_excel("flights_summary.xlsx", sheet = 2)           # by position
+```
+
+```{python}
+#| eval: false
+# Polars: first sheet (default)
+pl.read_excel("flights_summary.xlsx")
+
+# specific sheet by name
+pl.read_excel("flights_summary.xlsx", sheet_name="January")
+```
+
+When a workbook contains multiple sheets, pass `sheet_id=0` to read all sheets at once — Polars returns a dictionary keyed by sheet name:
+
+```{python}
+#| eval: false
+# read all sheets into a dict of DataFrames
+sheets = pl.read_excel("flights_summary.xlsx", sheet_id=0)
+january_df = sheets["January"]
+```
+
+The equivalent in R is iterating with `purrr::map()` over `readxl::excel_sheets()`:
+
+```r
+# R: read all sheets
+library(purrr)
+path <- "flights_summary.xlsx"
+sheets <- excel_sheets(path) |>
+    set_names() |>
+    map(read_excel, path = path)
+```
+
+You can override inferred column types with `schema_overrides=`, matching `readxl`'s `col_types=`:
+
+```{python}
+#| eval: false
+pl.read_excel(
+    "flights_summary.xlsx",
+    sheet_name="January",
+    schema_overrides={"DepDelay": pl.Float32, "Reporting_Airline": pl.Categorical}
+)
+```
 
 ### Reading a SQL table
 
+Polars can query any SQL database directly, returning a `DataFrame` without going through pandas. There are two functions:
 
+- **`pl.read_database_uri(query, uri)`** — takes a connection string; uses the `connectorx` engine by default (fastest, zero-copy Arrow transfer)
+- **`pl.read_database(query, connection)`** — takes an existing DBAPI2 connection object (e.g., `sqlite3`, `psycopg2`, `pyodbc`)
+
+Both are equivalent to R's `DBI::dbGetQuery()` + `dbplyr::collect()`.
+
+```r
+# R: DBI + dbplyr
+library(DBI)
+con <- dbConnect(RPostgres::Postgres(),
+                 host = "db.example.com", port = 5432,
+                 dbname = "flights", user = "anchu")
+tbl(con, "on_time") |>
+    filter(OriginStateName == "Ohio") |>
+    collect()
+dbDisconnect(con)
+```
+
+**Using a URI string** (connectorx engine — recommended for PostgreSQL, MySQL, SQL Server):
+
+```{python}
+#| eval: false
+uri = "postgresql://user:password@host:5432/flights_db"
+
+ohio_flights = pl.read_database_uri(
+    query="SELECT * FROM on_time WHERE OriginStateName = 'Ohio'",
+    uri=uri
+)
+```
+
+**Using an existing connection** (works with Python's built-in `sqlite3` and any DBAPI2 driver):
+
+```{python}
+import sqlite3
+
+# connect to an in-memory SQLite database as an example
+conn = sqlite3.connect(":memory:")
+conn.execute("""
+    CREATE TABLE on_time (
+        FlightDate TEXT, Reporting_Airline TEXT, Origin TEXT, DepDelay REAL
+    )
+""")
+conn.execute("INSERT INTO on_time VALUES ('2022-01-14', 'AA', 'CMH', -3.0)")
+conn.execute("INSERT INTO on_time VALUES ('2022-01-15', 'UA', 'ORD', 12.0)")
+conn.commit()
+
+result = pl.read_database(
+    query="SELECT * FROM on_time WHERE DepDelay > 0",
+    connection=conn
+)
+result
+```
+
+```{python}
+conn.close()
+```
+
+For large result sets, `read_database_uri` supports partitioned parallel reads via `partition_on=`, `partition_range=`, and `partition_num=` — useful when fetching millions of rows from a database with an integer key column.
 
 ### Reading S3
 
+Polars reads CSV, Parquet, and other formats directly from S3, GCS, or Azure Blob Storage using the same `read_*` and `scan_*` functions — just swap the local path for a cloud URI:
+
+```{python}
+#| eval: false
+# read a single Parquet file from S3
+df = pl.read_parquet("s3://my-bucket/flights/2022.parquet")
+
+# lazy scan with predicate pushdown (downloads only matching rows)
+lazy_df = (
+    pl.scan_parquet("s3://my-bucket/flights/*.parquet")
+    .filter(pl.col("OriginStateName") == "Ohio")
+    .select(["FlightDate", "Reporting_Airline", "DepDelay"])
+    .collect()
+)
+```
+
+Authentication credentials are passed via `storage_options=` or picked up automatically from environment variables (e.g., `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`):
+
+```{python}
+#| eval: false
+storage_options = {
+    "aws_access_key_id":     "YOUR_KEY",
+    "aws_secret_access_key": "YOUR_SECRET",
+    "aws_region":            "us-east-1",
+}
+
+df = pl.scan_parquet(
+    "s3://my-bucket/flights/*.parquet",
+    storage_options=storage_options
+).collect()
+```
+
+For GCS and Azure, the URI scheme changes (`gs://` and `az://` respectively) but the API is identical. Install the matching filesystem library (`gcsfs` for GCS, `adlfs` for Azure) alongside `fsspec`.
 
 ## Writing data
+
+### Writing CSV
+
+`write_csv()` writes a `DataFrame` to a delimited file. The main parameters map directly to `readr::write_csv()`:
+
+```r
+# R: readr
+write_csv(full_flights, "output/flights_clean.csv")
+write_csv(full_flights, "output/flights_clean.csv.gz")   # auto-compressed
+```
+
+```{python}
+#| eval: false
+# write to CSV
+full_flights.write_csv("output/flights_clean.csv")
+
+# write with gzip compression
+full_flights.write_csv("output/flights_clean.csv.gz", compression="gzip")
+```
+
+Common options:
+
+| parameter | default | purpose |
+|---|---|---|
+| `separator` | `','` | field delimiter (use `'\t'` for TSV) |
+| `include_header` | `True` | write column names as first row |
+| `null_value` | `''` | string to write for `null` cells |
+| `date_format` | auto | format string for `Date` columns |
+| `compression` | `'uncompressed'` | `'gzip'` or `'zstd'` |
+
+### Writing Parquet
+
+Parquet is the recommended format for storing DataFrames on disk: it is columnar, strongly typed, and compresses very efficiently. Writing is a single method call:
+
+```r
+# R: arrow
+library(arrow)
+write_parquet(full_flights, "output/flights.parquet")
+```
+
+```{python}
+#| eval: false
+full_flights.write_parquet("output/flights.parquet")
+
+# choose compression codec (zstd is the default and generally best)
+full_flights.write_parquet("output/flights.parquet", compression="snappy")
+```
+
+For very large tables, `partition_by=` writes a directory of per-partition Parquet files (Hive-style), which cloud query engines and `scan_parquet()` can then read with partition pruning:
+
+```{python}
+#| eval: false
+# write one file per carrier: output/Reporting_Airline=AA/data.parquet, etc.
+full_flights.write_parquet(
+    "output/flights_partitioned/",
+    partition_by="Reporting_Airline"
+)
+
+# read back with predicate pushdown — only the AA partition is loaded
+aa_flights = pl.scan_parquet(
+    "output/flights_partitioned/",
+    hive_partitioning=True
+).filter(pl.col("Reporting_Airline") == "AA").collect()
+```
+
+### Writing Excel
+
+`write_excel()` requires `xlsxwriter` (`pip install xlsxwriter`). It produces a formatted `.xlsx` file and supports multiple sheets, column widths, conditional formatting, and sparklines:
+
+```r
+# R: writexl
+library(writexl)
+write_xlsx(full_flights, "output/flights.xlsx")
+```
+
+```{python}
+#| eval: false
+# basic write
+full_flights.write_excel("output/flights.xlsx")
+
+# custom sheet name with auto-fitted column widths
+full_flights.write_excel(
+    "output/flights.xlsx",
+    worksheet="January 2022",
+    autofit=True
+)
+```
+
+To write multiple DataFrames to separate sheets in one workbook, pass an `xlsxwriter.Workbook` object:
+
+```{python}
+#| eval: false
+import xlsxwriter
+
+with xlsxwriter.Workbook("output/flights_multi.xlsx") as wb:
+    full_flights.filter(pl.col("OriginStateName") == "Ohio").write_excel(wb, worksheet="Ohio")
+    full_flights.filter(pl.col("OriginStateName") == "Texas").write_excel(wb, worksheet="Texas")
+```
+
+### Writing to a database
+
+`write_database()` inserts a `DataFrame` into a database table. Pass a connection URI string and choose the engine:
+
+```r
+# R: DBI
+dbWriteTable(con, "on_time_clean", full_flights)
+```
+
+```{python}
+#| eval: false
+uri = "postgresql://user:password@host:5432/flights_db"
+
+full_flights.write_database(
+    table_name="on_time_clean",
+    connection=uri,
+    if_table_exists="replace"   # 'fail' | 'replace' | 'append'
+)
+```
+
+The `if_table_exists=` parameter controls behaviour when the target table already exists — equivalent to the `overwrite=` argument in `DBI::dbWriteTable()`.
+
+For SQLite (via the built-in `sqlite3` module and ADBC):
+
+```{python}
+#| eval: false
+full_flights.write_database(
+    table_name="on_time",
+    connection="sqlite:///output/flights.db",
+    engine="adbc"
+)
+```
+
+### Writing to S3
+
+`write_parquet()` and `write_csv()` accept S3 (and GCS/Azure) URIs directly, with the same `storage_options=` interface as reading:
+
+```{python}
+#| eval: false
+full_flights.write_parquet(
+    "s3://my-bucket/flights/2022_jan.parquet",
+    storage_options={
+        "aws_access_key_id":     "YOUR_KEY",
+        "aws_secret_access_key": "YOUR_SECRET",
+        "aws_region":            "us-east-1",
+    }
+)
+```
+
+For formats not natively supported with cloud URIs (e.g., compressed CSV), use an `fsspec` filesystem object:
+
+```{python}
+#| eval: false
+import s3fs, gzip
+
+fs = s3fs.S3FileSystem()
+with fs.open("s3://my-bucket/flights/2022_jan.csv.gz", "wb") as cloud_f:
+    with gzip.open(cloud_f, "w") as f:
+        full_flights.write_csv(f)
+```
