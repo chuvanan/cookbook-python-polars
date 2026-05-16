@@ -1,0 +1,114 @@
+
+
+Pivoting reshapes a DataFrame between **long** (many rows, few columns) and **wide** (few rows, many columns) layouts. The table below maps the tidyr verbs to Polars:
+
+| operation | tidyr | Polars |
+|---|---|---|
+| long → wide | `pivot_wider(names_from, values_from)` | `df.pivot(on, values)` |
+| wide → long | `pivot_longer(cols, names_to, values_to)` | `df.unpivot(on, variable_name, value_name)` |
+
+### pivot — long to wide
+
+`pivot()` spreads the distinct values of one column across new column headers, placing the aggregated values of another column into those cells.
+
+The main parameters are:
+
+- `on` — the column whose values become new column names
+- `index` — the columns that remain as row identifiers
+- `values` — the column whose values fill the new cells
+- `aggregate_function` — how to summarise when multiple rows map to the same cell (`'sum'`, `'mean'`, `'min'`, `'max'`, `'first'`, `'last'`, `'len'`); pass `None` when each cell is guaranteed to have exactly one value
+
+As an example, take the long-format table of flight counts by carrier and day of week, then spread the day numbers across columns:
+
+```r
+# tidyr
+carrier_day_counts |>
+  pivot_wider(names_from = DayOfWeek, values_from = n_flights)
+```
+
+```{python}
+# long-format summary: one row per carrier × day-of-week
+carrier_day_counts = (
+    full_flights
+    .filter(pl.col('Reporting_Airline').is_in(['AA', 'UA', 'DL', 'WN']))
+    .group_by(['Reporting_Airline', 'DayOfWeek'])
+    .agg(n_flights=pl.len())
+    .sort(['Reporting_Airline', 'DayOfWeek'])
+)
+carrier_day_counts.head(6)
+```
+
+```{python}
+# pivot wider: days become column names
+carrier_day_counts.pivot(
+    on='DayOfWeek',
+    index='Reporting_Airline',
+    values='n_flights',
+    aggregate_function=None,
+    sort_columns=True
+)
+```
+
+`sort_columns=True` sorts the new column headers numerically or alphabetically, which is useful when the source data is unordered. The `separator=` parameter controls the delimiter used when multiple `values` columns produce composite names (e.g. `'n_flights_AA'`).
+
+### unpivot — wide to long
+
+`unpivot()` is the inverse: it collapses selected columns into two columns — one holding the former column names, one holding the values. This is the `pivot_longer()` equivalent.
+
+Key parameters:
+
+- `on` — columns to melt into rows (the "measure" columns)
+- `index` — columns to keep as row identifiers (the "id" columns)
+- `variable_name` — name for the new column holding the former column headers (default `'variable'`)
+- `value_name` — name for the new column holding the values (default `'value'`)
+
+```r
+# tidyr
+carrier_day_wide |>
+  pivot_longer(
+    cols = -Reporting_Airline,
+    names_to = 'day_of_week',
+    values_to = 'n_flights'
+  )
+```
+
+```{python}
+carrier_day_wide = carrier_day_counts.pivot(
+    on='DayOfWeek',
+    index='Reporting_Airline',
+    values='n_flights',
+    aggregate_function=None,
+    sort_columns=True
+)
+
+carrier_day_wide.unpivot(
+    on=['1', '2', '3', '4', '5', '6', '7'],
+    index='Reporting_Airline',
+    variable_name='day_of_week',
+    value_name='n_flights'
+).sort(['Reporting_Airline', 'day_of_week'])
+```
+
+### Lazy evaluation caveat
+
+`pivot()` is an **eager-only** operation in Polars. The output schema depends on the distinct values found in the `on` column at runtime, which a `LazyFrame` cannot know statically. Two workarounds exist:
+
+1. Collect the lazy query before pivoting, then re-wrap in lazy if needed:
+
+```python
+df.lazy().collect().pivot(...).lazy()
+```
+
+2. Pre-declare the expected column values with `on_columns=`:
+
+```python
+df.lazy().pivot(
+    on='DayOfWeek',
+    on_columns=['1', '2', '3', '4', '5', '6', '7'],
+    index='Reporting_Airline',
+    values='n_flights',
+    aggregate_function='sum'
+)
+```
+
+`unpivot()` does not have this restriction — the output schema is always known upfront.
