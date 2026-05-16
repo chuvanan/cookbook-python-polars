@@ -5,7 +5,7 @@
 import polars as pl
 ```
 
-To showcase the robust syntax and efficiency of the polars package, we will leverage a moderately-sized dataset, comprising approximately 530,000 rows.
+All examples in this chapter use a real-world dataset of approximately 530,000 US domestic flights from January 2022.
 
 ```{python}
 full_flights = pl.read_csv('./data/On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2022_1.csv')
@@ -158,7 +158,7 @@ One practical consequence of this is that in R, `filter()` works on any compatib
 {{< include _null.qmd >}}
 
 
-## Strings methods
+## String methods
 
 <!-- Strings -->
 

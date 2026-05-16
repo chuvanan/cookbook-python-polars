@@ -68,23 +68,4 @@ major_hubs = full_flights.filter(
 major_hubs.shape
 ```
 
-* Why prefer `.filter()` over boolean indexing? The key reason is that `.filter()` integrates with Polars' lazy execution engine, which pushes the predicate down to the scan and avoids loading unnecessary rows into memory:
-
-```{python}
-import time
-
-start = time.perf_counter()
-lazy_result = (
-    pl.scan_csv('./data/On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2022_1.csv')
-    .filter(pl.col('OriginStateName') == 'Ohio')
-    .collect()
-)
-print(f"lazy:  {time.perf_counter() - start:.3f}s")
-
-start = time.perf_counter()
-eager_result = (
-    pl.read_csv('./data/On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2022_1.csv')
-    .filter(pl.col('OriginStateName') == 'Ohio')
-)
-print(f"eager: {time.perf_counter() - start:.3f}s")
-```
+* Why prefer `.filter()` over boolean indexing (`df[df['col'] == value]`)? `.filter()` integrates with Polars' lazy execution engine: when used with `scan_csv()` or `scan_parquet()`, the predicate is pushed down to the file scan so only qualifying rows are ever read from disk. Boolean indexing always loads the full dataset first. See the [Lazy API](#lazy-api) chapter for a detailed benchmark.

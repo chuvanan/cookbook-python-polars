@@ -4,7 +4,7 @@ This book was inspired by a series of [blog posts](https://www.emilyriederer.com
 tidyverse tools. In particular, this book explores the `Polars` library, a rising star in the DataFrame space (alongside established players like Pandas, Dask, Modin, Ray, and Vaex).
 
 In a nutshell, Polars is defined as a [query engine with a DataFrame front-end](https://pola.rs/posts/polars_birds_eye_view/). It offers a rich set of intuitive functions and principled workflows 
-for data manipulation and analysis. Designed from the ground up with performance in mind, Polars is also noted for its [lightning-fast execution speed](https://www.ritchievink.com/blog/2021/02/28/i-wrote-one-of-the-fastest-dataframe-libraries/). ~~Despite its quick rise in popularity, `Polars` is still in its early stages of development.~~ `Polars` has finally reached the [milestone of version 1.0](https://pola.rs/posts/announcing-polars-1/)
+for data manipulation and analysis. Designed from the ground up with performance in mind, Polars is also noted for its [lightning-fast execution speed](https://www.ritchievink.com/blog/2021/02/28/i-wrote-one-of-the-fastest-dataframe-libraries/). Polars has reached the [milestone of version 1.0](https://pola.rs/posts/announcing-polars-1/), signalling API stability and production readiness.
 
 The majority of this book contains structured examples of data wrangling tasks that demonstrate idiomatic Polars and related dplyr/tidyr code for comparison. Examples might include discussion on API choices.
 

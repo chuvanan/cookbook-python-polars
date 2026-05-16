@@ -128,4 +128,4 @@ A full comparison between dplyr and Polars selection features:
 | any of a list, ignoring missing names   | `any_of()`                        | not available      |
 
 
-**Note**: All available selector functions can be found [here](https://docs.pola.rs/api/python/stable/reference/selectors.html#functions)
+The full list of selector functions is available in the [Polars selectors reference](https://docs.pola.rs/api/python/stable/reference/selectors.html#functions).

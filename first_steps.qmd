@@ -3,7 +3,7 @@
 
 ## Installation
 
-Let's kick off our journey into the world of data manipulation with the Polars library. First things first, we need to set up a project with [uv](https://docs.astral.sh/uv/), a fast Python package manager. Install the latest stable version with:
+Start by setting up a project with [uv](https://docs.astral.sh/uv/), a fast Python package manager, and install the latest stable Polars release:
 
 ```bash
 uv add polars
@@ -15,7 +15,7 @@ Depending on your use case, you might want to install the [optional dependencies
 uv add 'polars[numpy,pandas,pyarrow]'
 ```
 
-To gain insights into the installed Polars package, including version details and enabled features, utilize the `show_versions()` function:
+To inspect the installed version and enabled features, use `show_versions()`:
 
 ```{python}
 import polars as pl
@@ -25,10 +25,10 @@ pl.show_versions()
 
 ## Initial exploration
 
-For better presentation, this book use Polars' [configuration options](https://docs.pola.rs/api/python/stable/reference/config.html) to adjust the layout of printed tables. Specifically:
+Throughout this book, Polars' [configuration options](https://docs.pola.rs/api/python/stable/reference/config.html) are set to keep output compact and readable:
 
-- Limit the number of columns and rows displayed in DataFrames to 10 each
-- Apply stylish formatting to the tables for pleasant reading experience
+- Limit displayed columns and rows to 10 each
+- Apply rounded-corner table formatting
 
 
 ```{python}
@@ -47,7 +47,7 @@ Reading a CSV file using Polars is straightforward. Let's take a quick look:
 flights = pl.read_csv('./data/flights.csv')
 ```
 
-For those familiar with R's dplyr, a similar method called `glimpse()` is available:
+Like dplyr's `glimpse()`, Polars provides the same method for a compact column-by-column overview:
 
 ```{python}
 # Glimpse the first 10 columns
@@ -103,7 +103,7 @@ flights.shape
 
 ### Converting from pandas
 
-Transitioning from a Pandas DataFrame to a Polars DataFrame is effortless with the `from_pandas()` method:
+To convert an existing pandas DataFrame, use `from_pandas()`:
 
 :::{.column-margin}
 For efficient zero-copy conversion, both Pandas and Polars rely on the `pyarrow` library as an interchange format.
@@ -154,7 +154,7 @@ print(s.mean())
 s.unique_counts()
 ```
 
-* `DataFrames` are 2-dimensional structures, similar to R's `data.frame`, built on top of `Series`. In the examples below, borrowed from [RealPython](https://realpython.com/polars-python/), we create DataFrame using two different approaches:
+* `DataFrames` are 2-dimensional structures, similar to R's `data.frame`, built on top of `Series`. They can be constructed from a dictionary of column arrays or from a list of `Series`:
 
 Creating DataFrame from a dictionary:
 
@@ -214,7 +214,7 @@ flights[:,:10].schema
 
 ## Summary
 
-At first glance, Polars offers the ease of use reminiscent of R, blending with the familiarity of pandas (minus any potential frustrations).
+`Series` and `DataFrame` are the two fundamental building blocks of Polars. Every operation in the chapters that follow — filtering, grouping, joining, reshaping — is expressed as a method call on one of these objects, chained together to form a readable pipeline. The next chapter puts them to work on a real-world dataset.
 
 
 
