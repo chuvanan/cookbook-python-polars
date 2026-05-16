@@ -145,12 +145,35 @@ One practical consequence of this is that in R, `filter()` works on any compatib
 
 ## Pivot a DataFrame
 
+<!-- Pivoting -->
+
+{{< include _pivot.qmd >}}
 
 ## Dealing with missing values
 
 
+<!-- Missing values -->
+
+
+{{< include _null.qmd >}}
+
+
 ## Strings methods
+
+<!-- Strings -->
+
+{{< include _string.qmd >}}
+
 
 ## Handling datetime
 
+<!-- Dates and times -->
+
+{{< include _datetime.qmd >}}
+
+
 ## Other useful methods
+
+<!-- Other useful methods -->
+
+{{< include _other.qmd >}}

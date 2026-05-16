@@ -1,0 +1,144 @@
+
+### Conditional expressions
+
+#### `when().then().otherwise()`
+
+The most common conditional pattern in data manipulation is creating a new column whose value depends on one or more conditions. In dplyr this is `if_else()` for a binary condition and `case_when()` for multiple branches. Polars provides a unified, chainable expression: `pl.when().then().otherwise()`.
+
+**Binary condition** — the direct `if_else()` equivalent:
+
+```r
+# dplyr
+full_flights |>
+    mutate(is_delayed = if_else(DepDelay > 0, "delayed", "on time"))
+```
+
+```{python}
+import polars as pl
+
+full_flights.with_columns(
+    pl.when(pl.col('DepDelay') > 0)
+      .then(pl.lit('delayed'))
+      .otherwise(pl.lit('on time'))
+      .alias('is_delayed')
+).select(['FlightDate', 'Reporting_Airline', 'DepDelay', 'is_delayed']).head(5)
+```
+
+**Multiple branches** — the `case_when()` equivalent. Chain additional `.when().then()` clauses before the final `.otherwise()`. Conditions are evaluated top-to-bottom; the first matching branch wins:
+
+```r
+# dplyr
+full_flights |>
+    mutate(
+        delay_category = case_when(
+            is.na(DepDelay)  ~ "cancelled",
+            DepDelay <= 0    ~ "on time",
+            DepDelay <= 15   ~ "minor delay",
+            .default         =  "major delay"
+        )
+    )
+```
+
+```{python}
+full_flights.with_columns(
+    pl.when(pl.col('DepDelay').is_null())
+      .then(pl.lit('cancelled'))
+      .when(pl.col('DepDelay') <= 0)
+      .then(pl.lit('on time'))
+      .when(pl.col('DepDelay') <= 15)
+      .then(pl.lit('minor delay'))
+      .otherwise(pl.lit('major delay'))
+      .alias('delay_category')
+).select(['FlightDate', 'Reporting_Airline', 'DepDelay', 'delay_category']).head(8)
+```
+
+The expression is not limited to string literals — any valid Polars expression works in `.then()` and `.otherwise()`, including column references and arithmetic:
+
+```{python}
+# fill missing DepDelay with the column mean when null
+full_flights.with_columns(
+    pl.when(pl.col('DepDelay').is_null())
+      .then(pl.col('DepDelay').mean())
+      .otherwise(pl.col('DepDelay'))
+      .alias('DepDelay_filled')
+).select(['DepDelay', 'DepDelay_filled']).head(5)
+```
+
+Quick comparison of the equivalent patterns:
+
+| dplyr | Polars |
+|---|---|
+| `if_else(cond, true, false)` | `pl.when(cond).then(true).otherwise(false)` |
+| `case_when(c1 ~ v1, c2 ~ v2, .default = v3)` | `.when(c1).then(v1).when(c2).then(v2).otherwise(v3)` |
+| `.default =` | `.otherwise()` |
+
+### Sampling and slicing rows
+
+#### `sample()` — random row selection
+
+`sample()` draws a random subset of rows, by count or fraction. dplyr's equivalent is `slice_sample()`:
+
+```r
+# dplyr
+full_flights |> slice_sample(n = 1000)
+full_flights |> slice_sample(prop = 0.01)
+```
+
+```{python}
+# by count — draw 5 rows at random
+full_flights.sample(n=5, seed=42).select(['FlightDate', 'Reporting_Airline', 'Origin', 'DepDelay'])
+```
+
+```{python}
+# by fraction — draw 1% of rows
+full_flights.sample(fraction=0.01, seed=42).shape
+```
+
+Pass `seed=` for reproducibility. `with_replacement=True` allows the same row to appear more than once, matching dplyr's `replace = TRUE`:
+
+```python
+full_flights.sample(n=1000, with_replacement=True, seed=42)
+```
+
+#### `top_k()` and `bottom_k()` — value-based row selection
+
+`slice_max()` and `slice_min()` in dplyr return rows with the largest or smallest values of a column. Polars provides `top_k()` and `bottom_k()`, which are more efficient than sorting the whole DataFrame when you only need a small number of rows:
+
+```r
+# dplyr — 5 most delayed flights
+full_flights |> slice_max(DepDelay, n = 5)
+
+# dplyr — 5 earliest departures
+full_flights |> slice_min(DepDelay, n = 5)
+```
+
+```{python}
+# 5 most delayed flights
+full_flights.select(['FlightDate', 'Reporting_Airline', 'Origin', 'DepDelay']).top_k(5, by='DepDelay')
+```
+
+```{python}
+# 5 earliest departures (excluding cancelled flights)
+(
+    full_flights
+    .select(['FlightDate', 'Reporting_Airline', 'Origin', 'DepDelay'])
+    .filter(pl.col('DepDelay').is_not_null())
+    .bottom_k(5, by='DepDelay')
+)
+```
+
+`top_k()` / `bottom_k()` also accept a list of columns for multi-column ordering, matching dplyr's `slice_max(order_by = c(col1, col2))`:
+
+```python
+# top 5 by departure delay, then by arrival delay as tiebreaker
+full_flights.top_k(5, by=['DepDelay', 'ArrDelay'])
+```
+
+A summary of the row-selection methods:
+
+| dplyr | Polars | selects |
+|---|---|---|
+| `slice_sample(n = k)` | `sample(n=k)` | k random rows |
+| `slice_sample(prop = p)` | `sample(fraction=p)` | fraction p of rows |
+| `slice_max(col, n = k)` | `top_k(k, by='col')` | k rows with largest values |
+| `slice_min(col, n = k)` | `bottom_k(k, by='col')` | k rows with smallest values |
