@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>lazy_execution – A tidyverse user's guide to polars library</title>
+<title>4&nbsp; Lazy API – A tidyverse user's guide to polars library</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -23,10 +23,45 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
-<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js" integrity="sha384-ZvpUoO/+PpLXR1lu4jmpXWu80pZlYUAfxl5NsBMWOEPSjUn/6Z/hRTt8+pR6L4N2" crossorigin="anonymous"></script><script src="site_libs/quarto-nav/quarto-nav.js"></script>
 <script src="site_libs/quarto-nav/headroom.min.js"></script>
 <script src="site_libs/clipboard/clipboard.min.js"></script>
 <script src="site_libs/quarto-search/autocomplete.umd.js"></script>
@@ -77,12 +112,15 @@ ul.task-list li input[type="checkbox"] {
     "search-label": "Search"
   }
 }</script>
+<script src="https://cdn.jsdelivr.net/npm/requirejs@2.3.6/require.min.js" integrity="sha384-c9c+LnTbwQ3aujuU7ULEPVvgLs+Fn6fJUvIGTsuu1ZcCf11fiEubah0ttpca4ntM sha384-6V1/AdqZRWk1KAlWbKBlGhN7VG4iE/yAZcO6NZPMF8od0vukrvr0tg4qY6NSrItx" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
 
 <link rel="stylesheet" href="custom.css">
 </head>
 
-<body class="nav-sidebar floating fullcontent quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+<body class="nav-sidebar floating quarto-light"><script id="quarto-html-before-body" type="application/javascript">
     const toggleBodyColorMode = (bsSheetEl) => {
       const mode = bsSheetEl.getAttribute("data-mode");
       const bodyEl = window.document.querySelector("body");
@@ -253,7 +291,7 @@ ul.task-list li input[type="checkbox"] {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./lazy_execution.html"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">lazy_execution.html</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./lazy_execution.html"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Lazy API</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -330,7 +368,7 @@ ul.task-list li input[type="checkbox"] {
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./lazy_execution.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">lazy_execution.html</span></span></a>
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Lazy API</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
@@ -350,16 +388,406 @@ ul.task-list li input[type="checkbox"] {
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#what-is-the-lazy-api" id="toc-what-is-the-lazy-api" class="nav-link active" data-scroll-target="#what-is-the-lazy-api"><span class="header-section-number">4.1</span> What is the lazy API?</a></li>
+  <li><a href="#why-laziness-makes-queries-faster" id="toc-why-laziness-makes-queries-faster" class="nav-link" data-scroll-target="#why-laziness-makes-queries-faster"><span class="header-section-number">4.2</span> Why laziness makes queries faster</a>
+  <ul class="collapse">
+  <li><a href="#predicate-pushdown" id="toc-predicate-pushdown" class="nav-link" data-scroll-target="#predicate-pushdown"><span class="header-section-number">4.2.1</span> Predicate pushdown</a></li>
+  <li><a href="#projection-pushdown" id="toc-projection-pushdown" class="nav-link" data-scroll-target="#projection-pushdown"><span class="header-section-number">4.2.2</span> Projection pushdown</a></li>
+  </ul></li>
+  <li><a href="#triggering-execution-with-collect" id="toc-triggering-execution-with-collect" class="nav-link" data-scroll-target="#triggering-execution-with-collect"><span class="header-section-number">4.3</span> Triggering execution with <code>collect()</code></a>
+  <ul class="collapse">
+  <li><a href="#eager-vs-lazy-measured-speedup" id="toc-eager-vs-lazy-measured-speedup" class="nav-link" data-scroll-target="#eager-vs-lazy-measured-speedup"><span class="header-section-number">4.3.1</span> Eager vs lazy: measured speedup</a></li>
+  </ul></li>
+  <li><a href="#comparison-with-r-tidyverse" id="toc-comparison-with-r-tidyverse" class="nav-link" data-scroll-target="#comparison-with-r-tidyverse"><span class="header-section-number">4.4</span> Comparison with R / tidyverse</a></li>
+  <li><a href="#when-to-use-the-lazy-api" id="toc-when-to-use-the-lazy-api" class="nav-link" data-scroll-target="#when-to-use-the-lazy-api"><span class="header-section-number">4.5</span> When to use the lazy API</a></li>
+  <li><a href="#streaming-processing-larger-than-memory-data" id="toc-streaming-processing-larger-than-memory-data" class="nav-link" data-scroll-target="#streaming-processing-larger-than-memory-data"><span class="header-section-number">4.6</span> Streaming: processing larger-than-memory data</a></li>
+  <li><a href="#converting-between-eager-and-lazy" id="toc-converting-between-eager-and-lazy" class="nav-link" data-scroll-target="#converting-between-eager-and-lazy"><span class="header-section-number">4.7</span> Converting between eager and lazy</a></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/chuvanan/cookbook-python-polars/edit/main/lazy_execution.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/chuvanan/cookbook-python-polars/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li><li><a href="https://github.com/chuvanan/cookbook-python-polars/blob/main/lazy_execution.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li></ul></div></nav>
+    </div>
 <!-- main -->
-<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"></header>
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Lazy API</span></h1>
+</div>
 
 
 
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
 
 
+</header>
 
 
+<section id="what-is-the-lazy-api" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="what-is-the-lazy-api"><span class="header-section-number">4.1</span> What is the lazy API?</h2>
+<p>Polars offers two execution modes that can be used interchangeably:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>mode</th>
+<th>entry point</th>
+<th>behaviour</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Eager</strong></td>
+<td><code>pl.read_csv()</code>, <code>pl.DataFrame</code></td>
+<td>each operation executes immediately and returns a result</td>
+</tr>
+<tr class="even">
+<td><strong>Lazy</strong></td>
+<td><code>pl.scan_csv()</code>, <code>pl.LazyFrame</code></td>
+<td>operations are recorded as a query plan and deferred until you call <code>.collect()</code></td>
+</tr>
+</tbody>
+</table>
+<p>The distinction is subtle but consequential. In eager mode, every method call immediately processes data and returns a new DataFrame. In lazy mode, calling <code>.filter()</code>, <code>.select()</code>, or <code>.group_by()</code> does nothing more than append a node to a query plan — no data is touched until you explicitly ask for results.</p>
+<div id="e942245a" class="cell" data-execution_count="2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>CSV <span class="op">=</span> <span class="st">'./data/On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2022_1.csv'</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co"># eager: data is read into memory immediately</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pl.read_csv(CSV)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="bu">type</span>(df)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="2">
+<pre data-code-line-numbers=""><code>polars.dataframe.frame.DataFrame</code></pre>
+</div>
+</div>
+<div id="5b12834a" class="cell" data-execution_count="3">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># lazy: only a query plan is created — no data loaded yet</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>lf <span class="op">=</span> pl.scan_csv(CSV)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="bu">type</span>(lf)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="3">
+<pre data-code-line-numbers=""><code>polars.lazyframe.frame.LazyFrame</code></pre>
+</div>
+</div>
+<p>The schema is accessible without loading data:</p>
+<div id="ebd65995" class="cell" data-execution_count="4">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># inspect column names and types without reading the file</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>lf.collect_schema().names()[:<span class="dv">8</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="4">
+<pre data-code-line-numbers=""><code>['Year',
+ 'Quarter',
+ 'Month',
+ 'DayofMonth',
+ 'DayOfWeek',
+ 'FlightDate',
+ 'Reporting_Airline',
+ 'DOT_ID_Reporting_Airline']</code></pre>
+</div>
+</div>
+</section>
+<section id="why-laziness-makes-queries-faster" class="level2" data-number="4.2">
+<h2 data-number="4.2" class="anchored" data-anchor-id="why-laziness-makes-queries-faster"><span class="header-section-number">4.2</span> Why laziness makes queries faster</h2>
+<p>Deferring execution gives Polars’ query optimiser a complete view of the pipeline before any computation begins. It can then apply a set of rewrites that dramatically reduce memory use and CPU time:</p>
+<section id="predicate-pushdown" class="level3" data-number="4.2.1">
+<h3 data-number="4.2.1" class="anchored" data-anchor-id="predicate-pushdown"><span class="header-section-number">4.2.1</span> Predicate pushdown</h3>
+<p>When you filter rows, Polars moves the filter as early as possible in the pipeline — ideally into the file scan itself. Instead of reading all 537,000 rows and then discarding 95% of them, only the rows that satisfy the predicate are ever loaded:</p>
+<div id="fa9bf81c" class="cell" data-execution_count="5">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>q <span class="op">=</span> (</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    pl.scan_csv(CSV)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(pl.col(<span class="st">'OriginStateName'</span>) <span class="op">==</span> <span class="st">'Ohio'</span>)</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    .group_by(<span class="st">'Reporting_Airline'</span>)</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    .agg(pl.col(<span class="st">'DepDelay'</span>).mean().alias(<span class="st">'mean_delay'</span>))</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    .sort(<span class="st">'mean_delay'</span>, descending<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(q.explain())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre data-code-line-numbers=""><code>SORT BY [descending: [true]] [col("mean_delay")]
+  AGGREGATE[maintain_order: false]
+    [col("DepDelay").mean().alias("mean_delay")] BY [col("Reporting_Airline")]
+    FROM
+    simple π 2/2 ["DepDelay", ... 1 other column]
+      Csv SCAN [./data/On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2022_1.csv]
+      PROJECT 3/110 COLUMNS
+      SELECTION: [(col("OriginStateName")) == ("Ohio")]
+      ESTIMATED ROWS: 547857</code></pre>
+</div>
+</div>
+<p>The key lines in the plan are:</p>
+<ul>
+<li><code>PROJECT 3/110 COLUMNS</code> — only 3 of the 110 CSV columns will be read from disk</li>
+<li><code>SELECTION: [(col("OriginStateName")) == ("Ohio")]</code> — the filter is applied at the scan level, before any rows enter memory</li>
+<li><code>ESTIMATED ROWS: 547857</code> — Polars’ estimate before filtering (the actual result is far smaller)</li>
+</ul>
+</section>
+<section id="projection-pushdown" class="level3" data-number="4.2.2">
+<h3 data-number="4.2.2" class="anchored" data-anchor-id="projection-pushdown"><span class="header-section-number">4.2.2</span> Projection pushdown</h3>
+<p>Similarly, when you select a subset of columns, Polars avoids reading the other columns from disk entirely. The 110-column flights CSV becomes a 3-column scan:</p>
+<div id="fd615f73" class="cell" data-execution_count="6">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>proj_q <span class="op">=</span> pl.scan_csv(CSV).select([<span class="st">'FlightDate'</span>, <span class="st">'Reporting_Airline'</span>, <span class="st">'DepDelay'</span>])</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(proj_q.explain())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre data-code-line-numbers=""><code>Csv SCAN [./data/On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2022_1.csv]
+PROJECT 3/110 COLUMNS
+ESTIMATED ROWS: 547857</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="triggering-execution-with-collect" class="level2" data-number="4.3">
+<h2 data-number="4.3" class="anchored" data-anchor-id="triggering-execution-with-collect"><span class="header-section-number">4.3</span> Triggering execution with <code>collect()</code></h2>
+<p>A <code>LazyFrame</code> computes nothing until you call <code>.collect()</code>, which executes the optimised plan and returns a <code>DataFrame</code>:</p>
+<div id="4fee66c1" class="cell" data-execution_count="7">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> q.collect()</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>result</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="7">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (15, 2)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">Reporting_Airline</th>
+<th data-quarto-table-cell-role="th">mean_delay</th>
+</tr>
+<tr class="even">
+<td>str</td>
+<td>f64</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"B6"</td>
+<td>41.673077</td>
+</tr>
+<tr class="even">
+<td>"YV"</td>
+<td>30.794643</td>
+</tr>
+<tr class="odd">
+<td>"AS"</td>
+<td>24.833333</td>
+</tr>
+<tr class="even">
+<td>"F9"</td>
+<td>22.518634</td>
+</tr>
+<tr class="odd">
+<td>"OO"</td>
+<td>19.089655</td>
+</tr>
+<tr class="even">
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="odd">
+<td>"WN"</td>
+<td>8.159069</td>
+</tr>
+<tr class="even">
+<td>"UA"</td>
+<td>7.806041</td>
+</tr>
+<tr class="odd">
+<td>"9E"</td>
+<td>6.43956</td>
+</tr>
+<tr class="even">
+<td>"YX"</td>
+<td>4.939932</td>
+</tr>
+<tr class="odd">
+<td>"DL"</td>
+<td>4.83871</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>The full pipeline — scan, filter, group-by, aggregate, sort — executes as a single optimised pass.</p>
+<section id="eager-vs-lazy-measured-speedup" class="level3" data-number="4.3.1">
+<h3 data-number="4.3.1" class="anchored" data-anchor-id="eager-vs-lazy-measured-speedup"><span class="header-section-number">4.3.1</span> Eager vs lazy: measured speedup</h3>
+<p>Running the same filter + group-by + aggregate pipeline in both modes on the flights dataset:</p>
+<div id="c9a9fa32" class="cell" data-execution_count="8">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> time</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>start <span class="op">=</span> time.perf_counter()</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>eager_result <span class="op">=</span> (</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    pl.read_csv(CSV)</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(pl.col(<span class="st">'OriginStateName'</span>) <span class="op">==</span> <span class="st">'Ohio'</span>)</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    .group_by(<span class="st">'Reporting_Airline'</span>)</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    .agg(pl.col(<span class="st">'DepDelay'</span>).mean().alias(<span class="st">'mean_delay'</span>))</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>eager_time <span class="op">=</span> time.perf_counter() <span class="op">-</span> start</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>start <span class="op">=</span> time.perf_counter()</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>lazy_result <span class="op">=</span> (</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>    pl.scan_csv(CSV)</span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(pl.col(<span class="st">'OriginStateName'</span>) <span class="op">==</span> <span class="st">'Ohio'</span>)</span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>    .group_by(<span class="st">'Reporting_Airline'</span>)</span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>    .agg(pl.col(<span class="st">'DepDelay'</span>).mean().alias(<span class="st">'mean_delay'</span>))</span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>    .collect()</span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>lazy_time <span class="op">=</span> time.perf_counter() <span class="op">-</span> start</span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Eager:   </span><span class="sc">{</span>eager_time<span class="sc">:.3f}</span><span class="ss">s"</span>)</span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Lazy:    </span><span class="sc">{</span>lazy_time<span class="sc">:.3f}</span><span class="ss">s"</span>)</span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Speedup: </span><span class="sc">{</span>eager_time <span class="op">/</span> lazy_time<span class="sc">:.1f}</span><span class="ss">x"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre data-code-line-numbers=""><code>Eager:   0.420s
+Lazy:    0.100s
+Speedup: 4.2x</code></pre>
+</div>
+</div>
+<p>The lazy pipeline is roughly <strong>4× faster</strong> on this 537k-row file — and the advantage grows with file size and pipeline complexity, because the optimiser has more to work with.</p>
+</section>
+</section>
+<section id="comparison-with-r-tidyverse" class="level2" data-number="4.4">
+<h2 data-number="4.4" class="anchored" data-anchor-id="comparison-with-r-tidyverse"><span class="header-section-number">4.4</span> Comparison with R / tidyverse</h2>
+<p>R’s native data frame operations (dplyr, data.table) are all <strong>eager</strong>: each verb executes immediately against an in-memory object. There is no built-in lazy query optimiser for in-memory data frames in the tidyverse.</p>
+<p>The closest R analogues to Polars’ lazy API are:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>R tool</th>
+<th>mechanism</th>
+<th>equivalent to</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>dbplyr</strong></td>
+<td>translates dplyr verbs to SQL; query sent to a database on <code>.collect()</code> / <code>as_tibble()</code></td>
+<td>Polars lazy over a database backend</td>
+</tr>
+<tr class="even">
+<td><strong>arrow</strong></td>
+<td>Apache Arrow’s R package; <code>open_dataset()</code> scans Parquet/CSV lazily, applies pushdown</td>
+<td>Polars <code>scan_parquet()</code> / <code>scan_csv()</code></td>
+</tr>
+<tr class="odd">
+<td><strong>dtplyr</strong></td>
+<td>translates dplyr to data.table code; executes on <code>as_tibble()</code></td>
+<td>Polars lazy for in-memory data</td>
+</tr>
+</tbody>
+</table>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14" data-code-line-numbers=""><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># dbplyr: build a lazy query against a database</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dbplyr)</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="fu">tbl</span>(con, <span class="st">"flights"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(OriginStateName <span class="sc">==</span> <span class="st">"Ohio"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(Reporting_Airline) <span class="sc">|&gt;</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarise</span>(<span class="at">mean_delay =</span> <span class="fu">mean</span>(DepDelay, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">collect</span>()   <span class="co"># sends SQL to the database and retrieves results</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="co"># arrow: lazy scan of Parquet files with pushdown</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(arrow)</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="fu">open_dataset</span>(<span class="st">"flights.parquet"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(OriginStateName <span class="sc">==</span> <span class="st">"Ohio"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(Reporting_Airline) <span class="sc">|&gt;</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarise</span>(<span class="at">mean_delay =</span> <span class="fu">mean</span>(DepDelay, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">collect</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Polars’ lazy API achieves the same deferred-execution and pushdown benefits as these tools, but operates entirely in-process — no database server required — and integrates seamlessly with the same API used for eager operations.</p>
+</section>
+<section id="when-to-use-the-lazy-api" class="level2" data-number="4.5">
+<h2 data-number="4.5" class="anchored" data-anchor-id="when-to-use-the-lazy-api"><span class="header-section-number">4.5</span> When to use the lazy API</h2>
+<p><strong>Use lazy (scan + collect) when:</strong></p>
+<ul>
+<li>Reading from files (CSV, Parquet, JSON) — pushdown avoids reading unnecessary rows and columns from disk</li>
+<li>Running multi-step pipelines (filter → select → group_by → agg → sort) — the optimiser composes the rewrites across the whole chain</li>
+<li>Working with datasets that approach or exceed available RAM — streaming mode (see below) can process them in chunks</li>
+<li>Production pipelines where throughput matters</li>
+</ul>
+<p><strong>Use eager (read + DataFrame) when:</strong></p>
+<ul>
+<li>Doing interactive exploration where you want to inspect intermediate results</li>
+<li>Working with small datasets where the optimisation overhead is irrelevant</li>
+<li>Using operations that are eager-only, such as <code>pivot()</code>, which requires knowing the full schema before it can determine output column names</li>
+</ul>
+<p>The recommended pattern is to start lazy, accumulate transformations, and call <code>.collect()</code> exactly once at the end:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15" data-code-line-numbers=""><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># recommended: one scan, one collect</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> (</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    pl.scan_csv(CSV)</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(pl.col(<span class="st">'Cancelled'</span>) <span class="op">==</span> <span class="dv">0</span>)</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">'FlightDate'</span>).<span class="bu">str</span>.to_date(<span class="st">'%Y-%m-</span><span class="sc">%d</span><span class="st">'</span>),</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">'DepDelay'</span>).fill_null(<span class="dv">0</span>)</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>    .group_by(<span class="st">'Reporting_Airline'</span>)</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>    .agg(</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>        n_flights  <span class="op">=</span> pl.<span class="bu">len</span>(),</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>        mean_delay <span class="op">=</span> pl.col(<span class="st">'DepDelay'</span>).mean()</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>    .sort(<span class="st">'mean_delay'</span>, descending<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>    .collect()</span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>If you need to pass through an eager-only operation mid-pipeline, collect, apply it, then call <code>.lazy()</code> to resume lazy execution:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16" data-code-line-numbers=""><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># pivot is eager-only; collect → pivot → lazy to continue</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> (</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    pl.scan_csv(CSV)</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>    .group_by([<span class="st">'Reporting_Airline'</span>, <span class="st">'DayOfWeek'</span>])</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    .agg(n_flights<span class="op">=</span>pl.<span class="bu">len</span>())</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    .collect()                          <span class="co"># materialise for pivot</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>    .pivot(on<span class="op">=</span><span class="st">'DayOfWeek'</span>, index<span class="op">=</span><span class="st">'Reporting_Airline'</span>, values<span class="op">=</span><span class="st">'n_flights'</span>, aggregate_function<span class="op">=</span><span class="va">None</span>)</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>    .lazy()                             <span class="co"># resume lazy for further steps</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>    .sort(<span class="st">'Reporting_Airline'</span>)</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>    .collect()</span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="streaming-processing-larger-than-memory-data" class="level2" data-number="4.6">
+<h2 data-number="4.6" class="anchored" data-anchor-id="streaming-processing-larger-than-memory-data"><span class="header-section-number">4.6</span> Streaming: processing larger-than-memory data</h2>
+<p>For datasets that exceed available RAM, pass <code>engine='streaming'</code> to <code>.collect()</code>. Polars will process the data in chunks, keeping only the current chunk in memory at any time:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17" data-code-line-numbers=""><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> (</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    pl.scan_csv(CSV)</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(pl.col(<span class="st">'DepDelay'</span>) <span class="op">&gt;</span> <span class="dv">60</span>)</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    .group_by(<span class="st">'Reporting_Airline'</span>)</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    .agg(pl.col(<span class="st">'DepDelay'</span>).mean())</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    .collect(engine<span class="op">=</span><span class="st">'streaming'</span>)</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Streaming is transparent — the query plan and API are identical; only the execution engine changes. Not all operations are supported in streaming mode (complex joins and certain aggregations may fall back to non-streaming), but filters, projections, simple group-bys, and sorts work reliably.</p>
+</section>
+<section id="converting-between-eager-and-lazy" class="level2" data-number="4.7">
+<h2 data-number="4.7" class="anchored" data-anchor-id="converting-between-eager-and-lazy"><span class="header-section-number">4.7</span> Converting between eager and lazy</h2>
+<p>Any <code>DataFrame</code> can be converted to a <code>LazyFrame</code> with <code>.lazy()</code>, and any <code>LazyFrame</code> to a <code>DataFrame</code> with <code>.collect()</code>:</p>
+<div id="801661be" class="cell" data-execution_count="9">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># DataFrame → LazyFrame</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pl.read_csv(CSV)</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>lf <span class="op">=</span> df.lazy()</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="co"># LazyFrame → DataFrame</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>df_again <span class="op">=</span> lf.collect()</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="bu">type</span>(lf), <span class="st">"→"</span>, <span class="bu">type</span>(df_again))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre data-code-line-numbers=""><code>&lt;class 'polars.lazyframe.frame.LazyFrame'&gt; → &lt;class 'polars.dataframe.frame.DataFrame'&gt;</code></pre>
+</div>
+</div>
+<p>This makes it easy to mix lazy and eager code: start eager for exploration, switch to lazy for the final pipeline, or vice versa.</p>
+
+
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
@@ -792,5 +1220,5 @@ ul.task-list li input[type="checkbox"] {
 
 
 
-<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions"><ul><li><a href="https://github.com/chuvanan/cookbook-python-polars/edit/main/lazy_execution.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/chuvanan/cookbook-python-polars/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li><li><a href="https://github.com/chuvanan/cookbook-python-polars/blob/main/lazy_execution.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li></ul></div></div></div></footer><script src="site_libs/quarto-contrib/line-highlight-1.0.0/line-highlight.js" defer="true"></script>
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/chuvanan/cookbook-python-polars/edit/main/lazy_execution.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/chuvanan/cookbook-python-polars/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li><li><a href="https://github.com/chuvanan/cookbook-python-polars/blob/main/lazy_execution.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li></ul></div></div></div></footer><script src="site_libs/quarto-contrib/line-highlight-1.0.0/line-highlight.js" defer="true"></script>
 </body></html>

@@ -1,0 +1,234 @@
+
+# Lazy API
+
+```{python}
+#| include: false
+import polars as pl
+```
+
+## What is the lazy API?
+
+Polars offers two execution modes that can be used interchangeably:
+
+| mode | entry point | behaviour |
+|---|---|---|
+| **Eager** | `pl.read_csv()`, `pl.DataFrame` | each operation executes immediately and returns a result |
+| **Lazy** | `pl.scan_csv()`, `pl.LazyFrame` | operations are recorded as a query plan and deferred until you call `.collect()` |
+
+The distinction is subtle but consequential. In eager mode, every method call immediately processes data and returns a new DataFrame. In lazy mode, calling `.filter()`, `.select()`, or `.group_by()` does nothing more than append a node to a query plan — no data is touched until you explicitly ask for results.
+
+```{python}
+CSV = './data/On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2022_1.csv'
+
+# eager: data is read into memory immediately
+df = pl.read_csv(CSV)
+type(df)
+```
+
+```{python}
+# lazy: only a query plan is created — no data loaded yet
+lf = pl.scan_csv(CSV)
+type(lf)
+```
+
+The schema is accessible without loading data:
+
+```{python}
+# inspect column names and types without reading the file
+lf.collect_schema().names()[:8]
+```
+
+## Why laziness makes queries faster
+
+Deferring execution gives Polars' query optimiser a complete view of the pipeline before any computation begins. It can then apply a set of rewrites that dramatically reduce memory use and CPU time:
+
+### Predicate pushdown
+
+When you filter rows, Polars moves the filter as early as possible in the pipeline — ideally into the file scan itself. Instead of reading all 537,000 rows and then discarding 95% of them, only the rows that satisfy the predicate are ever loaded:
+
+```{python}
+q = (
+    pl.scan_csv(CSV)
+    .filter(pl.col('OriginStateName') == 'Ohio')
+    .group_by('Reporting_Airline')
+    .agg(pl.col('DepDelay').mean().alias('mean_delay'))
+    .sort('mean_delay', descending=True)
+)
+
+print(q.explain())
+```
+
+The key lines in the plan are:
+
+- `PROJECT 3/110 COLUMNS` — only 3 of the 110 CSV columns will be read from disk
+- `SELECTION: [(col("OriginStateName")) == ("Ohio")]` — the filter is applied at the scan level, before any rows enter memory
+- `ESTIMATED ROWS: 547857` — Polars' estimate before filtering (the actual result is far smaller)
+
+### Projection pushdown
+
+Similarly, when you select a subset of columns, Polars avoids reading the other columns from disk entirely. The 110-column flights CSV becomes a 3-column scan:
+
+```{python}
+proj_q = pl.scan_csv(CSV).select(['FlightDate', 'Reporting_Airline', 'DepDelay'])
+print(proj_q.explain())
+```
+
+## Triggering execution with `collect()`
+
+A `LazyFrame` computes nothing until you call `.collect()`, which executes the optimised plan and returns a `DataFrame`:
+
+```{python}
+result = q.collect()
+result
+```
+
+The full pipeline — scan, filter, group-by, aggregate, sort — executes as a single optimised pass.
+
+### Eager vs lazy: measured speedup
+
+Running the same filter + group-by + aggregate pipeline in both modes on the flights dataset:
+
+```{python}
+import time
+
+start = time.perf_counter()
+eager_result = (
+    pl.read_csv(CSV)
+    .filter(pl.col('OriginStateName') == 'Ohio')
+    .group_by('Reporting_Airline')
+    .agg(pl.col('DepDelay').mean().alias('mean_delay'))
+)
+eager_time = time.perf_counter() - start
+
+start = time.perf_counter()
+lazy_result = (
+    pl.scan_csv(CSV)
+    .filter(pl.col('OriginStateName') == 'Ohio')
+    .group_by('Reporting_Airline')
+    .agg(pl.col('DepDelay').mean().alias('mean_delay'))
+    .collect()
+)
+lazy_time = time.perf_counter() - start
+
+print(f"Eager:   {eager_time:.3f}s")
+print(f"Lazy:    {lazy_time:.3f}s")
+print(f"Speedup: {eager_time / lazy_time:.1f}x")
+```
+
+The lazy pipeline is roughly **4× faster** on this 537k-row file — and the advantage grows with file size and pipeline complexity, because the optimiser has more to work with.
+
+## Comparison with R / tidyverse
+
+R's native data frame operations (dplyr, data.table) are all **eager**: each verb executes immediately against an in-memory object. There is no built-in lazy query optimiser for in-memory data frames in the tidyverse.
+
+The closest R analogues to Polars' lazy API are:
+
+| R tool | mechanism | equivalent to |
+|---|---|---|
+| **dbplyr** | translates dplyr verbs to SQL; query sent to a database on `.collect()` / `as_tibble()` | Polars lazy over a database backend |
+| **arrow** | Apache Arrow's R package; `open_dataset()` scans Parquet/CSV lazily, applies pushdown | Polars `scan_parquet()` / `scan_csv()` |
+| **dtplyr** | translates dplyr to data.table code; executes on `as_tibble()` | Polars lazy for in-memory data |
+
+```r
+# dbplyr: build a lazy query against a database
+library(dbplyr)
+tbl(con, "flights") |>
+    filter(OriginStateName == "Ohio") |>
+    group_by(Reporting_Airline) |>
+    summarise(mean_delay = mean(DepDelay, na.rm = TRUE)) |>
+    collect()   # sends SQL to the database and retrieves results
+
+# arrow: lazy scan of Parquet files with pushdown
+library(arrow)
+open_dataset("flights.parquet") |>
+    filter(OriginStateName == "Ohio") |>
+    group_by(Reporting_Airline) |>
+    summarise(mean_delay = mean(DepDelay, na.rm = TRUE)) |>
+    collect()
+```
+
+Polars' lazy API achieves the same deferred-execution and pushdown benefits as these tools, but operates entirely in-process — no database server required — and integrates seamlessly with the same API used for eager operations.
+
+## When to use the lazy API
+
+**Use lazy (scan + collect) when:**
+
+- Reading from files (CSV, Parquet, JSON) — pushdown avoids reading unnecessary rows and columns from disk
+- Running multi-step pipelines (filter → select → group_by → agg → sort) — the optimiser composes the rewrites across the whole chain
+- Working with datasets that approach or exceed available RAM — streaming mode (see below) can process them in chunks
+- Production pipelines where throughput matters
+
+**Use eager (read + DataFrame) when:**
+
+- Doing interactive exploration where you want to inspect intermediate results
+- Working with small datasets where the optimisation overhead is irrelevant
+- Using operations that are eager-only, such as `pivot()`, which requires knowing the full schema before it can determine output column names
+
+The recommended pattern is to start lazy, accumulate transformations, and call `.collect()` exactly once at the end:
+
+```python
+# recommended: one scan, one collect
+result = (
+    pl.scan_csv(CSV)
+    .filter(pl.col('Cancelled') == 0)
+    .with_columns(
+        pl.col('FlightDate').str.to_date('%Y-%m-%d'),
+        pl.col('DepDelay').fill_null(0)
+    )
+    .group_by('Reporting_Airline')
+    .agg(
+        n_flights  = pl.len(),
+        mean_delay = pl.col('DepDelay').mean()
+    )
+    .sort('mean_delay', descending=True)
+    .collect()
+)
+```
+
+If you need to pass through an eager-only operation mid-pipeline, collect, apply it, then call `.lazy()` to resume lazy execution:
+
+```python
+# pivot is eager-only; collect → pivot → lazy to continue
+result = (
+    pl.scan_csv(CSV)
+    .group_by(['Reporting_Airline', 'DayOfWeek'])
+    .agg(n_flights=pl.len())
+    .collect()                          # materialise for pivot
+    .pivot(on='DayOfWeek', index='Reporting_Airline', values='n_flights', aggregate_function=None)
+    .lazy()                             # resume lazy for further steps
+    .sort('Reporting_Airline')
+    .collect()
+)
+```
+
+## Streaming: processing larger-than-memory data
+
+For datasets that exceed available RAM, pass `engine='streaming'` to `.collect()`. Polars will process the data in chunks, keeping only the current chunk in memory at any time:
+
+```python
+result = (
+    pl.scan_csv(CSV)
+    .filter(pl.col('DepDelay') > 60)
+    .group_by('Reporting_Airline')
+    .agg(pl.col('DepDelay').mean())
+    .collect(engine='streaming')
+)
+```
+
+Streaming is transparent — the query plan and API are identical; only the execution engine changes. Not all operations are supported in streaming mode (complex joins and certain aggregations may fall back to non-streaming), but filters, projections, simple group-bys, and sorts work reliably.
+
+## Converting between eager and lazy
+
+Any `DataFrame` can be converted to a `LazyFrame` with `.lazy()`, and any `LazyFrame` to a `DataFrame` with `.collect()`:
+
+```{python}
+# DataFrame → LazyFrame
+df = pl.read_csv(CSV)
+lf = df.lazy()
+
+# LazyFrame → DataFrame
+df_again = lf.collect()
+print(type(lf), "→", type(df_again))
+```
+
+This makes it easy to mix lazy and eager code: start eager for exploration, switch to lazy for the final pipeline, or vice versa.

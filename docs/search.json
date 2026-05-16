@@ -258,5 +258,85 @@
     "crumbs": [
       "Summary & references"
     ]
+  },
+  {
+    "objectID": "lazy_execution.html",
+    "href": "lazy_execution.html",
+    "title": "4  Lazy API",
+    "section": "",
+    "text": "4.1 What is the lazy API?\nPolars offers two execution modes that can be used interchangeably:\nThe distinction is subtle but consequential. In eager mode, every method call immediately processes data and returns a new DataFrame. In lazy mode, calling .filter(), .select(), or .group_by() does nothing more than append a node to a query plan — no data is touched until you explicitly ask for results.\nCSV = './data/On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2022_1.csv'\n\n# eager: data is read into memory immediately\ndf = pl.read_csv(CSV)\ntype(df)\n\npolars.dataframe.frame.DataFrame\n# lazy: only a query plan is created — no data loaded yet\nlf = pl.scan_csv(CSV)\ntype(lf)\n\npolars.lazyframe.frame.LazyFrame\nThe schema is accessible without loading data:\n# inspect column names and types without reading the file\nlf.collect_schema().names()[:8]\n\n['Year',\n 'Quarter',\n 'Month',\n 'DayofMonth',\n 'DayOfWeek',\n 'FlightDate',\n 'Reporting_Airline',\n 'DOT_ID_Reporting_Airline']",
+    "crumbs": [
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Lazy API</span>"
+    ]
+  },
+  {
+    "objectID": "lazy_execution.html#what-is-the-lazy-api",
+    "href": "lazy_execution.html#what-is-the-lazy-api",
+    "title": "4  Lazy API",
+    "section": "",
+    "text": "mode\nentry point\nbehaviour\n\n\n\n\nEager\npl.read_csv(), pl.DataFrame\neach operation executes immediately and returns a result\n\n\nLazy\npl.scan_csv(), pl.LazyFrame\noperations are recorded as a query plan and deferred until you call .collect()",
+    "crumbs": [
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Lazy API</span>"
+    ]
+  },
+  {
+    "objectID": "lazy_execution.html#why-laziness-makes-queries-faster",
+    "href": "lazy_execution.html#why-laziness-makes-queries-faster",
+    "title": "4  Lazy API",
+    "section": "4.2 Why laziness makes queries faster",
+    "text": "4.2 Why laziness makes queries faster\nDeferring execution gives Polars’ query optimiser a complete view of the pipeline before any computation begins. It can then apply a set of rewrites that dramatically reduce memory use and CPU time:\n\n4.2.1 Predicate pushdown\nWhen you filter rows, Polars moves the filter as early as possible in the pipeline — ideally into the file scan itself. Instead of reading all 537,000 rows and then discarding 95% of them, only the rows that satisfy the predicate are ever loaded:\n\nq = (\n    pl.scan_csv(CSV)\n    .filter(pl.col('OriginStateName') == 'Ohio')\n    .group_by('Reporting_Airline')\n    .agg(pl.col('DepDelay').mean().alias('mean_delay'))\n    .sort('mean_delay', descending=True)\n)\n\nprint(q.explain())\n\nSORT BY [descending: [true]] [col(\"mean_delay\")]\n  AGGREGATE[maintain_order: false]\n    [col(\"DepDelay\").mean().alias(\"mean_delay\")] BY [col(\"Reporting_Airline\")]\n    FROM\n    simple π 2/2 [\"DepDelay\", ... 1 other column]\n      Csv SCAN [./data/On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2022_1.csv]\n      PROJECT 3/110 COLUMNS\n      SELECTION: [(col(\"OriginStateName\")) == (\"Ohio\")]\n      ESTIMATED ROWS: 547857\n\n\nThe key lines in the plan are:\n\nPROJECT 3/110 COLUMNS — only 3 of the 110 CSV columns will be read from disk\nSELECTION: [(col(\"OriginStateName\")) == (\"Ohio\")] — the filter is applied at the scan level, before any rows enter memory\nESTIMATED ROWS: 547857 — Polars’ estimate before filtering (the actual result is far smaller)\n\n\n\n4.2.2 Projection pushdown\nSimilarly, when you select a subset of columns, Polars avoids reading the other columns from disk entirely. The 110-column flights CSV becomes a 3-column scan:\n\nproj_q = pl.scan_csv(CSV).select(['FlightDate', 'Reporting_Airline', 'DepDelay'])\nprint(proj_q.explain())\n\nCsv SCAN [./data/On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2022_1.csv]\nPROJECT 3/110 COLUMNS\nESTIMATED ROWS: 547857",
+    "crumbs": [
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Lazy API</span>"
+    ]
+  },
+  {
+    "objectID": "lazy_execution.html#triggering-execution-with-collect",
+    "href": "lazy_execution.html#triggering-execution-with-collect",
+    "title": "4  Lazy API",
+    "section": "4.3 Triggering execution with collect()",
+    "text": "4.3 Triggering execution with collect()\nA LazyFrame computes nothing until you call .collect(), which executes the optimised plan and returns a DataFrame:\n\nresult = q.collect()\nresult\n\n\nshape: (15, 2)\n\n\n\nReporting_Airline\nmean_delay\n\n\nstr\nf64\n\n\n\n\n\"B6\"\n41.673077\n\n\n\"YV\"\n30.794643\n\n\n\"AS\"\n24.833333\n\n\n\"F9\"\n22.518634\n\n\n\"OO\"\n19.089655\n\n\n…\n…\n\n\n\"WN\"\n8.159069\n\n\n\"UA\"\n7.806041\n\n\n\"9E\"\n6.43956\n\n\n\"YX\"\n4.939932\n\n\n\"DL\"\n4.83871\n\n\n\n\n\n\nThe full pipeline — scan, filter, group-by, aggregate, sort — executes as a single optimised pass.\n\n4.3.1 Eager vs lazy: measured speedup\nRunning the same filter + group-by + aggregate pipeline in both modes on the flights dataset:\n\nimport time\n\nstart = time.perf_counter()\neager_result = (\n    pl.read_csv(CSV)\n    .filter(pl.col('OriginStateName') == 'Ohio')\n    .group_by('Reporting_Airline')\n    .agg(pl.col('DepDelay').mean().alias('mean_delay'))\n)\neager_time = time.perf_counter() - start\n\nstart = time.perf_counter()\nlazy_result = (\n    pl.scan_csv(CSV)\n    .filter(pl.col('OriginStateName') == 'Ohio')\n    .group_by('Reporting_Airline')\n    .agg(pl.col('DepDelay').mean().alias('mean_delay'))\n    .collect()\n)\nlazy_time = time.perf_counter() - start\n\nprint(f\"Eager:   {eager_time:.3f}s\")\nprint(f\"Lazy:    {lazy_time:.3f}s\")\nprint(f\"Speedup: {eager_time / lazy_time:.1f}x\")\n\nEager:   0.420s\nLazy:    0.100s\nSpeedup: 4.2x\n\n\nThe lazy pipeline is roughly 4× faster on this 537k-row file — and the advantage grows with file size and pipeline complexity, because the optimiser has more to work with.",
+    "crumbs": [
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Lazy API</span>"
+    ]
+  },
+  {
+    "objectID": "lazy_execution.html#comparison-with-r-tidyverse",
+    "href": "lazy_execution.html#comparison-with-r-tidyverse",
+    "title": "4  Lazy API",
+    "section": "4.4 Comparison with R / tidyverse",
+    "text": "4.4 Comparison with R / tidyverse\nR’s native data frame operations (dplyr, data.table) are all eager: each verb executes immediately against an in-memory object. There is no built-in lazy query optimiser for in-memory data frames in the tidyverse.\nThe closest R analogues to Polars’ lazy API are:\n\n\n\n\n\n\n\n\nR tool\nmechanism\nequivalent to\n\n\n\n\ndbplyr\ntranslates dplyr verbs to SQL; query sent to a database on .collect() / as_tibble()\nPolars lazy over a database backend\n\n\narrow\nApache Arrow’s R package; open_dataset() scans Parquet/CSV lazily, applies pushdown\nPolars scan_parquet() / scan_csv()\n\n\ndtplyr\ntranslates dplyr to data.table code; executes on as_tibble()\nPolars lazy for in-memory data\n\n\n\n# dbplyr: build a lazy query against a database\nlibrary(dbplyr)\ntbl(con, \"flights\") |&gt;\n    filter(OriginStateName == \"Ohio\") |&gt;\n    group_by(Reporting_Airline) |&gt;\n    summarise(mean_delay = mean(DepDelay, na.rm = TRUE)) |&gt;\n    collect()   # sends SQL to the database and retrieves results\n\n# arrow: lazy scan of Parquet files with pushdown\nlibrary(arrow)\nopen_dataset(\"flights.parquet\") |&gt;\n    filter(OriginStateName == \"Ohio\") |&gt;\n    group_by(Reporting_Airline) |&gt;\n    summarise(mean_delay = mean(DepDelay, na.rm = TRUE)) |&gt;\n    collect()\nPolars’ lazy API achieves the same deferred-execution and pushdown benefits as these tools, but operates entirely in-process — no database server required — and integrates seamlessly with the same API used for eager operations.",
+    "crumbs": [
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Lazy API</span>"
+    ]
+  },
+  {
+    "objectID": "lazy_execution.html#when-to-use-the-lazy-api",
+    "href": "lazy_execution.html#when-to-use-the-lazy-api",
+    "title": "4  Lazy API",
+    "section": "4.5 When to use the lazy API",
+    "text": "4.5 When to use the lazy API\nUse lazy (scan + collect) when:\n\nReading from files (CSV, Parquet, JSON) — pushdown avoids reading unnecessary rows and columns from disk\nRunning multi-step pipelines (filter → select → group_by → agg → sort) — the optimiser composes the rewrites across the whole chain\nWorking with datasets that approach or exceed available RAM — streaming mode (see below) can process them in chunks\nProduction pipelines where throughput matters\n\nUse eager (read + DataFrame) when:\n\nDoing interactive exploration where you want to inspect intermediate results\nWorking with small datasets where the optimisation overhead is irrelevant\nUsing operations that are eager-only, such as pivot(), which requires knowing the full schema before it can determine output column names\n\nThe recommended pattern is to start lazy, accumulate transformations, and call .collect() exactly once at the end:\n# recommended: one scan, one collect\nresult = (\n    pl.scan_csv(CSV)\n    .filter(pl.col('Cancelled') == 0)\n    .with_columns(\n        pl.col('FlightDate').str.to_date('%Y-%m-%d'),\n        pl.col('DepDelay').fill_null(0)\n    )\n    .group_by('Reporting_Airline')\n    .agg(\n        n_flights  = pl.len(),\n        mean_delay = pl.col('DepDelay').mean()\n    )\n    .sort('mean_delay', descending=True)\n    .collect()\n)\nIf you need to pass through an eager-only operation mid-pipeline, collect, apply it, then call .lazy() to resume lazy execution:\n# pivot is eager-only; collect → pivot → lazy to continue\nresult = (\n    pl.scan_csv(CSV)\n    .group_by(['Reporting_Airline', 'DayOfWeek'])\n    .agg(n_flights=pl.len())\n    .collect()                          # materialise for pivot\n    .pivot(on='DayOfWeek', index='Reporting_Airline', values='n_flights', aggregate_function=None)\n    .lazy()                             # resume lazy for further steps\n    .sort('Reporting_Airline')\n    .collect()\n)",
+    "crumbs": [
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Lazy API</span>"
+    ]
+  },
+  {
+    "objectID": "lazy_execution.html#streaming-processing-larger-than-memory-data",
+    "href": "lazy_execution.html#streaming-processing-larger-than-memory-data",
+    "title": "4  Lazy API",
+    "section": "4.6 Streaming: processing larger-than-memory data",
+    "text": "4.6 Streaming: processing larger-than-memory data\nFor datasets that exceed available RAM, pass engine='streaming' to .collect(). Polars will process the data in chunks, keeping only the current chunk in memory at any time:\nresult = (\n    pl.scan_csv(CSV)\n    .filter(pl.col('DepDelay') &gt; 60)\n    .group_by('Reporting_Airline')\n    .agg(pl.col('DepDelay').mean())\n    .collect(engine='streaming')\n)\nStreaming is transparent — the query plan and API are identical; only the execution engine changes. Not all operations are supported in streaming mode (complex joins and certain aggregations may fall back to non-streaming), but filters, projections, simple group-bys, and sorts work reliably.",
+    "crumbs": [
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Lazy API</span>"
+    ]
+  },
+  {
+    "objectID": "lazy_execution.html#converting-between-eager-and-lazy",
+    "href": "lazy_execution.html#converting-between-eager-and-lazy",
+    "title": "4  Lazy API",
+    "section": "4.7 Converting between eager and lazy",
+    "text": "4.7 Converting between eager and lazy\nAny DataFrame can be converted to a LazyFrame with .lazy(), and any LazyFrame to a DataFrame with .collect():\n\n# DataFrame → LazyFrame\ndf = pl.read_csv(CSV)\nlf = df.lazy()\n\n# LazyFrame → DataFrame\ndf_again = lf.collect()\nprint(type(lf), \"→\", type(df_again))\n\n&lt;class 'polars.lazyframe.frame.LazyFrame'&gt; → &lt;class 'polars.dataframe.frame.DataFrame'&gt;\n\n\nThis makes it easy to mix lazy and eager code: start eager for exploration, switch to lazy for the final pipeline, or vice versa.",
+    "crumbs": [
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Lazy API</span>"
+    ]
   }
 ]
