@@ -1,1 +1,159 @@
 ### Concatenate DataFrames
+
+Concatenation combines DataFrames by stacking them either vertically (more rows) or horizontally (more columns), without matching on keys. The dplyr verbs are `bind_rows()` and `bind_cols()`; Polars uses a single `pl.concat()` function with a `how=` argument:
+
+| operation | dplyr | Polars |
+|---|---|---|
+| stack rows, identical schemas | `bind_rows(df1, df2)` | `pl.concat([df1, df2], how='vertical')` |
+| stack rows, mixed schemas | `bind_rows(df1, df2)` | `pl.concat([df1, df2], how='diagonal')` |
+| stack rows, coerce types | `bind_rows(df1, df2)` | `pl.concat([df1, df2], how='vertical_relaxed')` |
+| stack columns | `bind_cols(df1, df2)` | `pl.concat([df1, df2], how='horizontal')` |
+
+#### Vertical concatenation
+
+Vertical concatenation stacks rows from multiple DataFrames into one. The typical use case is reassembling data that was split by time period, geographic region, or any other partition.
+
+```r
+# dplyr: stack two data frames row-wise
+bind_rows(jan_flights, feb_flights)
+```
+
+```{python}
+# split full_flights into two halves by day of month, then reassemble
+first_half  = full_flights.filter(pl.col('DayofMonth') <= 15)
+second_half = full_flights.filter(pl.col('DayofMonth') > 15)
+
+reassembled = pl.concat([first_half, second_half])
+reassembled.shape  # same as full_flights
+```
+
+`pl.concat()` accepts a list of any length — two DataFrames, ten DataFrames, or the result of a list comprehension over many files:
+
+```python
+# read and stack many CSV files in one expression
+import glob
+
+pl.concat([pl.read_csv(f) for f in glob.glob('./data/monthly/*.csv')])
+```
+
+#### Schema strictness
+
+The most important difference from dplyr's `bind_rows()` is how each handles mismatched schemas.
+
+**dplyr's `bind_rows()`** is permissive by default: it matches columns by name and fills any column that is absent in one of the inputs with `NA`. This is equivalent to a set union of all column names:
+
+```r
+# dplyr: df2 is missing 'dep_delay'; the missing column is filled with NA
+bind_rows(df1, df2)
+```
+
+**Polars `how='vertical'`** (the default) is strict: it requires both column names and types to match exactly. This makes errors visible immediately instead of silently producing nulls:
+
+```python
+# Polars: raises SchemaError if schemas don't match exactly
+pl.concat([df1, df2], how='vertical')
+```
+
+To get dplyr-like behaviour — filling missing columns with `null` — use `how='diagonal'`:
+
+```{python}
+# two DataFrames with different column sets
+df_jan = pl.DataFrame({
+    'FlightDate': ['2022-01-01', '2022-01-02'],
+    'Carrier': ['AA', 'UA'],
+    'DepDelay': [5.0, -3.0]
+})
+
+df_feb = pl.DataFrame({
+    'FlightDate': ['2022-02-01', '2022-02-02'],
+    'Carrier': ['DL', 'WN'],
+    'ArrDelay': [12.0, 0.0]   # different column: ArrDelay instead of DepDelay
+})
+
+# diagonal fills missing columns with null
+pl.concat([df_jan, df_feb], how='diagonal')
+```
+
+When schemas differ only in numeric precision (e.g., `Int32` vs `Int64`), use `how='vertical_relaxed'` or `how='diagonal_relaxed'` to automatically promote columns to their common supertype rather than raising an error:
+
+```{python}
+df_int32  = pl.DataFrame({'delay': pl.Series([5, -3], dtype=pl.Int32)})
+df_int64  = pl.DataFrame({'delay': pl.Series([12, 0], dtype=pl.Int64)})
+
+# vertical_relaxed coerces Int32 → Int64
+pl.concat([df_int32, df_int64], how='vertical_relaxed')
+```
+
+A summary of the four vertical strategies:
+
+| `how=` | schema must match | fills missing columns | coerces types |
+|---|---|---|---|
+| `'vertical'` | yes (strict) | — | no |
+| `'vertical_relaxed'` | names only | — | yes |
+| `'diagonal'` | no | yes (null) | no |
+| `'diagonal_relaxed'` | no | yes (null) | yes |
+
+#### Horizontal concatenation
+
+Horizontal concatenation places DataFrames side by side, adding columns. This is the `bind_cols()` equivalent and is typically used after computing separate sets of features that share a natural row ordering:
+
+```r
+# dplyr: append columns from two frames of equal height
+bind_cols(identity_cols, delay_cols)
+```
+
+```{python}
+identity_cols = full_flights.select(['FlightDate', 'Reporting_Airline', 'Origin', 'Dest'])
+delay_cols    = full_flights.select(['DepDelay', 'ArrDelay', 'Distance'])
+
+pl.concat([identity_cols, delay_cols], how='horizontal').head(3)
+```
+
+When the DataFrames have different heights, Polars pads the shorter one with `null` by default. Pass `strict=True` to raise an error instead — matching dplyr's `bind_cols()`, which also errors on unequal row counts.
+
+#### Tracking the source of each row
+
+dplyr's `bind_rows()` has a `.id` argument that adds a source-identifier column, using the names of the input list:
+
+```r
+# dplyr: add a 'state' column identifying which frame each row came from
+bind_rows(
+    list(Ohio = ohio_flights, Texas = texas_flights),
+    .id = 'state'
+)
+```
+
+Polars has no equivalent parameter. The idiomatic approach is to add the label column before concatenating with `with_columns(pl.lit(...))`:
+
+```{python}
+ohio_flights = (
+    full_flights
+    .filter(pl.col('OriginStateName') == 'Ohio')
+    .with_columns(pl.lit('Ohio').alias('state_group'))
+)
+
+texas_flights = (
+    full_flights
+    .filter(pl.col('OriginStateName') == 'Texas')
+    .with_columns(pl.lit('Texas').alias('state_group'))
+)
+
+(
+    pl.concat([ohio_flights, texas_flights])
+    .select(['FlightDate', 'state_group', 'Origin', 'DepDelay'])
+    .head(5)
+)
+```
+
+This pattern generalises naturally to any number of frames via a list comprehension:
+
+```python
+states = ['Ohio', 'Texas', 'California']
+
+pl.concat([
+    full_flights
+    .filter(pl.col('OriginStateName') == state)
+    .with_columns(pl.lit(state).alias('state_group'))
+    for state in states
+])
+```
