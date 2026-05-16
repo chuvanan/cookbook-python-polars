@@ -2,35 +2,74 @@
 
 ## Summary
 
-* Zen of polars (a.k.a. the polars design principles). If you're into tidyverse, you might find the polars API design guideline familiar with [tidy design principles](https://design.tidyverse.org/)
+This book is a practical guide to the [Polars](https://pola.rs/) DataFrame library for Python, written for R and tidyverse users. Rather than starting from scratch, it maps Polars concepts directly onto what you already know — dplyr verbs, tidyr reshaping, lubridate datetime handling, and stringr string operations — so the learning curve is a translation, not a reinvention.
 
+The chapters cover:
+
+- **First steps** — installation, reading data, and inspecting DataFrames
+- **Data manipulation** — the full single-table toolkit: filtering, selecting, mutating, aggregating, sorting, joining, concatenating, pivoting, handling missing values, string methods, datetime operations, and conditional expressions
+- **Import / Export** — reading and writing CSV, Parquet, Excel, SQL databases, and cloud storage (S3, GCS, Azure)
+- **Lazy API** — deferred execution, query optimisation (predicate and projection pushdown), benchmarking, and streaming for larger-than-memory data
+
+## The Zen of Polars and tidyverse design principles
+
+Polars' design philosophy and the tidyverse's [tidy design principles](https://design.tidyverse.org/) are more than superficially similar — they share a common conviction that **API design shapes how people think about data**.
+
+Both prioritise **readability over brevity**: a Polars method chain reads left-to-right like a dplyr pipe, and both ecosystems resist cryptic shortcuts in favour of self-documenting code. Both favour **explicit over implicit**: Polars never coerces types silently (contrast R's implicit coercion hierarchy), and the tidyverse makes data flow visible through the pipe rather than hiding it in global state. Both aim for **predictable, pure operations** — Polars' immutable DataFrames echo the tidyverse's preference for functions that return new objects rather than modifying in place. And both treat **minimising ambiguity** as a first-class goal: one function, one clear purpose, consistent argument names.
+
+The result is that switching from dplyr to Polars feels less like learning a new tool and more like translating a familiar vocabulary into a new dialect — the underlying grammar of tidy data transformation is the same.
+
+Polars' design principles in brief:
 
 |         - readability over saving keystrokes
 |         - explicit over implicit
 |         - aim for a single return dtype per expression
 |         - API should nudge to fast code
 |         - pure over in-place
-|         - undersore over concatenated words
-|         - minimize ambiguity
+|         - underscore over concatenated words
+|         - minimise ambiguity
 
 ## References
 
-Here is a compilation of resources, including talks, articles, blogs and tutorials, that I studied in crafting this book.
+Here is a compilation of resources — talks, articles, blogs, documentation, and tutorials — used in crafting this book.
 
-* Must watch: [Ritchie Vink's (author of polars) keynote at EuroSciPy 2023](https://www.youtube.com/watch?v=GTVm3QyJ-3I&t=43s)
+### Polars
 
+* **Must watch**: [Ritchie Vink's (author of Polars) keynote at EuroSciPy 2023](https://www.youtube.com/watch?v=GTVm3QyJ-3I&t=43s)
 * [Polars user guide](https://docs.pola.rs/)
+* [Polars Python API reference](https://docs.pola.rs/api/python/stable/reference/index.html)
+* [A bird's eye view of Polars](https://pola.rs/posts/polars_birds_eye_view/)
+* [Understanding Polars data types](https://pola.rs/posts/understanding-polars-data-types/)
+* [Modern Polars](https://kevinheavey.github.io/modern-polars/)
+* [Cookbook Polars for R](https://ddotta.github.io/cookbook-rpolars/)
+* [Awesome Polars — a curated list of docs, talks, tools and articles](https://ddotta.github.io/awesome-polars/)
+* [Real Python — Python Polars: A lightning-fast DataFrame library](https://realpython.com/polars-python/)
+* [Real Python — Polars GroupBy](https://realpython.com/polars-groupby/)
+* [Real Python — Polars missing data](https://realpython.com/polars-missing-data/)
+* [Practical Business Python — Introduction to Polars](https://pbpython.com/polars-intro.html)
+* [The Polars vs pandas difference nobody is talking about](https://labs.quansight.org/blog/dataframe-group-by)
+* [LazyFrame vs DataFrame performance comparison](https://stuffbyyuki.com/lazyframe-vs-dataframe-in-polars-performance-comparison/)
+* [Date and datetime manipulation in Polars](https://www.confessionsofadataguy.com/date-and-datetime-manipulation-in-polar/)
 
-* [Modern polars](https://kevinheavey.github.io/modern-polars/)
+### R / tidyverse
 
-* [Cookbook polars for R](https://ddotta.github.io/cookbook-rpolars/)
+* [R for Data Science (2e)](https://r4ds.hadley.nz/) — Hadley Wickham, Mine Çetinkaya-Rundel, Garrett Grolemund
+* [Tidy design principles](https://design.tidyverse.org/)
+* [dplyr documentation](https://dplyr.tidyverse.org/)
+* [tidyr documentation](https://tidyr.tidyverse.org/)
+* [lubridate documentation](https://lubridate.tidyverse.org/)
+* [stringr documentation](https://stringr.tidyverse.org/)
+* [The split-apply-combine strategy for data analysis](https://www.jstatsoft.org/article/view/v040i01) — Hadley Wickham, *Journal of Statistical Software* (2011)
+* [Per-operation grouping with `.by`](https://dplyr.tidyverse.org/reference/dplyr_by.html)
 
-* [Python's polars API reference](https://docs.pola.rs/py-polars/html/reference/index.html)
+### Python Polars — chapter references
 
-* [Practical business Python - Introduction to polars](https://pbpython.com/polars-intro.html)
-
-* [Real Python - Python polars: A lightning-fast DataFrame libray](https://realpython.com/polars-python/)
-
-* [A bird's eye view of polars](https://pola.rs/posts/polars_birds_eye_view/)
-
-* [Awesome polars - A curated list of polars docs, talks, tools, examples and articles](https://ddotta.github.io/awesome-polars/)
+* **Data manipulation**: [Polars expressions and contexts](https://docs.pola.rs/user-guide/concepts/expressions-and-contexts/), [Polars selectors](https://docs.pola.rs/api/python/stable/reference/selectors.html)
+* **Strings**: [Polars string functions](https://docs.pola.rs/user-guide/expressions/strings/)
+* **Datetime**: [Polars temporal expressions](https://docs.pola.rs/api/python/stable/reference/expressions/temporal.html)
+* **Missing values**: [Polars missing data](https://docs.pola.rs/user-guide/expressions/missing-data/)
+* **Pivoting**: [Polars pivot transformations](https://docs.pola.rs/user-guide/transformations/pivot/)
+* **Lazy API**: [Polars lazy API concepts](https://docs.pola.rs/user-guide/concepts/lazy-api/)
+* **I/O — Excel**: [Polars Excel I/O](https://docs.pola.rs/user-guide/io/excel/)
+* **I/O — Database**: [Polars database I/O](https://docs.pola.rs/user-guide/io/database/)
+* **I/O — Cloud**: [Polars cloud storage I/O](https://docs.pola.rs/user-guide/io/cloud-storage/)
