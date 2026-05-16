@@ -1,0 +1,276 @@
+
+
+Polars exposes string operations through the `.str` accessor — a namespace attached to any `Expr` or `Series` whose type is `String`. The R equivalent is the stringr package, where functions are standalone verbs prefixed with `str_`.
+
+```r
+# stringr + dplyr: string functions applied inside a pipe
+full_flights |> mutate(carrier_upper = str_to_upper(Reporting_Airline))
+full_flights |> filter(str_detect(OriginCityName, "New York"))
+```
+
+```python
+# Polars: .str accessor chained on an expression
+pl.col('Reporting_Airline').str.to_uppercase()
+pl.col('OriginCityName').str.contains('New York')
+```
+
+The `.str` namespace provides over 40 methods. The sections below cover the most commonly needed operations.
+
+::: {.callout-note}
+**Namespaces in Polars**
+
+`.str` is one of several type-specific namespaces in Polars that group operations by the data type they act on:
+
+| namespace | data type |
+|---|---|
+| `.str` | `String` |
+| `.dt` | `Date`, `Datetime`, `Duration` |
+| `.list` | `List[*]` |
+| `.struct` | `Struct` |
+| `.arr` | fixed-size `Array` |
+| `.cat` | `Categorical` |
+
+This pattern keeps the API organised and self-documenting: any expression ending in `.str.something()` is immediately recognisable as a string operation, with no risk of name collision between namespaces.
+:::
+
+### Checking and detecting patterns
+
+**`str.contains()`** tests each element against a pattern (regex by default). Pass `literal=True` to treat the pattern as a plain string, which is faster and avoids escaping issues:
+
+
+```r
+# stringr
+full_flights |>
+    filter(str_detect(OriginCityName, fixed("New York"))) |>
+    distinct(OriginCityName)
+```
+
+
+```{python}
+# city names contains "New York"
+(
+    full_flights
+    .select('OriginCityName')
+    .filter(pl.col('OriginCityName').str.contains('New York', literal=True))
+    .unique()
+)
+```
+
+**`str.starts_with()`** and **`str.ends_with()`** test for exact prefix or suffix matches. Unlike `str.contains()`, they always do a literal comparison — no regex, no escaping needed:
+
+```r
+# stringr
+full_flights |>
+    filter(str_ends(Dest, "X")) |>
+    distinct(Origin, Dest)
+```
+
+```{python}
+# flights whose destination airport code ends with 'X'
+(
+full_flights.filter(pl.col('Dest').str.ends_with('X'))
+    .select(['Origin', 'Dest'])
+    .unique()
+    .head(5)
+)
+```
+
+**`str.count_matches()`** counts how many times a pattern appears in each string:
+
+```r
+# stringr
+full_flights |>
+    mutate(slash_count = str_count(OriginCityName, "/")) |>
+    filter(slash_count > 0) |>
+    distinct(OriginCityName, slash_count)
+```
+
+```{python}
+# city names that contain a slash (e.g. "North Bend/Coos Bay, OR")
+(
+    full_flights
+    .select(
+        pl.col('OriginCityName'),
+        pl.col('OriginCityName').str.count_matches('/').alias('slash_count')
+    )
+    .filter(pl.col('slash_count') > 0)
+    .unique()
+    .head(5)
+)
+```
+
+### Case conversion
+
+```r
+# stringr
+full_flights |>
+    mutate(
+        carrier_upper = str_to_upper(Reporting_Airline),
+        carrier_lower = str_to_lower(Reporting_Airline),
+        city_title    = str_to_title(OriginCityName)
+    ) |>
+    select(carrier_upper, carrier_lower, city_title)
+```
+
+```{python}
+full_flights.select(
+    pl.col('Reporting_Airline').str.to_uppercase().alias('carrier_upper'),
+    pl.col('Reporting_Airline').str.to_lowercase().alias('carrier_lower'),
+    pl.col('OriginCityName').str.to_titlecase().alias('city_title'),
+).head(3)
+```
+
+### Replacing substrings
+
+**`str.replace()`** replaces the **first** match; **`str.replace_all()`** replaces every non-overlapping match. Both accept regex patterns by default:
+
+```r
+# stringr
+full_flights |>
+    mutate(city_fmt = str_replace(OriginCityName, ", ", " / ")) |>
+    distinct(OriginCityName, city_fmt)
+```
+
+```{python}
+# replace the comma+space separator in city names with " / "
+full_flights.select(
+    pl.col('OriginCityName'),
+    pl.col('OriginCityName').str.replace(', ', ' / ', literal=True).alias('city_fmt')
+).unique().head(5)
+```
+
+### Extracting substrings
+
+**`str.extract()`** applies a regex and returns the first capture group. The `group_index=` parameter (default 1) selects which capture group to return:
+
+```r
+# stringr
+full_flights |>
+    mutate(city_only = str_extract(OriginCityName, "^[^,]+")) |>
+    distinct(OriginCityName, city_only)
+```
+
+```{python}
+# extract just the city name, dropping the state abbreviation
+full_flights.select(
+    pl.col('OriginCityName'),
+    pl.col('OriginCityName').str.extract(r'^([^,]+)').alias('city_only')
+).unique().head(5)
+```
+
+**`str.extract_all()`** returns a `List[String]` of all matches rather than just the first.
+
+**`str.slice()`** extracts a fixed-position substring. Use `str.head(n)` and `str.tail(n)` as convenient shorthands:
+
+```r
+# stringr
+full_flights |>
+    mutate(city_abbr = str_sub(OriginCityName, 1, 3)) |>
+    distinct(city_abbr)
+```
+
+```{python}
+# abbreviate each city name to its first 3 characters
+full_flights.select(
+    pl.col('OriginCityName').str.head(3).alias('city_abbr')
+).unique().head(5)
+```
+
+### Splitting strings
+
+**`str.split()`** splits each string on a delimiter and returns a `List[String]`:
+
+```r
+# stringr / tidyr
+full_flights |>
+    mutate(parts = str_split(OriginCityName, ", ")) |>
+    select(OriginCityName, parts)
+```
+
+```{python}
+# split city name into city and state
+full_flights.select(
+    pl.col('OriginCityName'),
+    pl.col('OriginCityName').str.split(', ').alias('parts')
+).head(3)
+```
+
+When you need exactly `n` parts and want them in separate named columns, use **`str.split_exact()`** combined with `.struct.unnest()`:
+
+```r
+# tidyr — separate_wider_delim() was introduced in tidyr 1.3.0 as a
+# replacement for the superseded separate(); it was experimental on release
+full_flights |>
+    separate_wider_delim(OriginCityName, delim = ", ", names = c("city", "state"))
+```
+
+```{python}
+# split into exactly 2 parts and unpack into city/state columns
+full_flights.select(
+    pl.col('OriginCityName').str.split_exact(', ', 1).struct.rename_fields(['city', 'state']).alias('loc')
+).unnest('loc').unique().head(5)
+```
+
+::: {.callout-note}
+`str.split_exact()` returns a **`Struct`** column — a composite type where each part of the split is stored as a named field. The `.struct` namespace (see the note at the top of this section) exposes methods for working with these nested types; `.rename_fields()` gives the fields meaningful names, and `.unnest()` on the DataFrame then promotes those fields into ordinary top-level columns. If Struct types are unfamiliar, treat this as a two-step recipe: `str.split_exact()` does the split, `.unnest()` flattens the result.
+:::
+
+### Measuring length
+
+**`str.len_chars()`** counts Unicode characters (correct for multi-byte text); **`str.len_bytes()`** counts raw bytes:
+
+```r
+# stringr
+full_flights |>
+    mutate(name_length = str_length(OriginCityName)) |>
+    distinct(OriginCityName, name_length) |>
+    arrange(desc(name_length))
+```
+
+```{python}
+# find the longest city names by character count
+full_flights.select(
+    pl.col('OriginCityName'),
+    pl.col('OriginCityName').str.len_chars().alias('name_length')
+).unique().sort('name_length', descending=True).head(5)
+```
+
+### Trimming whitespace
+
+**`str.strip_chars()`** removes leading and trailing characters. With no argument it strips whitespace; pass a string to strip any character in that set:
+
+```r
+# stringr
+full_flights |> mutate(city_trimmed  = str_trim(OriginCityName))
+full_flights |> mutate(city_ltrimmed = str_trim(OriginCityName, side = "left"))
+full_flights |> mutate(city_rtrimmed = str_trim(OriginCityName, side = "right"))
+```
+
+```python
+pl.col('col').str.strip_chars()          # both sides (whitespace)
+pl.col('col').str.strip_chars_start()    # leading only
+pl.col('col').str.strip_chars_end()      # trailing only
+```
+
+Use **`str.strip_prefix()`** / **`str.strip_suffix()`** to remove an exact literal prefix or suffix rather than a character set.
+
+### Quick reference
+
+| task | stringr | Polars `.str` |
+|---|---|---|
+| detect pattern | `str_detect(x, pattern)` | `str.contains(pattern)` |
+| starts with | `str_starts(x, prefix)` | `str.starts_with(prefix)` |
+| ends with | `str_ends(x, suffix)` | `str.ends_with(suffix)` |
+| count matches | `str_count(x, pattern)` | `str.count_matches(pattern)` |
+| to uppercase | `str_to_upper(x)` | `str.to_uppercase()` |
+| to lowercase | `str_to_lower(x)` | `str.to_lowercase()` |
+| to title case | `str_to_title(x)` | `str.to_titlecase()` |
+| replace first | `str_replace(x, p, r)` | `str.replace(p, r)` |
+| replace all | `str_replace_all(x, p, r)` | `str.replace_all(p, r)` |
+| extract group | `str_extract(x, pattern)` | `str.extract(pattern)` |
+| substring | `str_sub(x, start, end)` | `str.slice(offset, length)` |
+| first n chars | — | `str.head(n)` |
+| split to list | `str_split(x, delim)` | `str.split(delim)` |
+| split to columns | `separate_wider_delim(df, col, ...)` | `str.split_exact(delim, n)` + `.unnest()` |
+| string length | `str_length(x)` | `str.len_chars()` |
+| trim whitespace | `str_trim(x)` | `str.strip_chars()` |
