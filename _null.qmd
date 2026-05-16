@@ -1,0 +1,222 @@
+
+
+
+Missing data is represented differently across R and Polars, and the distinction matters for both detection and imputation.
+
+### null vs NaN vs NULL
+
+Both R and Polars use three distinct concepts that are easy to confuse. The table below is the orientation:
+
+| concept | R | Polars | meaning |
+|---|---|---|---|
+| missing value | `NA` | `null` | unknown / undefined but theoretically exists |
+| not a number | `NaN` | `NaN` | indeterminate floating-point result |
+| nothing | `NULL` | — | absence of an object; not a value at all |
+
+#### NA and null — statistically missing
+
+R's `NA` and Polars' `null` are the canonical missing value markers, and they share the same design philosophy:
+
+- They apply to **all data types** — integers, strings, booleans, dates, lists.
+- They **propagate automatically**: any operation that touches a missing value produces a missing result, because the answer is unknowable.
+- They carry a **statistical meaning**: the value exists in principle but was not observed, was withheld, or could not be measured.
+
+```r
+# R: NA applies to every vector type and propagates
+c(1L, NA, 3L)          # integer vector with a missing element
+c("a", NA, "c")        # character vector
+c(TRUE, NA, FALSE)     # logical vector
+
+NA + 5                 #> NA  — propagates through arithmetic
+NA > 0                 #> NA  — propagates through comparisons
+sum(c(1, NA, 3))       #> NA  — propagates into aggregations (unless na.rm = TRUE)
+```
+
+```{python}
+import polars as pl
+
+# Polars: null applies to every dtype and propagates
+pl.DataFrame({
+    'int_col':  pl.Series([1, None, 3], dtype=pl.Int64),
+    'str_col':  pl.Series(['a', None, 'c']),
+    'date_col': pl.Series(['2022-01-01', None, '2022-01-03']).str.to_date(),
+})
+```
+
+```{python}
+# null propagates — but aggregations skip nulls by default
+s = pl.Series([1.0, None, 3.0])
+print('mean (nulls skipped):', s.mean())   # 2.0, not NA
+```
+
+One practical difference: Polars aggregations **skip nulls silently** (equivalent to R's `na.rm = TRUE`), while base R aggregations propagate `NA` by default unless you pass `na.rm = TRUE`. Both behaviours are intentional designs for their respective ecosystems.
+
+#### NULL — absence of an object
+
+R's `NULL` is frequently mistaken for a missing value, but it is something different: it represents the **complete absence of an object**. A `NULL` has no type and no length:
+
+```r
+length(NULL)          #> 0
+is.null(NULL)         #> TRUE
+typeof(NULL)          #> "NULL"
+
+# NULL does not propagate — it simply disappears from vectors
+c(1, NULL, 3)         #> [1] 1 3   — NULL is silently dropped, not missing
+c("a", NULL, "c")     #> [1] "a" "c"
+```
+
+This is the critical distinction: `NA` is a placeholder for an unknown value that **still occupies a position**; `NULL` is nothing at all and **takes up no space**. Polars has no equivalent concept — a missing position is always represented as `null`.
+
+::: {.callout-note}
+Python has its own "nothing" value — `None` — which is conceptually similar to R's `NULL` (it represents the absence of a value). When you pass `None` in a Python list to Polars, however, Polars **automatically converts it to `null`**, treating it as a missing observation rather than "nothing":
+
+```{python}
+# Python None → Polars null, regardless of column type
+pl.DataFrame({
+    'int_col': [1, None, 3],
+    'str_col': ['a', None, 'c'],
+})
+```
+
+This is a deliberate convenience: in pure Python, `None` is the natural way to express "I have no value here", and Polars maps that intent directly onto its statistical missing value. You never need to write `pl.lit(None).cast(pl.Int64)` — just use `None` and Polars handles the rest.
+:::
+
+#### NaN — indeterminate floating-point
+
+`NaN` (Not a Number) is a special IEEE 754 floating-point value that arises from indeterminate arithmetic operations. Both R and Polars treat it the same way:
+
+- It is **float-only** — `NaN` cannot exist in an integer or string column.
+- It is **not** a missing value in the statistical sense; it signals a computation that has no well-defined numeric result.
+- It **propagates through arithmetic**: `NaN + 5` → `NaN`.
+
+```r
+# R: NaN from indeterminate arithmetic
+0 / 0           #> NaN
+Inf - Inf       #> NaN
+sqrt(-1)        #> NaN  (with a warning)
+
+# is.na() catches both NA and NaN; is.nan() is specific to NaN
+is.na(NaN)      #> TRUE
+is.nan(NA)      #> FALSE
+```
+
+```{python}
+# Polars: NaN from float arithmetic
+import math
+s_null = pl.Series([1.0, None, 3.0])
+s_nan  = pl.Series([1.0, float('nan'), 3.0])
+
+print('null series — null count:', s_null.null_count(), '| mean:', s_null.mean())
+print('NaN  series — null count:', s_nan.null_count(),  '| mean:', s_nan.mean())
+```
+
+The key divergence in Polars: **`null` is skipped in aggregations; `NaN` propagates**. A single `NaN` in a column makes `.mean()` return `NaN`, while `null` is ignored. When reading CSV or Parquet files, Polars always maps missing cells to `null` — `NaN` only ever appears as the result of a floating-point computation.
+
+### Detecting missing values
+
+The dplyr/base-R function for detection is `is.na()`, which catches both `NA` and `NaN`. Polars provides separate predicates:
+
+```r
+# R: is.na() catches both NA and NaN
+is.na(df$DepDelay)
+```
+
+```{python}
+# Polars: is_null() for null; is_nan() for NaN
+full_flights.select(['FlightDate', 'Reporting_Airline', 'Origin', 'Dest', 'DepDelay', 'ArrDelay']).filter(
+    pl.col('DepDelay').is_null()
+).head(5)
+```
+
+To get a column-by-column count of nulls across the whole DataFrame, call `.null_count()` on the DataFrame itself — it uses Polars' internal validity bitmap and is essentially free:
+
+```{python}
+(
+    full_flights
+    .select(['FlightDate', 'Reporting_Airline', 'Origin', 'Dest', 'DepDelay', 'ArrDelay'])
+    .null_count()
+)
+```
+
+`DepDelay` and `ArrDelay` are null for cancelled flights — rows where the plane never departed.
+
+### Dropping missing values
+
+`drop_nulls()` removes rows where any specified column contains `null`. Pass a `subset=` list to restrict which columns are checked:
+
+```r
+# R: na.omit() or dplyr's drop_na()
+flights |> drop_na(DepDelay)
+```
+
+```{python}
+delays = full_flights.select(['FlightDate', 'Reporting_Airline', 'Origin', 'Dest', 'DepDelay', 'ArrDelay'])
+
+# drop rows where DepDelay is null (cancelled flights)
+delays.drop_nulls(subset=['DepDelay']).shape
+```
+
+Without `subset=`, `drop_nulls()` removes any row with a null in **any** column — equivalent to `na.omit()` in R.
+
+### Filling missing values
+
+`fill_null()` replaces `null` with a constant, an expression, or one of several imputation strategies. The tidyr/dplyr equivalents are `replace_na()` and `coalesce()`.
+
+**Literal replacement** — substitute a fixed value:
+
+```r
+# R: replace_na()
+flights |> mutate(DepDelay = replace_na(DepDelay, 0))
+```
+
+```{python}
+delays.with_columns(
+    pl.col('DepDelay').fill_null(0),
+    pl.col('ArrDelay').fill_null(0)
+).head(5)
+```
+
+**Expression-based replacement** — derive the fill value from other columns:
+
+```python
+# fill with the column mean
+df.with_columns(
+    pl.col('DepDelay').fill_null(pl.col('DepDelay').mean())
+)
+```
+
+**Forward and backward fill** — carry the last (or next) observed value forward (or backward) along the column. This is equivalent to tidyr's `fill()` and is the standard approach for slowly-changing time series:
+
+```r
+# R: tidyr fill()
+flights |> fill(DepDelay, .direction = 'down')   # forward fill
+flights |> fill(DepDelay, .direction = 'up')     # backward fill
+```
+
+```{python}
+delays.with_columns(
+    pl.col('DepDelay').fill_null(strategy='forward').alias('dep_delay_ffill'),
+    pl.col('DepDelay').fill_null(strategy='backward').alias('dep_delay_bfill'),
+).select(['FlightDate', 'DepDelay', 'dep_delay_ffill', 'dep_delay_bfill']).head(5)
+```
+
+The optional `limit=` parameter caps how many consecutive nulls a fill is allowed to span. `fill_null(strategy='forward', limit=3)` leaves a null in place if it would require bridging a gap of more than 3 positions.
+
+**Interpolation** — fill nulls by linear interpolation between surrounding non-null values:
+
+```{python}
+s = pl.Series([1.0, None, None, 4.0, None])
+s.interpolate()
+```
+
+Note that trailing nulls (at the end of the series) are left as `null` — there is no right-hand value to interpolate toward.
+
+#### A summary of fill strategies
+
+| method | fills nulls | fills NaN | typical use |
+|---|---|---|---|
+| `fill_null(value)` | yes | no | constant or computed replacement |
+| `fill_null(strategy='forward')` | yes | no | carry last observation forward |
+| `fill_null(strategy='backward')` | yes | no | backfill from next observation |
+| `interpolate()` | yes | no | smooth numeric series |
+| `fill_nan(value)` | no | yes | fix floating-point artifacts |
