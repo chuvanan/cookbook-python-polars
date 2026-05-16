@@ -443,7 +443,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>This book was inspired by a series of <a href="https://www.emilyriederer.com/post/py-rgo-polars/">blog posts</a> recommending a Pythonic data science stack that mimics the comfort and familiarity of R’s tidyverse tools. In particular, this book explores the <code>Polars</code> library, a rising star in the DataFrame space (alongside established players like Pandas, Dask, Modin, Ray, and Vaex).</p>
 <p>In a nutshell, Polars is defined as a <a href="https://pola.rs/posts/polars_birds_eye_view/">query engine with a DataFrame front-end</a>. It offers a rich set of intuitive functions and principled workflows for data manipulation and analysis. Designed from the ground up with performance in mind, Polars is also noted for its <a href="https://www.ritchievink.com/blog/2021/02/28/i-wrote-one-of-the-fastest-dataframe-libraries/">lightning-fast execution speed</a>. <del>Despite its quick rise in popularity, <code>Polars</code> is still in its early stages of development.</del> <code>Polars</code> has finally reached the <a href="https://pola.rs/posts/announcing-polars-1/">milestone of version 1.0</a></p>
 <p>The majority of this book contains structured examples of data wrangling tasks that demonstrate idiomatic Polars and related dplyr/tidyr code for comparison. Examples might include discussion on API choices.</p>
-<div id="7320355f" class="cell" data-execution_count="1">
+<div id="750095b8" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
@@ -476,7 +476,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>    ggsize(<span class="dv">700</span>,<span class="dv">380</span>)</span>
 <span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="3">
+<div class="cell-output cell-output-display" data-execution_count="1">
 <svg xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" display="block" class="plt-container" width="700.0" height="380.0">
   <style type="text/css">
   .plt-container {
@@ -489,7 +489,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 text {
    text-rendering: optimizeLegibility;
 }
-#pL7l1gW .plot-title {
+#pqe6DDV .plot-title {
 fill: #474747;
 font-weight: bold;
 font-style: normal;
@@ -497,7 +497,7 @@ font-family: Roboto Condensed;
 font-size: 18.0px;
 
 }
-#pL7l1gW .plot-subtitle {
+#pqe6DDV .plot-subtitle {
 fill: #474747;
 font-weight: normal;
 font-style: normal;
@@ -505,7 +505,7 @@ font-family: Roboto Condensed;
 font-size: 15.0px;
 
 }
-#pL7l1gW .plot-caption {
+#pqe6DDV .plot-caption {
 fill: #474747;
 font-weight: normal;
 font-style: normal;
@@ -513,7 +513,7 @@ font-family: Roboto Condensed;
 font-size: 13.0px;
 
 }
-#pL7l1gW .plot-tag {
+#pqe6DDV .plot-tag {
 fill: #474747;
 font-weight: normal;
 font-style: normal;
@@ -521,13 +521,13 @@ font-family: Roboto Condensed;
 font-size: 16.0px;
 
 }
-#pL7l1gW .hyperlink-element {
+#pqe6DDV .hyperlink-element {
 fill: #118ed8;
 font-weight: normal;
 font-style: normal;
 
 }
-#pL7l1gW .legend-title {
+#pqe6DDV .legend-title {
 fill: #474747;
 font-weight: normal;
 font-style: normal;
@@ -535,7 +535,7 @@ font-family: Roboto Condensed;
 font-size: 15.0px;
 
 }
-#pL7l1gW .legend-item {
+#pqe6DDV .legend-item {
 fill: #474747;
 font-weight: normal;
 font-style: normal;
@@ -543,7 +543,7 @@ font-family: Roboto Condensed;
 font-size: 15.0px;
 
 }
-#pL7l1gW .axis-title-x {
+#pqe6DDV .axis-title-x {
 fill: #474747;
 font-weight: normal;
 font-style: normal;
@@ -551,7 +551,7 @@ font-family: Roboto Condensed;
 font-size: 15.0px;
 
 }
-#pL7l1gW .axis-text-x {
+#pqe6DDV .axis-text-x {
 fill: #474747;
 font-weight: normal;
 font-style: normal;
@@ -559,7 +559,7 @@ font-family: Roboto Condensed;
 font-size: 15.0px;
 
 }
-#d7b7Kz0 .axis-tooltip-text-x {
+#dLofATB .axis-tooltip-text-x {
 fill: #ffffff;
 font-weight: normal;
 font-style: normal;
@@ -567,7 +567,7 @@ font-family: Roboto Condensed;
 font-size: 15.0px;
 
 }
-#pL7l1gW .axis-title-y {
+#pqe6DDV .axis-title-y {
 fill: #474747;
 font-weight: normal;
 font-style: normal;
@@ -575,7 +575,7 @@ font-family: Roboto Condensed;
 font-size: 15.0px;
 
 }
-#pL7l1gW .axis-text-y {
+#pqe6DDV .axis-text-y {
 fill: #474747;
 font-weight: normal;
 font-style: normal;
@@ -583,7 +583,7 @@ font-family: Roboto Condensed;
 font-size: 15.0px;
 
 }
-#d7b7Kz0 .axis-tooltip-text-y {
+#dLofATB .axis-tooltip-text-y {
 fill: #ffffff;
 font-weight: normal;
 font-style: normal;
@@ -591,7 +591,7 @@ font-family: Roboto Condensed;
 font-size: 15.0px;
 
 }
-#pL7l1gW .facet-strip-text-x {
+#pqe6DDV .facet-strip-text-x {
 fill: #474747;
 font-weight: normal;
 font-style: normal;
@@ -599,7 +599,7 @@ font-family: Roboto Condensed;
 font-size: 15.0px;
 
 }
-#pL7l1gW .facet-strip-text-y {
+#pqe6DDV .facet-strip-text-y {
 fill: #474747;
 font-weight: normal;
 font-style: normal;
@@ -607,7 +607,7 @@ font-family: Roboto Condensed;
 font-size: 15.0px;
 
 }
-#d7b7Kz0 .tooltip-text {
+#dLofATB .tooltip-text {
 fill: #474747;
 font-weight: normal;
 font-style: normal;
@@ -615,7 +615,7 @@ font-family: Roboto Condensed;
 font-size: 15.0px;
 
 }
-#d7b7Kz0 .tooltip-title {
+#dLofATB .tooltip-title {
 fill: #474747;
 font-weight: bold;
 font-style: normal;
@@ -623,7 +623,7 @@ font-family: Roboto Condensed;
 font-size: 15.0px;
 
 }
-#d7b7Kz0 .tooltip-label {
+#dLofATB .tooltip-label {
 fill: #474747;
 font-weight: bold;
 font-style: normal;
@@ -633,7 +633,7 @@ font-size: 15.0px;
 }
 
   </style>
-  <g id="pL7l1gW">
+  <g id="pqe6DDV">
     <path fill-rule="evenodd" fill="rgb(255,255,255)" fill-opacity="1.0" d="M0.0 0.0 L0.0 380.0 L700.0 380.0 L700.0 0.0 Z">
     </path>
     <g transform="translate(21.0 24.0 ) ">
@@ -665,7 +665,7 @@ font-size: 15.0px;
           </g>
         </g>
       </g>
-      <g clip-path="url(#cfk1bMY)" clip-bounds-jfx="[rect (53.89598183079157, 0.0), (415.50096582933656, 301.0)]">
+      <g clip-path="url(#cVI7pLB)" clip-bounds-jfx="[rect (53.89598183079157, 0.0), (415.50096582933656, 301.0)]">
         <g transform="translate(53.89598183079157 0.0 ) ">
           <g>
             <g buffered-rendering="static">
@@ -693,7 +693,7 @@ font-size: 15.0px;
           </g>
         </g>
         <defs>
-          <clippath id="cfk1bMY">
+          <clippath id="cVI7pLB">
             <rect x="53.89598183079157" y="0.0" width="415.50096582933656" height="301.0">
             </rect>
           </clippath>
@@ -885,7 +885,7 @@ font-size: 15.0px;
     <path fill="rgb(0,0,0)" fill-opacity="0.0" stroke="rgb(71,71,71)" stroke-opacity="1.0" stroke-width="0.0" d="M0.0 0.0 L0.0 380.0 L700.0 380.0 L700.0 0.0 Z" pointer-events="none">
     </path>
   </g>
-  <g id="d7b7Kz0">
+  <g id="dLofATB">
   </g>
 </svg>
 </div>
