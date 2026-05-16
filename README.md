@@ -24,11 +24,9 @@ The book's website is available at https://chuvanan.github.io/cookbook-python-po
   - Handling datetime (`.dt` namespace → `lubridate`)
   - Other useful methods (`when/then/otherwise`, `sample`, `top_k/bottom_k`)
 
-- **Import / Export** — reading and writing CSV, Parquet, JSON
+- **Import / Export** — reading and writing CSV, Parquet, Excel, SQL databases, and cloud storage (S3, GCS, Azure)
 
-- **Lazy execution** — `LazyFrame`, query optimization, `scan_csv`
-
-- **Benchmarking**
+- **Lazy API** — `LazyFrame`, predicate and projection pushdown, `explain()`, streaming for larger-than-memory data
 
 ## Contribution
 
