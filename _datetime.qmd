@@ -1,0 +1,318 @@
+
+
+Dates and times are first-class citizens in Polars, with a dedicated type system and a rich `.dt` accessor namespace that mirrors — and in some ways surpasses — what lubridate offers in the tidyverse.
+
+### Datetime types
+
+Polars provides four distinct temporal types, each mapping to an equivalent in both Python and R:
+
+| Polars | Python | R (lubridate) | represents |
+|---|---|---|---|
+| `Date` | `datetime.date` | `Date` | calendar date (year, month, day) |
+| `Datetime` | `datetime.datetime` | `POSIXct` | date + time, with optional time zone |
+| `Duration` | `datetime.timedelta` | `difftime` | elapsed time between two instants |
+| `Time` | `datetime.time` | `hms::hms` | time-of-day, independent of date |
+
+`Datetime` columns carry a **time unit** annotation (`us` = microseconds, `ms` = milliseconds, `ns` = nanoseconds) and optionally a **time zone**. The full type signature looks like `datetime[μs, UTC]`. Polars stores all datetimes internally as an integer count in the given time unit, converting to the named time zone only for display and computation.
+
+### Parsing strings to dates
+
+The most common entry point is converting a string column to a temporal type. Lubridate provides intent-revealing functions (`ymd()`, `mdy()`, `dmy()`, `ymd_hms()`) based on the order of the date components; Polars uses `str.to_date()` and `str.to_datetime()`, optionally with a format string:
+
+```r
+# lubridate: function name encodes component order
+full_flights |>
+    mutate(date = ymd(FlightDate))
+```
+
+```{python}
+# ISO 8601 strings are detected automatically
+full_flights.with_columns(
+    pl.col('FlightDate').str.to_date().alias('date')
+).select(['FlightDate', 'date']).head(3)
+```
+
+When the format is non-standard, pass an explicit format string. Polars uses `strptime`-style format codes (`%Y`, `%m`, `%d`, `%H`, `%M`, `%S`):
+
+```{python}
+# explicit format for unambiguous parsing
+full_flights.with_columns(
+    pl.col('FlightDate').str.to_date('%Y-%m-%d').alias('date')
+).select(['FlightDate', 'date']).head(3)
+```
+
+`str.to_datetime()` works identically for columns that include time:
+
+```{python}
+# string with date + time component
+(
+    full_flights
+    .with_columns(
+        DepTime = pl.when(pl.col("DepTime") == "2400")
+                .then(pl.lit("0000"))
+                .otherwise(pl.col("DepTime"))
+    )
+    .with_columns(DepTime=pl.col("DepTime").str.pad_end(length=6, fill_char="0"))
+    .with_columns(
+        dep_datetime_str = pl.concat_str([pl.col("FlightDate"), pl.col("DepTime")], separator=" ")
+    )
+    .with_columns(
+        pl.col('dep_datetime_str').str.to_datetime('%Y-%m-%d %H%M%S').alias('dep_dt')
+    )
+    .select("FlightDate", "DepTime", "dep_datetime_str", "dep_dt")
+    .head()
+)
+
+
+```
+
+
+```r
+# lubridate: cast DepTime to character first, pad to 4 digits, then parse
+full_flights |>
+    mutate(
+        DepTime = str_pad(replace_na(as.character(DepTime), "0000"), 4, pad = "0"),
+        dep_dt  = ymd_hms(paste(FlightDate, paste0(DepTime, "00")))
+    ) |>
+    select(FlightDate, DepTime, dep_dt) |>
+    head()
+```
+
+### Building dates from components
+
+When date components are spread across separate columns, lubridate's `make_date()` / `make_datetime()` assembles them. Polars provides `pl.date()` and `pl.datetime()` as expression-level constructors:
+
+```r
+# lubridate
+full_flights |>
+    mutate(departure = make_datetime(Year, Month, DayofMonth, CRSDepTime %/% 100, CRSDepTime %% 100))
+```
+
+```{python}
+# Polars: pl.datetime() takes column expressions for each component
+full_flights.with_columns(
+    pl.datetime(
+        year   = pl.col('Year').cast(pl.Int32),
+        month  = pl.col('Month'),
+        day    = pl.col('DayofMonth'),
+        hour   = (pl.col('CRSDepTime') // 100).cast(pl.Int8),
+        minute = (pl.col('CRSDepTime') % 100).cast(pl.Int8),
+    ).alias('scheduled_departure')
+).select(['FlightDate', 'CRSDepTime', 'scheduled_departure']).head(5)
+```
+
+### Extracting components
+
+The `.dt` namespace is to temporal types what `.str` is to strings — it exposes all component-extraction and transformation methods under one roof.
+
+```r
+# lubridate: standalone accessor functions
+full_flights |>
+    mutate(
+        yr       = year(FlightDate),
+        mo       = month(FlightDate),
+        dy       = mday(FlightDate),
+        wday_num = wday(FlightDate),            # 1=Sun … 7=Sat (default)
+        yday     = yday(FlightDate),
+        qtr      = quarter(FlightDate)
+    )
+```
+
+```{python}
+dates = full_flights.with_columns(
+    pl.col('FlightDate').str.to_date().alias('date')
+)
+
+dates.select(
+    pl.col('date'),
+    pl.col('date').dt.year().alias('year'),
+    pl.col('date').dt.month().alias('month'),
+    pl.col('date').dt.day().alias('day'),
+    pl.col('date').dt.weekday().alias('weekday'),      # 1=Mon … 7=Sun (ISO)
+    pl.col('date').dt.ordinal_day().alias('day_of_year'),
+    pl.col('date').dt.quarter().alias('quarter'),
+).head(5)
+```
+
+::: {.callout-note}
+**Weekday numbering differs between R and Polars.** Lubridate's `wday()` defaults to 1 = Sunday … 7 = Saturday. Polars follows the ISO 8601 standard: 1 = Monday … 7 = Sunday. Adjust comparisons accordingly — e.g., what lubridate calls `wday == 2` (Monday) is `dt.weekday() == 1` in Polars.
+:::
+
+For `Datetime` columns, the same `.dt` namespace gives access to time components:
+
+```python
+df.with_columns(
+    pl.col('dep_dt').dt.hour().alias('hour'),
+    pl.col('dep_dt').dt.minute().alias('minute'),
+    pl.col('dep_dt').dt.second().alias('second'),
+)
+```
+
+### Date arithmetic
+
+Adding or subtracting a fixed number of days, hours, or minutes uses `pl.duration()`, which is the Polars equivalent of lubridate's `ddays()` / `dhours()` (exact-second durations):
+
+```r
+# lubridate: add 30 days using a duration
+full_flights |>
+    mutate(date_plus_30 = FlightDate + ddays(30))
+```
+
+```{python}
+dates.select(
+    pl.col('date'),
+    (pl.col('date') + pl.duration(days=30)).alias('date_plus_30'),
+).head(3)
+```
+
+For **calendar-aware** offsets — adding whole months or years where the exact number of days varies — use `dt.offset_by()`. This is the counterpart to lubridate's `months()` and `years()` (period arithmetic):
+
+```r
+# lubridate: period arithmetic respects calendar months
+full_flights |>
+    mutate(
+        next_month = FlightDate + months(1),
+        next_year  = FlightDate + years(1)
+    )
+```
+
+```{python}
+# dt.offset_by() accepts duration strings: 'Xd', 'Xmo', 'Xy', 'Xw', 'Xh', etc.
+dates.select(
+    pl.col('date'),
+    pl.col('date').dt.offset_by('1mo').alias('next_month'),
+    pl.col('date').dt.offset_by('1y').alias('next_year'),
+).head(3)
+```
+
+Subtracting two `Date` or `Datetime` values produces a **`Duration`** column. Extract the numeric value with `.dt.total_days()`, `.dt.total_hours()`, etc.:
+
+```r
+# lubridate
+full_flights |>
+    mutate(days_into_year = as.integer(FlightDate - ymd("2022-01-01")))
+```
+
+```{python}
+dates.select(
+    pl.col('date'),
+    (pl.col('date') - pl.date(2022, 1, 1)).dt.total_days().alias('days_since_jan1'),
+).head(5)
+```
+
+### Convenience boundary methods
+
+`dt.month_start()` and `dt.month_end()` snap a date to the first and last day of its month — a common need when building reporting periods:
+
+```r
+# lubridate
+full_flights |>
+    mutate(
+        month_start = floor_date(FlightDate, "month"),
+        month_end   = ceiling_date(FlightDate, "month") - days(1)
+    )
+```
+
+```{python}
+dates.select(
+    pl.col('date'),
+    pl.col('date').dt.month_start().alias('month_start'),
+    pl.col('date').dt.month_end().alias('month_end'),
+).head(3)
+```
+
+### Rounding and truncating
+
+`dt.truncate()` floors a date or datetime to a given unit (equivalent to lubridate's `floor_date()`); `dt.round()` rounds to the nearest unit (equivalent to `round_date()`):
+
+```r
+# lubridate
+full_flights |>
+    mutate(
+        week_start = floor_date(FlightDate, "week"),
+        month      = floor_date(FlightDate, "month")
+    )
+```
+
+```{python}
+dates.select(
+    pl.col('date'),
+    pl.col('date').dt.truncate('1w').alias('week_start'),   # Monday of the ISO week
+    pl.col('date').dt.truncate('1mo').alias('month_start'),
+).head(5)
+```
+
+Common truncation / rounding intervals: `'1d'`, `'1w'`, `'1mo'`, `'1y'`, `'1h'`, `'30m'`, `'15m'`.
+
+### Formatting dates as strings
+
+`dt.strftime()` converts a temporal column to a formatted string using strftime-style format codes, equivalent to lubridate's `format()`:
+
+```r
+# lubridate / base R
+full_flights |>
+    mutate(
+        formatted    = format(FlightDate, "%B %d, %Y"),
+        weekday_name = weekdays(FlightDate)
+    )
+```
+
+```{python}
+dates.select(
+    pl.col('date'),
+    pl.col('date').dt.strftime('%B %d, %Y').alias('formatted'),
+    pl.col('date').dt.strftime('%A').alias('weekday_name'),
+).head(3)
+```
+
+Common format codes: `%Y` (4-digit year), `%m` (zero-padded month), `%d` (zero-padded day), `%B` (full month name), `%A` (full weekday name), `%H:%M:%S` (time).
+
+### Time zones
+
+Polars stores all datetimes in UTC internally and uses IANA time zone names (e.g., `'America/New_York'`, `'Europe/London'`), matching lubridate's convention. Two methods handle time zones:
+
+- **`dt.replace_time_zone(tz)`** — attaches a time zone label to a naive (tz-unaware) datetime without shifting the underlying instant. Equivalent to lubridate's `force_tz()`.
+- **`dt.convert_time_zone(tz)`** — converts a tz-aware datetime to a different time zone, shifting the display while preserving the underlying instant. Equivalent to lubridate's `with_tz()`.
+
+```r
+# lubridate
+x <- ymd_hms("2022-01-14 08:30:00", tz = "UTC")
+with_tz(x, "America/New_York")   # same instant, different display
+force_tz(x, "Europe/Paris")      # re-label without shifting
+```
+
+```{python}
+import polars as pl
+
+# attach UTC label to a naive datetime, then convert to New York local time
+(
+    pl.Series(['2022-01-14 08:30:00', '2022-01-15 14:45:00'])
+    .str.to_datetime('%Y-%m-%d %H:%M:%S')
+    .dt.replace_time_zone('UTC')             # label as UTC (no shift)
+    .dt.convert_time_zone('America/New_York') # convert display to NY time
+)
+```
+
+#### Quick reference
+
+| task | lubridate / R | Polars `.dt` |
+|---|---|---|
+| parse string → date | `ymd(x)` | `str.to_date()` |
+| parse string → datetime | `ymd_hms(x)` | `str.to_datetime()` |
+| build from components | `make_datetime(y, m, d, h, min)` | `pl.datetime(year, month, day, ...)` |
+| extract year | `year(x)` | `dt.year()` |
+| extract month | `month(x)` | `dt.month()` |
+| extract day of month | `mday(x)` | `dt.day()` |
+| extract day of week | `wday(x)` *(1=Sun)* | `dt.weekday()` *(1=Mon, ISO)* |
+| extract day of year | `yday(x)` | `dt.ordinal_day()` |
+| extract quarter | `quarter(x)` | `dt.quarter()` |
+| extract hour / minute / second | `hour(x)` / `minute(x)` / `second(x)` | `dt.hour()` / `dt.minute()` / `dt.second()` |
+| add exact days | `x + ddays(n)` | `x + pl.duration(days=n)` |
+| add calendar months | `x + months(n)` | `dt.offset_by('Nmo')` |
+| date difference in days | `as.integer(x - y)` | `(x - y).dt.total_days()` |
+| floor to unit | `floor_date(x, "week")` | `dt.truncate('1w')` |
+| round to unit | `round_date(x, "day")` | `dt.round('1d')` |
+| month boundaries | `floor_date(x, "month")` | `dt.month_start()` / `dt.month_end()` |
+| format as string | `format(x, "%B %d, %Y")` | `dt.strftime('%B %d, %Y')` |
+| attach time zone | `force_tz(x, tz)` | `dt.replace_time_zone(tz)` |
+| convert time zone | `with_tz(x, tz)` | `dt.convert_time_zone(tz)` |
