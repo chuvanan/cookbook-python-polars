@@ -65,6 +65,13 @@ uv sync
 python download-data.py
 ```
 
+* Create the DuckDB and SQLite databases used in the Import / Export chapter:
+
+```bash
+python create_ontime_db.py
+python create_ontime_sqlite.py
+```
+
 ## Credit
 
 This work builds upon the organizational style of [https://ddotta.github.io/cookbook-rpolars/](https://ddotta.github.io/cookbook-rpolars/) but the content and examples are tailored to Polars library in Python. So credit goes to [Damien Dotta](https://github.com/ddotta), all remaining errors are mine.
