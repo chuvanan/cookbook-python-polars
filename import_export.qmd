@@ -14,8 +14,7 @@ An overview of Polars I/O capabilities:
 | Cloud storage (AWS S3, Azure blob storage, Google cloud storage) 	| native                 	| x    	| x     	| x               	|
 
 
-A note regarding `implementation`: A Polars function or method that is entirely written in Rust is referred to as 'native'. Though this definition may not be strictly accurate, it is acceptable
-to use it for distinguishing purpose, particularly in contrast to invoking functions/methods from external packages.
+A note regarding `implementation`: 'Native' means the I/O is handled by Polars itself — no external library is required. 'Via external libraries' means Polars delegates to a third-party package that must be installed separately.
 
 A note about `scan`: Similar to the concept of [lazy reading](https://www.tidyverse.org/blog/2021/11/readr-2-1-0-lazy/) in the `readr` package, Polars allows you to `scan` an input file, which defers the actual parsing of the file and provides a `LazyFrame`, a lazy computation holder. This feature offers notable performance benefits:
 
@@ -146,27 +145,32 @@ Polars reads Excel (`.xlsx`, `.xls`) and ODS files with `read_excel()`. Unlike C
 ```r
 # R: readxl
 library(readxl)
-read_excel("flights_summary.xlsx")                      # first sheet
-read_excel("flights_summary.xlsx", sheet = "January")  # by name
-read_excel("flights_summary.xlsx", sheet = 2)           # by position
+read_excel("data/EWS.xlsx")                       # first sheet
+read_excel("data/EWS.xlsx", sheet = "Sheet1")     # by name
+read_excel("data/EWS.xlsx", sheet = 2)            # by position
 ```
 
 ```{python}
-#| eval: false
 # Polars: first sheet (default)
-pl.read_excel("flights_summary.xlsx")
+pl.read_excel("data/EWS.xlsx").shape
+```
 
+```{python}
 # specific sheet by name
-pl.read_excel("flights_summary.xlsx", sheet_name="January")
+pl.read_excel("data/EWS.xlsx", sheet_name="Sheet2").shape
 ```
 
 When a workbook contains multiple sheets, pass `sheet_id=0` to read all sheets at once — Polars returns a dictionary keyed by sheet name:
 
 ```{python}
-#| eval: false
 # read all sheets into a dict of DataFrames
-sheets = pl.read_excel("flights_summary.xlsx", sheet_id=0)
-january_df = sheets["January"]
+sheets = pl.read_excel("data/EWS.xlsx", sheet_id=0)
+list(sheets.keys())
+```
+
+```{python}
+sheet1_df = sheets["Sheet1"]
+sheet1_df.shape
 ```
 
 The equivalent in R is iterating with `purrr::map()` over `readxl::excel_sheets()`:
@@ -174,7 +178,7 @@ The equivalent in R is iterating with `purrr::map()` over `readxl::excel_sheets(
 ```r
 # R: read all sheets
 library(purrr)
-path <- "flights_summary.xlsx"
+path <- "data/EWS.xlsx"
 sheets <- excel_sheets(path) |>
     set_names() |>
     map(read_excel, path = path)
@@ -183,111 +187,81 @@ sheets <- excel_sheets(path) |>
 You can override inferred column types with `schema_overrides=`, matching `readxl`'s `col_types=`:
 
 ```{python}
-#| eval: false
 pl.read_excel(
-    "flights_summary.xlsx",
-    sheet_name="January",
-    schema_overrides={"DepDelay": pl.Float32, "Reporting_Airline": pl.Categorical}
-)
+    "data/EWS.xlsx",
+    sheet_name="Sheet1",
+    schema_overrides={"VAR_001": pl.Int32, "VAR_002": pl.Int64}
+).select(["VAR_001", "VAR_002"]).head(3)
 ```
 
 ### Reading a SQL table
 
 Polars can query any SQL database directly, returning a `DataFrame` without going through pandas. There are two functions:
 
-- **`pl.read_database_uri(query, uri)`** — takes a connection string; uses the `connectorx` engine by default (fastest, zero-copy Arrow transfer)
-- **`pl.read_database(query, connection)`** — takes an existing DBAPI2 connection object (e.g., `sqlite3`, `psycopg2`, `pyodbc`)
+- **`pl.read_database_uri(query, uri)`** — takes a connection string; uses the `connectorx` engine by default
+- **`pl.read_database(query, connection)`** — takes an existing connection object (DBAPI2 or ADBC)
 
 Both are equivalent to R's `DBI::dbGetQuery()` + `dbplyr::collect()`.
 
+**Reading from SQLite via a URI string:**
+
 ```r
-# R: DBI + dbplyr
+# R: DBI + RSQLite
 library(DBI)
-con <- dbConnect(RPostgres::Postgres(),
-                 host = "db.example.com", port = 5432,
-                 dbname = "flights", user = "anchu")
-tbl(con, "on_time") |>
-    filter(OriginStateName == "Ohio") |>
-    collect()
+con <- dbConnect(RSQLite::SQLite(), "data/ontime.sqlite")
+dbGetQuery(con, "SELECT Reporting_Airline, COUNT(*) AS n_flights
+                 FROM ontime GROUP BY Reporting_Airline ORDER BY n_flights DESC")
 dbDisconnect(con)
 ```
 
-**Using a URI string** (connectorx engine — recommended for PostgreSQL, MySQL, SQL Server):
-
 ```{python}
-#| eval: false
-uri = "postgresql://user:password@host:5432/flights_db"
+import os
+db_path = os.path.abspath("data/ontime.sqlite")
+uri = f"sqlite:///{db_path}"
 
 ohio_flights = pl.read_database_uri(
-    query="SELECT * FROM on_time WHERE OriginStateName = 'Ohio'",
+    query="""
+        SELECT FlightDate, Reporting_Airline, Origin, Dest, DepDelay
+        FROM ontime
+        WHERE OriginStateName = 'Ohio'
+        LIMIT 5
+    """,
     uri=uri
 )
+ohio_flights
 ```
 
-**Using an existing connection** (works with Python's built-in `sqlite3` and any DBAPI2 driver):
+**Reading from DuckDB via a connection object:**
+
+DuckDB integrates natively with Polars via its Python package — pass an open connection directly to `read_database()`:
+
+```r
+# R: DBI + duckdb
+library(DBI)
+con <- dbConnect(duckdb::duckdb(), "data/ontime.duckdb")
+dbGetQuery(con, "SELECT Reporting_Airline, COUNT(*) AS n_flights
+                 FROM ontime GROUP BY Reporting_Airline ORDER BY n_flights DESC")
+dbDisconnect(con)
+```
 
 ```{python}
-import sqlite3
+import duckdb
 
-# connect to an in-memory SQLite database as an example
-conn = sqlite3.connect(":memory:")
-conn.execute("""
-    CREATE TABLE on_time (
-        FlightDate TEXT, Reporting_Airline TEXT, Origin TEXT, DepDelay REAL
-    )
-""")
-conn.execute("INSERT INTO on_time VALUES ('2022-01-14', 'AA', 'CMH', -3.0)")
-conn.execute("INSERT INTO on_time VALUES ('2022-01-15', 'UA', 'ORD', 12.0)")
-conn.commit()
-
-result = pl.read_database(
-    query="SELECT * FROM on_time WHERE DepDelay > 0",
+conn = duckdb.connect("data/ontime.duckdb")
+airline_counts = pl.read_database(
+    query="""
+        SELECT Reporting_Airline, COUNT(*) AS n_flights
+        FROM ontime
+        GROUP BY Reporting_Airline
+        ORDER BY n_flights DESC
+    """,
     connection=conn
 )
-result
-```
-
-```{python}
 conn.close()
+airline_counts
 ```
 
 For large result sets, `read_database_uri` supports partitioned parallel reads via `partition_on=`, `partition_range=`, and `partition_num=` — useful when fetching millions of rows from a database with an integer key column.
-
-### Reading S3
-
-Polars reads CSV, Parquet, and other formats directly from S3, GCS, or Azure Blob Storage using the same `read_*` and `scan_*` functions — just swap the local path for a cloud URI:
-
-```{python}
-#| eval: false
-# read a single Parquet file from S3
-df = pl.read_parquet("s3://my-bucket/flights/2022.parquet")
-
-# lazy scan with predicate pushdown (downloads only matching rows)
-lazy_df = (
-    pl.scan_parquet("s3://my-bucket/flights/*.parquet")
-    .filter(pl.col("OriginStateName") == "Ohio")
-    .select(["FlightDate", "Reporting_Airline", "DepDelay"])
-    .collect()
-)
-```
-
-Authentication credentials are passed via `storage_options=` or picked up automatically from environment variables (e.g., `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`):
-
-```{python}
-#| eval: false
-storage_options = {
-    "aws_access_key_id":     "YOUR_KEY",
-    "aws_secret_access_key": "YOUR_SECRET",
-    "aws_region":            "us-east-1",
-}
-
-df = pl.scan_parquet(
-    "s3://my-bucket/flights/*.parquet",
-    storage_options=storage_options
-).collect()
-```
-
-For GCS and Azure, the URI scheme changes (`gs://` and `az://` respectively) but the API is identical. Install the matching filesystem library (`gcsfs` for GCS, `adlfs` for Azure) alongside `fsspec`.
 
 ## Writing data
 
@@ -391,61 +365,49 @@ with xlsxwriter.Workbook("output/flights_multi.xlsx") as wb:
 
 ### Writing to a database
 
-`write_database()` inserts a `DataFrame` into a database table. Pass a connection URI string and choose the engine:
+`write_database()` inserts a `DataFrame` into a database table. It accepts either a URI string or an open connection object, and mirrors `DBI::dbWriteTable()` in R.
 
 ```r
 # R: DBI
-dbWriteTable(con, "on_time_clean", full_flights)
+library(DBI)
+con <- dbConnect(RSQLite::SQLite(), "data/ontime.sqlite")
+dbWriteTable(con, "airline_summary", airline_summary, overwrite = TRUE)
+dbDisconnect(con)
 ```
 
-```{python}
-#| eval: false
-uri = "postgresql://user:password@host:5432/flights_db"
+Here we compute a per-airline summary from the January 2022 dataset and write it back to the SQLite database:
 
-full_flights.write_database(
-    table_name="on_time_clean",
+```{python}
+import polars as pl
+
+full_flights = pl.read_csv(
+    './data/On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2022_1.csv'
+)
+
+airline_summary = (
+    full_flights
+    .group_by("Reporting_Airline")
+    .agg(
+        pl.len().alias("n_flights"),
+        pl.col("DepDelay").mean().round(1).alias("avg_dep_delay"),
+        pl.col("ArrDelay").mean().round(1).alias("avg_arr_delay"),
+    )
+    .sort("n_flights", descending=True)
+)
+
+airline_summary.write_database(
+    table_name="airline_summary",
     connection=uri,
     if_table_exists="replace"   # 'fail' | 'replace' | 'append'
 )
 ```
 
-The `if_table_exists=` parameter controls behaviour when the target table already exists — equivalent to the `overwrite=` argument in `DBI::dbWriteTable()`.
-
-For SQLite (via the built-in `sqlite3` module and ADBC):
+The `if_table_exists=` parameter controls behaviour when the target table already exists. Read it back to verify:
 
 ```{python}
-#| eval: false
-full_flights.write_database(
-    table_name="on_time",
-    connection="sqlite:///output/flights.db",
-    engine="adbc"
+pl.read_database_uri(
+    query="SELECT * FROM airline_summary ORDER BY n_flights DESC",
+    uri=uri
 )
 ```
 
-### Writing to S3
-
-`write_parquet()` and `write_csv()` accept S3 (and GCS/Azure) URIs directly, with the same `storage_options=` interface as reading:
-
-```{python}
-#| eval: false
-full_flights.write_parquet(
-    "s3://my-bucket/flights/2022_jan.parquet",
-    storage_options={
-        "aws_access_key_id":     "YOUR_KEY",
-        "aws_secret_access_key": "YOUR_SECRET",
-        "aws_region":            "us-east-1",
-    }
-)
-```
-
-For formats not natively supported with cloud URIs (e.g., compressed CSV), use an `fsspec` filesystem object:
-
-```{python}
-#| eval: false
-import s3fs, gzip
-
-fs = s3fs.S3FileSystem()
-with fs.open("s3://my-bucket/flights/2022_jan.csv.gz", "wb") as cloud_f:
-    with gzip.open(cloud_f, "w") as f:
-        full_flights.write_csv(f)
-```
