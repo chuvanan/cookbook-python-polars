@@ -399,7 +399,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#reading-multiple-files" id="toc-reading-multiple-files" class="nav-link" data-scroll-target="#reading-multiple-files"><span class="header-section-number">3.1.2</span> Reading multiple files</a></li>
   <li><a href="#reading-spreadsheets" id="toc-reading-spreadsheets" class="nav-link" data-scroll-target="#reading-spreadsheets"><span class="header-section-number">3.1.3</span> Reading spreadsheets</a></li>
   <li><a href="#reading-a-sql-table" id="toc-reading-a-sql-table" class="nav-link" data-scroll-target="#reading-a-sql-table"><span class="header-section-number">3.1.4</span> Reading a SQL table</a></li>
-  <li><a href="#reading-s3" id="toc-reading-s3" class="nav-link" data-scroll-target="#reading-s3"><span class="header-section-number">3.1.5</span> Reading S3</a></li>
   </ul></li>
   <li><a href="#writing-data" id="toc-writing-data" class="nav-link" data-scroll-target="#writing-data"><span class="header-section-number">3.2</span> Writing data</a>
   <ul class="collapse">
@@ -407,7 +406,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#writing-parquet" id="toc-writing-parquet" class="nav-link" data-scroll-target="#writing-parquet"><span class="header-section-number">3.2.2</span> Writing Parquet</a></li>
   <li><a href="#writing-excel" id="toc-writing-excel" class="nav-link" data-scroll-target="#writing-excel"><span class="header-section-number">3.2.3</span> Writing Excel</a></li>
   <li><a href="#writing-to-a-database" id="toc-writing-to-a-database" class="nav-link" data-scroll-target="#writing-to-a-database"><span class="header-section-number">3.2.4</span> Writing to a database</a></li>
-  <li><a href="#writing-to-s3" id="toc-writing-to-s3" class="nav-link" data-scroll-target="#writing-to-s3"><span class="header-section-number">3.2.5</span> Writing to S3</a></li>
   </ul></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/chuvanan/cookbook-python-polars/edit/main/import_export.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/chuvanan/cookbook-python-polars/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li><li><a href="https://github.com/chuvanan/cookbook-python-polars/blob/main/import_export.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li></ul></div></nav>
@@ -498,7 +496,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tr>
 </tbody>
 </table>
-<p>A note regarding <code>implementation</code>: A Polars function or method that is entirely written in Rust is referred to as ‘native’. Though this definition may not be strictly accurate, it is acceptable to use it for distinguishing purpose, particularly in contrast to invoking functions/methods from external packages.</p>
+<p>A note regarding <code>implementation</code>: ‘Native’ means the I/O is handled by Polars itself — no external library is required. ‘Via external libraries’ means Polars delegates to a third-party package that must be installed separately.</p>
 <p>A note about <code>scan</code>: Similar to the concept of <a href="https://www.tidyverse.org/blog/2021/11/readr-2-1-0-lazy/">lazy reading</a> in the <code>readr</code> package, Polars allows you to <code>scan</code> an input file, which defers the actual parsing of the file and provides a <code>LazyFrame</code>, a lazy computation holder. This feature offers notable performance benefits:</p>
 <ul>
 <li><p>reduction of memory usage by reading only the necessary data</p></li>
@@ -509,7 +507,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="delimited-file-csv-tsv" class="level3" data-number="3.1.1">
 <h3 data-number="3.1.1" class="anchored" data-anchor-id="delimited-file-csv-tsv"><span class="header-section-number">3.1.1</span> Delimited file (CSV, TSV)</h3>
 <p>For a complete list of parameter options to use with Polars CSV readers, see this <a href="https://docs.pola.rs/api/python/stable/reference/api/polars.read_csv.html">page</a>. These parameters provides the same functionality as readr’s arguments but with slightly different names. Here’s an example:</p>
-<div id="e28290f2" class="cell" data-execution_count="2">
+<div id="9cd33bca" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Read a CSV file</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>flights_202212 <span class="op">=</span> pl.read_csv(</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    source<span class="op">=</span><span class="st">'./data/On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2022_12.csv'</span>,</span>
@@ -606,7 +604,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <p><br></p>
 <p>In a complex data set, it is common to override data types for specific columns</p>
-<div id="aa03c4b5" class="cell" data-class-source="numberLines" data-execution_count="3">
+<div id="ceb9927b" class="cell" data-class-source="numberLines" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2" data-source-line-numbers="nil" data-code-line-numbers="8,9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Read the CSV file with specified data types for selected columns</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>flights_202212 <span class="op">=</span> pl.read_csv(</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    source<span class="op">=</span><span class="st">'./data/On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2022_12.csv'</span>,</span>
@@ -706,7 +704,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="reading-multiple-files" class="level3" data-number="3.1.2">
 <h3 data-number="3.1.2" class="anchored" data-anchor-id="reading-multiple-files"><span class="header-section-number">3.1.2</span> Reading multiple files</h3>
 <p>Polars’ <code>scan_*()</code> method is a really neat technique for reading multiple files efficiently.</p>
-<div id="ccce849b" class="cell" data-execution_count="4">
+<div id="1d6e1226" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> convert_bytes(size):</span>
@@ -734,7 +732,7 @@ On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2022_11.csv : 235.7
 </div>
 </div>
 <p>To read multiple files into a single DataFrame, we can use globbing patterns:</p>
-<div id="e3e4a71f" class="cell" data-cache="true" data-execution_count="5">
+<div id="38e8a90d" class="cell" data-cache="true" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>no_flights_each_month <span class="op">=</span> (</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    pl.scan_csv(<span class="st">'./data/On_Time*.csv'</span>)</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    .group_by([<span class="st">'Year'</span>, <span class="st">'Month'</span>])</span>
@@ -831,7 +829,7 @@ On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2022_11.csv : 235.7
 </div>
 <p>If your files don’t have to be in a single table you can also build a query plan for each file and execute them in parallel on the Polars thread pool.</p>
 <p>All query plan execution is embarrassingly parallel and doesn’t require any communication.</p>
-<div id="f9b9df31" class="cell" data-cache="true" data-execution_count="6">
+<div id="ddce826c" class="cell" data-cache="true" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>queries <span class="op">=</span> []</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> p <span class="kw">in</span> Path.cwd().rglob(<span class="st">'data/On_Time*.csv'</span>):</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    q <span class="op">=</span> (</span>
@@ -967,85 +965,54 @@ On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2022_11.csv : 235.7
 </table>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7" data-code-line-numbers=""><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># R: readxl</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readxl)</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="fu">read_excel</span>(<span class="st">"flights_summary.xlsx"</span>)                      <span class="co"># first sheet</span></span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="fu">read_excel</span>(<span class="st">"flights_summary.xlsx"</span>, <span class="at">sheet =</span> <span class="st">"January"</span>)  <span class="co"># by name</span></span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="fu">read_excel</span>(<span class="st">"flights_summary.xlsx"</span>, <span class="at">sheet =</span> <span class="dv">2</span>)           <span class="co"># by position</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div id="1a5d1ba7" class="cell" data-execution_count="7">
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="fu">read_excel</span>(<span class="st">"data/EWS.xlsx"</span>)                       <span class="co"># first sheet</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="fu">read_excel</span>(<span class="st">"data/EWS.xlsx"</span>, <span class="at">sheet =</span> <span class="st">"Sheet1"</span>)     <span class="co"># by name</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="fu">read_excel</span>(<span class="st">"data/EWS.xlsx"</span>, <span class="at">sheet =</span> <span class="dv">2</span>)            <span class="co"># by position</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="280f6421" class="cell" data-execution_count="7">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Polars: first sheet (default)</span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>pl.read_excel(<span class="st">"flights_summary.xlsx"</span>)</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co"># specific sheet by name</span></span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>pl.read_excel(<span class="st">"flights_summary.xlsx"</span>, sheet_name<span class="op">=</span><span class="st">"January"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>pl.read_excel(<span class="st">"data/EWS.xlsx"</span>).shape</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="7">
+<pre data-code-line-numbers=""><code>(29245, 50)</code></pre>
+</div>
+</div>
+<div id="e5caf8d8" class="cell" data-execution_count="8">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># specific sheet by name</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>pl.read_excel(<span class="st">"data/EWS.xlsx"</span>, sheet_name<span class="op">=</span><span class="st">"Sheet2"</span>).shape</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="8">
+<pre data-code-line-numbers=""><code>(28136, 50)</code></pre>
+</div>
 </div>
 <p>When a workbook contains multiple sheets, pass <code>sheet_id=0</code> to read all sheets at once — Polars returns a dictionary keyed by sheet name:</p>
-<div id="fbfe253e" class="cell" data-execution_count="8">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># read all sheets into a dict of DataFrames</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>sheets <span class="op">=</span> pl.read_excel(<span class="st">"flights_summary.xlsx"</span>, sheet_id<span class="op">=</span><span class="dv">0</span>)</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>january_df <span class="op">=</span> sheets[<span class="st">"January"</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="91961842" class="cell" data-execution_count="9">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># read all sheets into a dict of DataFrames</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>sheets <span class="op">=</span> pl.read_excel(<span class="st">"data/EWS.xlsx"</span>, sheet_id<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="bu">list</span>(sheets.keys())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="9">
+<pre data-code-line-numbers=""><code>['Sheet1', 'Sheet2']</code></pre>
+</div>
+</div>
+<div id="c23c1115" class="cell" data-execution_count="10">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>sheet1_df <span class="op">=</span> sheets[<span class="st">"Sheet1"</span>]</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>sheet1_df.shape</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="10">
+<pre data-code-line-numbers=""><code>(29245, 50)</code></pre>
+</div>
 </div>
 <p>The equivalent in R is iterating with <code>purrr::map()</code> over <code>readxl::excel_sheets()</code>:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10" data-code-line-numbers=""><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># R: read all sheets</span></span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(purrr)</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>path <span class="ot">&lt;-</span> <span class="st">"flights_summary.xlsx"</span></span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>sheets <span class="ot">&lt;-</span> <span class="fu">excel_sheets</span>(path) <span class="sc">|&gt;</span></span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">set_names</span>() <span class="sc">|&gt;</span></span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">map</span>(read_excel, <span class="at">path =</span> path)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16" data-code-line-numbers=""><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># R: read all sheets</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(purrr)</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>path <span class="ot">&lt;-</span> <span class="st">"data/EWS.xlsx"</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>sheets <span class="ot">&lt;-</span> <span class="fu">excel_sheets</span>(path) <span class="sc">|&gt;</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">set_names</span>() <span class="sc">|&gt;</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">map</span>(read_excel, <span class="at">path =</span> path)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>You can override inferred column types with <code>schema_overrides=</code>, matching <code>readxl</code>’s <code>col_types=</code>:</p>
-<div id="d766c480" class="cell" data-execution_count="9">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>pl.read_excel(</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"flights_summary.xlsx"</span>,</span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    sheet_name<span class="op">=</span><span class="st">"January"</span>,</span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    schema_overrides<span class="op">=</span>{<span class="st">"DepDelay"</span>: pl.Float32, <span class="st">"Reporting_Airline"</span>: pl.Categorical}</span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-</section>
-<section id="reading-a-sql-table" class="level3" data-number="3.1.4">
-<h3 data-number="3.1.4" class="anchored" data-anchor-id="reading-a-sql-table"><span class="header-section-number">3.1.4</span> Reading a SQL table</h3>
-<p>Polars can query any SQL database directly, returning a <code>DataFrame</code> without going through pandas. There are two functions:</p>
-<ul>
-<li><strong><code>pl.read_database_uri(query, uri)</code></strong> — takes a connection string; uses the <code>connectorx</code> engine by default (fastest, zero-copy Arrow transfer)</li>
-<li><strong><code>pl.read_database(query, connection)</code></strong> — takes an existing DBAPI2 connection object (e.g., <code>sqlite3</code>, <code>psycopg2</code>, <code>pyodbc</code>)</li>
-</ul>
-<p>Both are equivalent to R’s <code>DBI::dbGetQuery()</code> + <code>dbplyr::collect()</code>.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12" data-code-line-numbers=""><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># R: DBI + dbplyr</span></span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(DBI)</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>con <span class="ot">&lt;-</span> <span class="fu">dbConnect</span>(RPostgres<span class="sc">::</span><span class="fu">Postgres</span>(),</span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>                 <span class="at">host =</span> <span class="st">"db.example.com"</span>, <span class="at">port =</span> <span class="dv">5432</span>,</span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>                 <span class="at">dbname =</span> <span class="st">"flights"</span>, <span class="at">user =</span> <span class="st">"anchu"</span>)</span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="fu">tbl</span>(con, <span class="st">"on_time"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(OriginStateName <span class="sc">==</span> <span class="st">"Ohio"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">collect</span>()</span>
-<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="fu">dbDisconnect</span>(con)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p><strong>Using a URI string</strong> (connectorx engine — recommended for PostgreSQL, MySQL, SQL Server):</p>
-<div id="32a1d4cd" class="cell" data-execution_count="10">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>uri <span class="op">=</span> <span class="st">"postgresql://user:password@host:5432/flights_db"</span></span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>ohio_flights <span class="op">=</span> pl.read_database_uri(</span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    query<span class="op">=</span><span class="st">"SELECT * FROM on_time WHERE OriginStateName = 'Ohio'"</span>,</span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    uri<span class="op">=</span>uri</span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<p><strong>Using an existing connection</strong> (works with Python’s built-in <code>sqlite3</code> and any DBAPI2 driver):</p>
-<div id="ec0d5e43" class="cell" data-execution_count="11">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> sqlite3</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="co"># connect to an in-memory SQLite database as an example</span></span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>conn <span class="op">=</span> sqlite3.<span class="ex">connect</span>(<span class="st">":memory:"</span>)</span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>conn.execute(<span class="st">"""</span></span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="st">    CREATE TABLE on_time (</span></span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="st">        FlightDate TEXT, Reporting_Airline TEXT, Origin TEXT, DepDelay REAL</span></span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="st">    )</span></span>
-<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="st">"""</span>)</span>
-<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>conn.execute(<span class="st">"INSERT INTO on_time VALUES ('2022-01-14', 'AA', 'CMH', -3.0)"</span>)</span>
-<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>conn.execute(<span class="st">"INSERT INTO on_time VALUES ('2022-01-15', 'UA', 'ORD', 12.0)"</span>)</span>
-<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>conn.commit()</span>
-<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> pl.read_database(</span>
-<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>    query<span class="op">=</span><span class="st">"SELECT * FROM on_time WHERE DepDelay &gt; 0"</span>,</span>
-<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>    connection<span class="op">=</span>conn</span>
-<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>result</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="7">
+<div id="d8ba2d05" class="cell" data-execution_count="11">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>pl.read_excel(</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"data/EWS.xlsx"</span>,</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    sheet_name<span class="op">=</span><span class="st">"Sheet1"</span>,</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    schema_overrides<span class="op">=</span>{<span class="st">"VAR_001"</span>: pl.Int32, <span class="st">"VAR_002"</span>: pl.Int64}</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>).select([<span class="st">"VAR_001"</span>, <span class="st">"VAR_002"</span>]).head(<span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="11">
 <div><style>
 .dataframe > thead > tr,
 .dataframe > tbody > tr {
@@ -1053,16 +1020,87 @@ On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2022_11.csv : 235.7
   white-space: pre-wrap;
 }
 </style>
-<small>shape: (1, 4)</small>
+<small>shape: (3, 2)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">VAR_001</th>
+<th data-quarto-table-cell-role="th">VAR_002</th>
+</tr>
+<tr class="even">
+<td>i32</td>
+<td>i64</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>202003</td>
+<td>13879640</td>
+</tr>
+<tr class="even">
+<td>202003</td>
+<td>14715576</td>
+</tr>
+<tr class="odd">
+<td>202003</td>
+<td>14893869</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</section>
+<section id="reading-a-sql-table" class="level3" data-number="3.1.4">
+<h3 data-number="3.1.4" class="anchored" data-anchor-id="reading-a-sql-table"><span class="header-section-number">3.1.4</span> Reading a SQL table</h3>
+<p>Polars can query any SQL database directly, returning a <code>DataFrame</code> without going through pandas. There are two functions:</p>
+<ul>
+<li><strong><code>pl.read_database_uri(query, uri)</code></strong> — takes a connection string; uses the <code>connectorx</code> engine by default</li>
+<li><strong><code>pl.read_database(query, connection)</code></strong> — takes an existing connection object (DBAPI2 or ADBC)</li>
+</ul>
+<p>Both are equivalent to R’s <code>DBI::dbGetQuery()</code> + <code>dbplyr::collect()</code>.</p>
+<p><strong>Reading from SQLite via a URI string:</strong></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18" data-code-line-numbers=""><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># R: DBI + RSQLite</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(DBI)</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>con <span class="ot">&lt;-</span> <span class="fu">dbConnect</span>(RSQLite<span class="sc">::</span><span class="fu">SQLite</span>(), <span class="st">"data/ontime.sqlite"</span>)</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="fu">dbGetQuery</span>(con, <span class="st">"SELECT Reporting_Airline, COUNT(*) AS n_flights</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="st">                 FROM ontime GROUP BY Reporting_Airline ORDER BY n_flights DESC"</span>)</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a><span class="fu">dbDisconnect</span>(con)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="dfe62f14" class="cell" data-execution_count="12">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>db_path <span class="op">=</span> os.path.abspath(<span class="st">"data/ontime.sqlite"</span>)</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>uri <span class="op">=</span> <span class="ss">f"sqlite:///</span><span class="sc">{</span>db_path<span class="sc">}</span><span class="ss">"</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>ohio_flights <span class="op">=</span> pl.read_database_uri(</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>    query<span class="op">=</span><span class="st">"""</span></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a><span class="st">        SELECT FlightDate, Reporting_Airline, Origin, Dest, DepDelay</span></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a><span class="st">        FROM ontime</span></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a><span class="st">        WHERE OriginStateName = 'Ohio'</span></span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a><span class="st">        LIMIT 5</span></span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a><span class="st">    """</span>,</span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>    uri<span class="op">=</span>uri</span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>ohio_flights</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="12">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (5, 5)</small>
 <table class="dataframe caption-top table table-sm table-striped small" data-border="1">
 <thead>
 <tr class="header">
 <th data-quarto-table-cell-role="th">FlightDate</th>
 <th data-quarto-table-cell-role="th">Reporting_Airline</th>
 <th data-quarto-table-cell-role="th">Origin</th>
+<th data-quarto-table-cell-role="th">Dest</th>
 <th data-quarto-table-cell-role="th">DepDelay</th>
 </tr>
 <tr class="even">
+<td>str</td>
 <td>str</td>
 <td>str</td>
 <td>str</td>
@@ -1071,50 +1109,139 @@ On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2022_11.csv : 235.7
 </thead>
 <tbody>
 <tr class="odd">
+<td>"2022-01-14"</td>
+<td>"YX"</td>
+<td>"CMH"</td>
+<td>"DCA"</td>
+<td>-3.0</td>
+</tr>
+<tr class="even">
 <td>"2022-01-15"</td>
-<td>"UA"</td>
-<td>"ORD"</td>
-<td>12.0</td>
+<td>"YX"</td>
+<td>"CMH"</td>
+<td>"DCA"</td>
+<td>-10.0</td>
+</tr>
+<tr class="odd">
+<td>"2022-01-16"</td>
+<td>"YX"</td>
+<td>"CMH"</td>
+<td>"DCA"</td>
+<td>-6.0</td>
+</tr>
+<tr class="even">
+<td>"2022-01-17"</td>
+<td>"YX"</td>
+<td>"CMH"</td>
+<td>"DCA"</td>
+<td>-7.0</td>
+</tr>
+<tr class="odd">
+<td>"2022-01-18"</td>
+<td>"YX"</td>
+<td>"CMH"</td>
+<td>"DCA"</td>
+<td>-6.0</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
 </div>
-<div id="9ddb966a" class="cell" data-execution_count="12">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>conn.close()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Reading from DuckDB via a connection object:</strong></p>
+<p>DuckDB integrates natively with Polars via its Python package — pass an open connection directly to <code>read_database()</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20" data-code-line-numbers=""><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># R: DBI + duckdb</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(DBI)</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>con <span class="ot">&lt;-</span> <span class="fu">dbConnect</span>(duckdb<span class="sc">::</span><span class="fu">duckdb</span>(), <span class="st">"data/ontime.duckdb"</span>)</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="fu">dbGetQuery</span>(con, <span class="st">"SELECT Reporting_Airline, COUNT(*) AS n_flights</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a><span class="st">                 FROM ontime GROUP BY Reporting_Airline ORDER BY n_flights DESC"</span>)</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a><span class="fu">dbDisconnect</span>(con)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="5ebbea1a" class="cell" data-execution_count="13">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> duckdb</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>conn <span class="op">=</span> duckdb.<span class="ex">connect</span>(<span class="st">"data/ontime.duckdb"</span>)</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>airline_counts <span class="op">=</span> pl.read_database(</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>    query<span class="op">=</span><span class="st">"""</span></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a><span class="st">        SELECT Reporting_Airline, COUNT(*) AS n_flights</span></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a><span class="st">        FROM ontime</span></span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a><span class="st">        GROUP BY Reporting_Airline</span></span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a><span class="st">        ORDER BY n_flights DESC</span></span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a><span class="st">    """</span>,</span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>    connection<span class="op">=</span>conn</span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>conn.close()</span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>airline_counts</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="13">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (17, 2)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">Reporting_Airline</th>
+<th data-quarto-table-cell-role="th">n_flights</th>
+</tr>
+<tr class="even">
+<td>str</td>
+<td>i64</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"WN"</td>
+<td>1307149</td>
+</tr>
+<tr class="even">
+<td>"DL"</td>
+<td>893172</td>
+</tr>
+<tr class="odd">
+<td>"AA"</td>
+<td>874145</td>
+</tr>
+<tr class="even">
+<td>"OO"</td>
+<td>733576</td>
+</tr>
+<tr class="odd">
+<td>"UA"</td>
+<td>626473</td>
+</tr>
+<tr class="even">
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="odd">
+<td>"F9"</td>
+<td>155482</td>
+</tr>
+<tr class="even">
+<td>"G4"</td>
+<td>116877</td>
+</tr>
+<tr class="odd">
+<td>"YV"</td>
+<td>114779</td>
+</tr>
+<tr class="even">
+<td>"QX"</td>
+<td>88791</td>
+</tr>
+<tr class="odd">
+<td>"HA"</td>
+<td>73865</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <p>For large result sets, <code>read_database_uri</code> supports partitioned parallel reads via <code>partition_on=</code>, <code>partition_range=</code>, and <code>partition_num=</code> — useful when fetching millions of rows from a database with an integer key column.</p>
-</section>
-<section id="reading-s3" class="level3" data-number="3.1.5">
-<h3 data-number="3.1.5" class="anchored" data-anchor-id="reading-s3"><span class="header-section-number">3.1.5</span> Reading S3</h3>
-<p>Polars reads CSV, Parquet, and other formats directly from S3, GCS, or Azure Blob Storage using the same <code>read_*</code> and <code>scan_*</code> functions — just swap the local path for a cloud URI:</p>
-<div id="5fd3bdc6" class="cell" data-execution_count="13">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># read a single Parquet file from S3</span></span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pl.read_parquet(<span class="st">"s3://my-bucket/flights/2022.parquet"</span>)</span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="co"># lazy scan with predicate pushdown (downloads only matching rows)</span></span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>lazy_df <span class="op">=</span> (</span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    pl.scan_parquet(<span class="st">"s3://my-bucket/flights/*.parquet"</span>)</span>
-<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(pl.col(<span class="st">"OriginStateName"</span>) <span class="op">==</span> <span class="st">"Ohio"</span>)</span>
-<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>    .select([<span class="st">"FlightDate"</span>, <span class="st">"Reporting_Airline"</span>, <span class="st">"DepDelay"</span>])</span>
-<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>    .collect()</span>
-<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<p>Authentication credentials are passed via <code>storage_options=</code> or picked up automatically from environment variables (e.g., <code>AWS_ACCESS_KEY_ID</code>, <code>AWS_SECRET_ACCESS_KEY</code>):</p>
-<div id="2013603d" class="cell" data-execution_count="14">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>storage_options <span class="op">=</span> {</span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"aws_access_key_id"</span>:     <span class="st">"YOUR_KEY"</span>,</span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"aws_secret_access_key"</span>: <span class="st">"YOUR_SECRET"</span>,</span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"aws_region"</span>:            <span class="st">"us-east-1"</span>,</span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pl.scan_parquet(</span>
-<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"s3://my-bucket/flights/*.parquet"</span>,</span>
-<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>    storage_options<span class="op">=</span>storage_options</span>
-<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>).collect()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<p>For GCS and Azure, the URI scheme changes (<code>gs://</code> and <code>az://</code> respectively) but the API is identical. Install the matching filesystem library (<code>gcsfs</code> for GCS, <code>adlfs</code> for Azure) alongside <code>fsspec</code>.</p>
 </section>
 </section>
 <section id="writing-data" class="level2" data-number="3.2">
@@ -1122,15 +1249,15 @@ On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2022_11.csv : 235.7
 <section id="writing-csv" class="level3" data-number="3.2.1">
 <h3 data-number="3.2.1" class="anchored" data-anchor-id="writing-csv"><span class="header-section-number">3.2.1</span> Writing CSV</h3>
 <p><code>write_csv()</code> writes a <code>DataFrame</code> to a delimited file. The main parameters map directly to <code>readr::write_csv()</code>:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18" data-code-line-numbers=""><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># R: readr</span></span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">write_csv</span>(full_flights, <span class="st">"output/flights_clean.csv"</span>)</span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="fu">write_csv</span>(full_flights, <span class="st">"output/flights_clean.csv.gz"</span>)   <span class="co"># auto-compressed</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div id="75fbb5c9" class="cell" data-execution_count="15">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># write to CSV</span></span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>full_flights.write_csv(<span class="st">"output/flights_clean.csv"</span>)</span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="co"># write with gzip compression</span></span>
-<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>full_flights.write_csv(<span class="st">"output/flights_clean.csv.gz"</span>, compression<span class="op">=</span><span class="st">"gzip"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22" data-code-line-numbers=""><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co"># R: readr</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="fu">write_csv</span>(full_flights, <span class="st">"output/flights_clean.csv"</span>)</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="fu">write_csv</span>(full_flights, <span class="st">"output/flights_clean.csv.gz"</span>)   <span class="co"># auto-compressed</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="6b37aad2" class="cell" data-execution_count="14">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co"># write to CSV</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>full_flights.write_csv(<span class="st">"output/flights_clean.csv"</span>)</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a><span class="co"># write with gzip compression</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>full_flights.write_csv(<span class="st">"output/flights_clean.csv.gz"</span>, compression<span class="op">=</span><span class="st">"gzip"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Common options:</p>
 <table class="caption-top table">
@@ -1173,101 +1300,193 @@ On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2022_11.csv : 235.7
 <section id="writing-parquet" class="level3" data-number="3.2.2">
 <h3 data-number="3.2.2" class="anchored" data-anchor-id="writing-parquet"><span class="header-section-number">3.2.2</span> Writing Parquet</h3>
 <p>Parquet is the recommended format for storing DataFrames on disk: it is columnar, strongly typed, and compresses very efficiently. Writing is a single method call:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20" data-code-line-numbers=""><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># R: arrow</span></span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(arrow)</span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="fu">write_parquet</span>(full_flights, <span class="st">"output/flights.parquet"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div id="ba0d55a4" class="cell" data-execution_count="16">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>full_flights.write_parquet(<span class="st">"output/flights.parquet"</span>)</span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="co"># choose compression codec (zstd is the default and generally best)</span></span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>full_flights.write_parquet(<span class="st">"output/flights.parquet"</span>, compression<span class="op">=</span><span class="st">"snappy"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24" data-code-line-numbers=""><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co"># R: arrow</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(arrow)</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="fu">write_parquet</span>(full_flights, <span class="st">"output/flights.parquet"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="6c9817b2" class="cell" data-execution_count="15">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>full_flights.write_parquet(<span class="st">"output/flights.parquet"</span>)</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="co"># choose compression codec (zstd is the default and generally best)</span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>full_flights.write_parquet(<span class="st">"output/flights.parquet"</span>, compression<span class="op">=</span><span class="st">"snappy"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>For very large tables, <code>partition_by=</code> writes a directory of per-partition Parquet files (Hive-style), which cloud query engines and <code>scan_parquet()</code> can then read with partition pruning:</p>
-<div id="32937198" class="cell" data-execution_count="17">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co"># write one file per carrier: output/Reporting_Airline=AA/data.parquet, etc.</span></span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>full_flights.write_parquet(</span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"output/flights_partitioned/"</span>,</span>
-<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>    partition_by<span class="op">=</span><span class="st">"Reporting_Airline"</span></span>
-<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a><span class="co"># read back with predicate pushdown — only the AA partition is loaded</span></span>
-<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>aa_flights <span class="op">=</span> pl.scan_parquet(</span>
-<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"output/flights_partitioned/"</span>,</span>
-<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>    hive_partitioning<span class="op">=</span><span class="va">True</span></span>
-<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>).<span class="bu">filter</span>(pl.col(<span class="st">"Reporting_Airline"</span>) <span class="op">==</span> <span class="st">"AA"</span>).collect()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="c51f9a36" class="cell" data-execution_count="16">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co"># write one file per carrier: output/Reporting_Airline=AA/data.parquet, etc.</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>full_flights.write_parquet(</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"output/flights_partitioned/"</span>,</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>    partition_by<span class="op">=</span><span class="st">"Reporting_Airline"</span></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a><span class="co"># read back with predicate pushdown — only the AA partition is loaded</span></span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>aa_flights <span class="op">=</span> pl.scan_parquet(</span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"output/flights_partitioned/"</span>,</span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>    hive_partitioning<span class="op">=</span><span class="va">True</span></span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>).<span class="bu">filter</span>(pl.col(<span class="st">"Reporting_Airline"</span>) <span class="op">==</span> <span class="st">"AA"</span>).collect()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="writing-excel" class="level3" data-number="3.2.3">
 <h3 data-number="3.2.3" class="anchored" data-anchor-id="writing-excel"><span class="header-section-number">3.2.3</span> Writing Excel</h3>
 <p><code>write_excel()</code> requires <code>xlsxwriter</code> (<code>pip install xlsxwriter</code>). It produces a formatted <code>.xlsx</code> file and supports multiple sheets, column widths, conditional formatting, and sparklines:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23" data-code-line-numbers=""><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co"># R: writexl</span></span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(writexl)</span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="fu">write_xlsx</span>(full_flights, <span class="st">"output/flights.xlsx"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div id="16d6e458" class="cell" data-execution_count="18">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co"># basic write</span></span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>full_flights.write_excel(<span class="st">"output/flights.xlsx"</span>)</span>
-<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a><span class="co"># custom sheet name with auto-fitted column widths</span></span>
-<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>full_flights.write_excel(</span>
-<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"output/flights.xlsx"</span>,</span>
-<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>    worksheet<span class="op">=</span><span class="st">"January 2022"</span>,</span>
-<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>    autofit<span class="op">=</span><span class="va">True</span></span>
-<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27" data-code-line-numbers=""><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co"># R: writexl</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(writexl)</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a><span class="fu">write_xlsx</span>(full_flights, <span class="st">"output/flights.xlsx"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="f01a72b4" class="cell" data-execution_count="17">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="co"># basic write</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>full_flights.write_excel(<span class="st">"output/flights.xlsx"</span>)</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a><span class="co"># custom sheet name with auto-fitted column widths</span></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>full_flights.write_excel(</span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"output/flights.xlsx"</span>,</span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>    worksheet<span class="op">=</span><span class="st">"January 2022"</span>,</span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>    autofit<span class="op">=</span><span class="va">True</span></span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>To write multiple DataFrames to separate sheets in one workbook, pass an <code>xlsxwriter.Workbook</code> object:</p>
-<div id="e3ebb854" class="cell" data-execution_count="19">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> xlsxwriter</span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> xlsxwriter.Workbook(<span class="st">"output/flights_multi.xlsx"</span>) <span class="im">as</span> wb:</span>
-<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>    full_flights.<span class="bu">filter</span>(pl.col(<span class="st">"OriginStateName"</span>) <span class="op">==</span> <span class="st">"Ohio"</span>).write_excel(wb, worksheet<span class="op">=</span><span class="st">"Ohio"</span>)</span>
-<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>    full_flights.<span class="bu">filter</span>(pl.col(<span class="st">"OriginStateName"</span>) <span class="op">==</span> <span class="st">"Texas"</span>).write_excel(wb, worksheet<span class="op">=</span><span class="st">"Texas"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="d3ae2c4f" class="cell" data-execution_count="18">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> xlsxwriter</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> xlsxwriter.Workbook(<span class="st">"output/flights_multi.xlsx"</span>) <span class="im">as</span> wb:</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>    full_flights.<span class="bu">filter</span>(pl.col(<span class="st">"OriginStateName"</span>) <span class="op">==</span> <span class="st">"Ohio"</span>).write_excel(wb, worksheet<span class="op">=</span><span class="st">"Ohio"</span>)</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>    full_flights.<span class="bu">filter</span>(pl.col(<span class="st">"OriginStateName"</span>) <span class="op">==</span> <span class="st">"Texas"</span>).write_excel(wb, worksheet<span class="op">=</span><span class="st">"Texas"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="writing-to-a-database" class="level3" data-number="3.2.4">
 <h3 data-number="3.2.4" class="anchored" data-anchor-id="writing-to-a-database"><span class="header-section-number">3.2.4</span> Writing to a database</h3>
-<p><code>write_database()</code> inserts a <code>DataFrame</code> into a database table. Pass a connection URI string and choose the engine:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26" data-code-line-numbers=""><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co"># R: DBI</span></span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="fu">dbWriteTable</span>(con, <span class="st">"on_time_clean"</span>, full_flights)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div id="f21bb871" class="cell" data-execution_count="20">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>uri <span class="op">=</span> <span class="st">"postgresql://user:password@host:5432/flights_db"</span></span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>full_flights.write_database(</span>
-<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>    table_name<span class="op">=</span><span class="st">"on_time_clean"</span>,</span>
-<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>    connection<span class="op">=</span>uri,</span>
-<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>    if_table_exists<span class="op">=</span><span class="st">"replace"</span>   <span class="co"># 'fail' | 'replace' | 'append'</span></span>
-<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>write_database()</code> inserts a <code>DataFrame</code> into a database table. It accepts either a URI string or an open connection object, and mirrors <code>DBI::dbWriteTable()</code> in R.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30" data-code-line-numbers=""><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="co"># R: DBI</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(DBI)</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>con <span class="ot">&lt;-</span> <span class="fu">dbConnect</span>(RSQLite<span class="sc">::</span><span class="fu">SQLite</span>(), <span class="st">"data/ontime.sqlite"</span>)</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a><span class="fu">dbWriteTable</span>(con, <span class="st">"airline_summary"</span>, airline_summary, <span class="at">overwrite =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a><span class="fu">dbDisconnect</span>(con)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Here we compute a per-airline summary from the January 2022 dataset and write it back to the SQLite database:</p>
+<div id="35d9591a" class="cell" data-execution_count="19">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>full_flights <span class="op">=</span> pl.read_csv(</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">'./data/On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2022_1.csv'</span></span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>airline_summary <span class="op">=</span> (</span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>    full_flights</span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a>    .group_by(<span class="st">"Reporting_Airline"</span>)</span>
+<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a>    .agg(</span>
+<span id="cb31-11"><a href="#cb31-11" aria-hidden="true" tabindex="-1"></a>        pl.<span class="bu">len</span>().alias(<span class="st">"n_flights"</span>),</span>
+<span id="cb31-12"><a href="#cb31-12" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">"DepDelay"</span>).mean().<span class="bu">round</span>(<span class="dv">1</span>).alias(<span class="st">"avg_dep_delay"</span>),</span>
+<span id="cb31-13"><a href="#cb31-13" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">"ArrDelay"</span>).mean().<span class="bu">round</span>(<span class="dv">1</span>).alias(<span class="st">"avg_arr_delay"</span>),</span>
+<span id="cb31-14"><a href="#cb31-14" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb31-15"><a href="#cb31-15" aria-hidden="true" tabindex="-1"></a>    .sort(<span class="st">"n_flights"</span>, descending<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb31-16"><a href="#cb31-16" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb31-17"><a href="#cb31-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-18"><a href="#cb31-18" aria-hidden="true" tabindex="-1"></a>airline_summary.write_database(</span>
+<span id="cb31-19"><a href="#cb31-19" aria-hidden="true" tabindex="-1"></a>    table_name<span class="op">=</span><span class="st">"airline_summary"</span>,</span>
+<span id="cb31-20"><a href="#cb31-20" aria-hidden="true" tabindex="-1"></a>    connection<span class="op">=</span>uri,</span>
+<span id="cb31-21"><a href="#cb31-21" aria-hidden="true" tabindex="-1"></a>    if_table_exists<span class="op">=</span><span class="st">"replace"</span>   <span class="co"># 'fail' | 'replace' | 'append'</span></span>
+<span id="cb31-22"><a href="#cb31-22" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="14">
+<pre data-code-line-numbers=""><code>17</code></pre>
 </div>
-<p>The <code>if_table_exists=</code> parameter controls behaviour when the target table already exists — equivalent to the <code>overwrite=</code> argument in <code>DBI::dbWriteTable()</code>.</p>
-<p>For SQLite (via the built-in <code>sqlite3</code> module and ADBC):</p>
-<div id="8640920b" class="cell" data-execution_count="21">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>full_flights.write_database(</span>
-<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>    table_name<span class="op">=</span><span class="st">"on_time"</span>,</span>
-<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>    connection<span class="op">=</span><span class="st">"sqlite:///output/flights.db"</span>,</span>
-<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>    engine<span class="op">=</span><span class="st">"adbc"</span></span>
-<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-</section>
-<section id="writing-to-s3" class="level3" data-number="3.2.5">
-<h3 data-number="3.2.5" class="anchored" data-anchor-id="writing-to-s3"><span class="header-section-number">3.2.5</span> Writing to S3</h3>
-<p><code>write_parquet()</code> and <code>write_csv()</code> accept S3 (and GCS/Azure) URIs directly, with the same <code>storage_options=</code> interface as reading:</p>
-<div id="74e1c5be" class="cell" data-execution_count="22">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>full_flights.write_parquet(</span>
-<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"s3://my-bucket/flights/2022_jan.parquet"</span>,</span>
-<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>    storage_options<span class="op">=</span>{</span>
-<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>        <span class="st">"aws_access_key_id"</span>:     <span class="st">"YOUR_KEY"</span>,</span>
-<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">"aws_secret_access_key"</span>: <span class="st">"YOUR_SECRET"</span>,</span>
-<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>        <span class="st">"aws_region"</span>:            <span class="st">"us-east-1"</span>,</span>
-<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The <code>if_table_exists=</code> parameter controls behaviour when the target table already exists. Read it back to verify:</p>
+<div id="39500d3e" class="cell" data-execution_count="20">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>pl.read_database_uri(</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>    query<span class="op">=</span><span class="st">"SELECT * FROM airline_summary ORDER BY n_flights DESC"</span>,</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>    uri<span class="op">=</span>uri</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="15">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (17, 4)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">Reporting_Airline</th>
+<th data-quarto-table-cell-role="th">n_flights</th>
+<th data-quarto-table-cell-role="th">avg_dep_delay</th>
+<th data-quarto-table-cell-role="th">avg_arr_delay</th>
+</tr>
+<tr class="even">
+<td>str</td>
+<td>i64</td>
+<td>f64</td>
+<td>f64</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"WN"</td>
+<td>97436</td>
+<td>10.2</td>
+<td>1.1</td>
+</tr>
+<tr class="even">
+<td>"AA"</td>
+<td>69400</td>
+<td>7.9</td>
+<td>-1.1</td>
+</tr>
+<tr class="odd">
+<td>"DL"</td>
+<td>68963</td>
+<td>7.9</td>
+<td>-0.2</td>
+</tr>
+<tr class="even">
+<td>"OO"</td>
+<td>63146</td>
+<td>14.8</td>
+<td>7.9</td>
+</tr>
+<tr class="odd">
+<td>"UA"</td>
+<td>45741</td>
+<td>13.1</td>
+<td>4.8</td>
+</tr>
+<tr class="even">
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="odd">
+<td>"F9"</td>
+<td>12039</td>
+<td>15.6</td>
+<td>11.0</td>
+</tr>
+<tr class="even">
+<td>"YV"</td>
+<td>11404</td>
+<td>19.0</td>
+<td>11.2</td>
+</tr>
+<tr class="odd">
+<td>"G4"</td>
+<td>8714</td>
+<td>12.2</td>
+<td>12.2</td>
+</tr>
+<tr class="even">
+<td>"QX"</td>
+<td>8105</td>
+<td>12.2</td>
+<td>11.0</td>
+</tr>
+<tr class="odd">
+<td>"HA"</td>
+<td>5868</td>
+<td>9.6</td>
+<td>6.9</td>
+</tr>
+</tbody>
+</table>
 </div>
-<p>For formats not natively supported with cloud URIs (e.g., compressed CSV), use an <code>fsspec</code> filesystem object:</p>
-<div id="d75979d5" class="cell" data-execution_count="23">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> s3fs, gzip</span>
-<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>fs <span class="op">=</span> s3fs.S3FileSystem()</span>
-<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> fs.<span class="bu">open</span>(<span class="st">"s3://my-bucket/flights/2022_jan.csv.gz"</span>, <span class="st">"wb"</span>) <span class="im">as</span> cloud_f:</span>
-<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> gzip.<span class="bu">open</span>(cloud_f, <span class="st">"w"</span>) <span class="im">as</span> f:</span>
-<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>        full_flights.write_csv(f)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 </div>
 
 
