@@ -443,7 +443,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>This book was inspired by a series of <a href="https://www.emilyriederer.com/post/py-rgo-polars/">blog posts</a> recommending a Pythonic data science stack that mimics the comfort and familiarity of R’s tidyverse tools. In particular, this book explores the <code>Polars</code> library, a rising star in the DataFrame space (alongside established players like Pandas, Dask, Modin, Ray, and Vaex).</p>
 <p>In a nutshell, Polars is defined as a <a href="https://pola.rs/posts/polars_birds_eye_view/">query engine with a DataFrame front-end</a>. It offers a rich set of intuitive functions and principled workflows for data manipulation and analysis. Designed from the ground up with performance in mind, Polars is also noted for its <a href="https://www.ritchievink.com/blog/2021/02/28/i-wrote-one-of-the-fastest-dataframe-libraries/">lightning-fast execution speed</a>. Polars has reached the <a href="https://pola.rs/posts/announcing-polars-1/">milestone of version 1.0</a>, signalling API stability and production readiness.</p>
 <p>The majority of this book contains structured examples of data wrangling tasks that demonstrate idiomatic Polars and related dplyr/tidyr code for comparison. Examples might include discussion on API choices.</p>
-<div id="1db1d85b" class="cell" data-execution_count="1">
+<div id="07f721ac" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" data-source-line-numbers="nil" data-code-line-numbers="nil"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
@@ -489,7 +489,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 text {
    text-rendering: optimizeLegibility;
 }
-#pMzHNLC .plot-title {
+#pJaO6sP .plot-title {
 fill: #474747;
 font-weight: bold;
 font-style: normal;
@@ -497,7 +497,7 @@ font-family: Roboto Condensed;
 font-size: 18.0px;
 
 }
-#pMzHNLC .plot-subtitle {
+#pJaO6sP .plot-subtitle {
 fill: #474747;
 font-weight: normal;
 font-style: normal;
@@ -505,7 +505,7 @@ font-family: Roboto Condensed;
 font-size: 15.0px;
 
 }
-#pMzHNLC .plot-caption {
+#pJaO6sP .plot-caption {
 fill: #474747;
 font-weight: normal;
 font-style: normal;
@@ -513,7 +513,7 @@ font-family: Roboto Condensed;
 font-size: 13.0px;
 
 }
-#pMzHNLC .plot-tag {
+#pJaO6sP .plot-tag {
 fill: #474747;
 font-weight: normal;
 font-style: normal;
@@ -521,13 +521,13 @@ font-family: Roboto Condensed;
 font-size: 16.0px;
 
 }
-#pMzHNLC .hyperlink-element {
+#pJaO6sP .hyperlink-element {
 fill: #118ed8;
 font-weight: normal;
 font-style: normal;
 
 }
-#pMzHNLC .legend-title {
+#pJaO6sP .legend-title {
 fill: #474747;
 font-weight: normal;
 font-style: normal;
@@ -535,7 +535,7 @@ font-family: Roboto Condensed;
 font-size: 15.0px;
 
 }
-#pMzHNLC .legend-item {
+#pJaO6sP .legend-item {
 fill: #474747;
 font-weight: normal;
 font-style: normal;
@@ -543,7 +543,7 @@ font-family: Roboto Condensed;
 font-size: 15.0px;
 
 }
-#pMzHNLC .axis-title-x {
+#pJaO6sP .axis-title-x {
 fill: #474747;
 font-weight: normal;
 font-style: normal;
@@ -551,7 +551,7 @@ font-family: Roboto Condensed;
 font-size: 15.0px;
 
 }
-#pMzHNLC .axis-text-x {
+#pJaO6sP .axis-text-x {
 fill: #474747;
 font-weight: normal;
 font-style: normal;
@@ -559,7 +559,7 @@ font-family: Roboto Condensed;
 font-size: 15.0px;
 
 }
-#dF50qQ0 .axis-tooltip-text-x {
+#dCSWWjl .axis-tooltip-text-x {
 fill: #ffffff;
 font-weight: normal;
 font-style: normal;
@@ -567,7 +567,7 @@ font-family: Roboto Condensed;
 font-size: 15.0px;
 
 }
-#pMzHNLC .axis-title-y {
+#pJaO6sP .axis-title-y {
 fill: #474747;
 font-weight: normal;
 font-style: normal;
@@ -575,7 +575,7 @@ font-family: Roboto Condensed;
 font-size: 15.0px;
 
 }
-#pMzHNLC .axis-text-y {
+#pJaO6sP .axis-text-y {
 fill: #474747;
 font-weight: normal;
 font-style: normal;
@@ -583,7 +583,7 @@ font-family: Roboto Condensed;
 font-size: 15.0px;
 
 }
-#dF50qQ0 .axis-tooltip-text-y {
+#dCSWWjl .axis-tooltip-text-y {
 fill: #ffffff;
 font-weight: normal;
 font-style: normal;
@@ -591,7 +591,7 @@ font-family: Roboto Condensed;
 font-size: 15.0px;
 
 }
-#pMzHNLC .facet-strip-text-x {
+#pJaO6sP .facet-strip-text-x {
 fill: #474747;
 font-weight: normal;
 font-style: normal;
@@ -599,7 +599,7 @@ font-family: Roboto Condensed;
 font-size: 15.0px;
 
 }
-#pMzHNLC .facet-strip-text-y {
+#pJaO6sP .facet-strip-text-y {
 fill: #474747;
 font-weight: normal;
 font-style: normal;
@@ -607,7 +607,7 @@ font-family: Roboto Condensed;
 font-size: 15.0px;
 
 }
-#dF50qQ0 .tooltip-text {
+#dCSWWjl .tooltip-text {
 fill: #474747;
 font-weight: normal;
 font-style: normal;
@@ -615,7 +615,7 @@ font-family: Roboto Condensed;
 font-size: 15.0px;
 
 }
-#dF50qQ0 .tooltip-title {
+#dCSWWjl .tooltip-title {
 fill: #474747;
 font-weight: bold;
 font-style: normal;
@@ -623,7 +623,7 @@ font-family: Roboto Condensed;
 font-size: 15.0px;
 
 }
-#dF50qQ0 .tooltip-label {
+#dCSWWjl .tooltip-label {
 fill: #474747;
 font-weight: bold;
 font-style: normal;
@@ -633,7 +633,7 @@ font-size: 15.0px;
 }
 
   </style>
-  <g id="pMzHNLC">
+  <g id="pJaO6sP">
     <path fill-rule="evenodd" fill="rgb(255,255,255)" fill-opacity="1.0" d="M0.0 0.0 L0.0 380.0 L700.0 380.0 L700.0 0.0 Z">
     </path>
     <g transform="translate(21.0 24.0 ) ">
@@ -665,7 +665,7 @@ font-size: 15.0px;
           </g>
         </g>
       </g>
-      <g clip-path="url(#cJHdt3H)" clip-bounds-jfx="[rect (53.89598183079157, 0.0), (415.50096582933656, 301.0)]">
+      <g clip-path="url(#ckCu0ol)" clip-bounds-jfx="[rect (53.89598183079157, 0.0), (415.50096582933656, 301.0)]">
         <g transform="translate(53.89598183079157 0.0 ) ">
           <g>
             <g buffered-rendering="static">
@@ -693,7 +693,7 @@ font-size: 15.0px;
           </g>
         </g>
         <defs>
-          <clippath id="cJHdt3H">
+          <clippath id="ckCu0ol">
             <rect x="53.89598183079157" y="0.0" width="415.50096582933656" height="301.0">
             </rect>
           </clippath>
@@ -885,7 +885,7 @@ font-size: 15.0px;
     <path fill="rgb(0,0,0)" fill-opacity="0.0" stroke="rgb(71,71,71)" stroke-opacity="1.0" stroke-width="0.0" d="M0.0 0.0 L0.0 380.0 L700.0 380.0 L700.0 0.0 Z" pointer-events="none">
     </path>
   </g>
-  <g id="dF50qQ0">
+  <g id="dCSWWjl">
   </g>
 </svg>
 </div>
@@ -905,6 +905,11 @@ font-size: 15.0px;
 <li>Download the data (source: <a href="https://transtats.bts.gov/TableInfo.asp?gnoyr_VQ=FGJ&amp;QO_fu146_anzr=b0-gvzr&amp;V0s1_b0yB=D">Reporting carrier on-time performance</a>)</li>
 </ul>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4" data-code-line-numbers=""><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> download-data.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li>Create the DuckDB and SQLite databases used in the Import / Export chapter:</li>
+</ul>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5" data-code-line-numbers=""><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> create_ontime_db.py</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> create_ontime_sqlite.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="credit" class="level2">
 <h2 class="anchored" data-anchor-id="credit">Credit</h2>
