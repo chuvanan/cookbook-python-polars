@@ -99,26 +99,4 @@ carrier_day_wide.unpivot(
 ).sort(['Reporting_Airline', 'day_of_week'])
 ```
 
-### Lazy evaluation caveat
 
-`pivot()` is an **eager-only** operation in Polars. The output schema depends on the distinct values found in the `on` column at runtime, which a `LazyFrame` cannot know statically. Two workarounds exist:
-
-1. Collect the lazy query before pivoting, then re-wrap in lazy if needed:
-
-```python
-df.lazy().collect().pivot(...).lazy()
-```
-
-2. Pre-declare the expected column values with `on_columns=`:
-
-```python
-df.lazy().pivot(
-    on='DayOfWeek',
-    on_columns=['1', '2', '3', '4', '5', '6', '7'],
-    index='Reporting_Airline',
-    values='n_flights',
-    aggregate_function='sum'
-)
-```
-
-`unpivot()` does not have this restriction — the output schema is always known upfront.
